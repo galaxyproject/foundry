@@ -35,6 +35,41 @@ the oracle here is applied to whatever a scenario produces.
   digest. Docker Hub, Wave and other registry images cannot pass from source
   evidence directly into the artifact.
 
+## Property: target policy uses Galaxy matching and deny precedence
+
+- bucket: deployment-policy
+- check: deterministic
+- assertion: target-specific policy evidence carries both allowed and denied
+  entries. Namespace, image, tag and digest entries are compared using Galaxy's
+  canonical matching rules, and any denied match wins. Under the default, a
+  scheme-prefixed, tagless or non-BioContainers reference fails before schema
+  validation.
+
+## Property: recommender outcomes do not silently weaken requirements
+
+- bucket: requirements-fidelity
+- check: deterministic
+- assertion: every required package is submitted in one recommendation request;
+  exact-version results are policy-checked, name-only substitutions require
+  confirmation, and absent, malformed, out-of-policy or verified-false results
+  emit no UDT. The author never drops packages merely to obtain a container.
+
+## Property: the emitted definition passes executable static validation
+
+- bucket: structural-validity
+- check: deterministic
+- assertion: `gxwf validate-tool-source galaxy-user-tool.yml --json` exits zero
+  without `--schema-only` after drafting and after critique. A missing validator
+  is reported as `validation-not-run`, never treated as a pass.
+
+## Property: policy discovery leaves no probe tool
+
+- bucket: deployment-policy
+- check: deterministic
+- assertion: the author does not create a disposable UDT to discover policy. A
+  400 from creating the requested tool may update policy evidence and trigger
+  reselection, but an unrelated probe is never registered.
+
 ## Property: authoring does not duplicate discoverable wrappers
 
 - bucket: discovery-guard

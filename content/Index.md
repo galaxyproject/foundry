@@ -175,6 +175,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[validate-test-data-refs]] — AJV gate for the test-data-refs document the test-data-resolution chain writes.
 - [[validate-tests]] — Validate Galaxy workflow test files and optionally cross-check labels against their workflow.
 - [[validate-tests-format]] — AJV gate for Galaxy workflow tests YAML, with optional workflow cross-check.
+- [[validate-tool-source]] — Validate Galaxy user-defined tool YAML against the upstream schema and semantic authoring checks.
 - [[validate-workflow-brief]] — Validate the title and required sections of a Markdown Workflow Brief.
 
 ## Schemas

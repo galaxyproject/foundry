@@ -4,11 +4,11 @@
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
-    "revision": 9,
-    "content_hash": "52dde31f77865e86065b84a098be85be43795a0e586402f18dd8191b6841771a",
-    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
+    "revision": 10,
+    "content_hash": "665e7b96f284aa05c16ea175244d2b437ff121a886d601210c546d511985cd55",
+    "commit": "c7f67a5928b0ad72b085f5f1f120ff8c6c605e81"
   },
-  "cast_at": "2026-11-12T04:17:38.424Z",
+  "cast_at": "2026-11-12T04:37:18.022Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -19,6 +19,21 @@
     }
   ],
   "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[gxwf validate-tool-source]]",
+      "src": "content/cli/gxwf/validate-tool-source.md",
+      "dst": "references/cli/validate-tool-source.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "cast-validated",
+      "purpose": "Run Galaxy schema and semantic validation on the completed user-tool definition before critique or emission.",
+      "trigger": "After writing galaxy-user-tool.yml and after every structural edit made during critique.",
+      "src_hash": "50ac14df89e9302fd08423110ddd9ee53319fef82e319c47bb3709fad9802790",
+      "dst_hash": "abe80bc851cee8c8d5c93efb58e9dbbc339b3fe96621b93664cf624adcf98718",
+      "source": "deterministic"
+    },
     {
       "kind": "research",
       "mode": "verbatim",
@@ -61,8 +76,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Field contract, expression syntax, script placement, and package inference for a `GalaxyUserTool` definition.",
-      "src_hash": "2a90d75df295a677672d18d50c92911c040241fcbb188c46a7d6d73757a11b29",
-      "dst_hash": "2a90d75df295a677672d18d50c92911c040241fcbb188c46a7d6d73757a11b29",
+      "src_hash": "e38075f755d837d1f068afbd7d47029560451ec4d6c957a624472287a666b9fc",
+      "dst_hash": "e38075f755d837d1f068afbd7d47029560451ec4d6c957a624472287a666b9fc",
       "source": "deterministic"
     },
     {

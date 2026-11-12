@@ -22,7 +22,10 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Required Tools
 
-- None declared. Procedure should not assume external CLIs are present.
+- **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.15.0'`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.15.0 gxwf`.
+  Check: `gxwf --help | grep -q draft-validate`.
+  Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
 
 ## Load Upfront
 
@@ -31,6 +34,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Load On Demand
 
+- `references/cli/validate-tool-source.json`: CLI command reference packaged as a sidecar. Run Galaxy schema and semantic validation on the completed user-tool definition before critique or emission. Use when: after writing galaxy-user-tool.yml and after every structural edit made during critique.
 - `references/notes/component-nextflow-containers-and-envs.md`: Research note copied verbatim into the bundle. Map Nextflow container/conda evidence to Galaxy UDT container and package provenance. Use when: a missing Galaxy user-defined tool must be authored from a Nextflow process with container or conda directives.
 - `references/notes/component-nextflow-containers-and-envs.yml`: Companion file copied verbatim into the bundle. Sibling of `references/notes/component-nextflow-containers-and-envs.md`; read it where that note directs.
 - `references/notes/galaxy-user-tool-critique.md`: Research note copied verbatim into the bundle. Clarity and idiomaticity criteria, and the text-versus-structural test for each proposed fix. Use when: after the drafted `GalaxyUserTool` passes structural validation and before emitting `galaxy-user-tool.yml`.
@@ -72,9 +76,19 @@ Extract the minimum executable contract:
 - Input parameters with Galaxy-compatible names, types, labels, defaults, help text, and datatypes when evidenced.
 - Output datasets or collections with formats and `from_work_dir` / discovery rules.
 
-Assume the target uses Galaxy's default UDT allowlist unless the caller provides evidence that it differs. Under that default, emit only an image below `quay.io/biocontainers/`. A source Docker Hub, Wave, or other registry image remains provenance, not an eligible UDT `container`.
+Resolve the target policy before selecting an image. Use caller-supplied `user_defined_tool_allowed_containers` and `user_defined_tool_denied_containers`, or a policy returned by the target Galaxy. Otherwise use the Galaxy default: allow `quay.io/biocontainers/*` and deny nothing. Do not create a probe tool. A 400 from creating the requested tool is policy evidence, not permission to leave a disposable tool behind.
 
-When the source supplies a pinned `quay.io/biocontainers` image, use it after confirming it provides every invoked command. Otherwise derive canonical Conda package specs from the source and call `recommend_biocontainer` when that operation is available. Use an exact-version result when `verified` is not false. A `name_only` result changes the evidenced version, so surface it for confirmation before use. If the operation is unavailable, returns no image, or cannot verify the result, do not guess a tag.
+Apply both lists with Galaxy's matching semantics. Canonicalize registry names before comparison; namespace rules ending in `/*` match repositories strictly below that path; an exact image without a tag or digest allows every version; a tag rule excludes digest-bearing references; a digest rule matches that digest; and a denied match overrides every allowed match. Reject `docker://` and other schemes in the artifact even when policy parsing can canonicalize one, because Galaxy's runtime adds its own transport scheme.
+
+Under the default, emit only a fully qualified image strictly below `quay.io/biocontainers/`, pinned by tag, digest, or both. A source Docker Hub, Wave, ORAS, or other registry image remains provenance, not an eligible UDT `container`.
+
+When the source supplies a pinned allowed BioContainers image, use it only after confirming that the tag exists and provides every invoked command. Otherwise derive canonical Conda package specs from the source and call `recommend_biocontainer` when that operation is available. Pass every required package together so a multi-command tool resolves to a mulled image rather than an incomplete single-package image.
+
+Interpret the result before drafting:
+
+- `exact_version` with an image and `verified` not false: recheck the returned image against the target policy, then use it.
+- `name_only` with an image and `verified` not false: report the requested-to-resolved version change and require confirmation before use.
+- No image, `not_found`, `verified: false`, an unavailable resolver, or a malformed or out-of-policy result: stop unresolved. Do not retry with fewer packages merely to obtain an image.
 
 For a command that needs only shell builtins or core utilities, use a known allowed general-purpose BioContainers image such as `quay.io/biocontainers/python:3.13`, after confirming the required commands exist. Nothing downstream of this skill re-resolves the image.
 
@@ -88,9 +102,9 @@ Nothing constrains this draft to the schema as it is written, so the rules in th
 
 #### 4. Validate structurally
 
-Check the container policy before schema validation. Under the default policy, parse the image reference and require registry `quay.io`, a repository below `biocontainers/`, and a pinned tag or digest. If the caller supplied a different target allowlist, require positive evidence that the selected image matches it. A source image's existence is not policy evidence.
+Check the selected image against the resolved allow and deny lists before schema validation. Under the default, require registry `quay.io`, a repository strictly below `biocontainers/`, no transport scheme, and a tag or digest. A source image's existence is not policy evidence.
 
-Validate the draft against the available Galaxy user-tool validator or schema surface before critique. Treat container-policy and structural validation failures as authoring failures, not critic feedback.
+Write the draft to `galaxy-user-tool.yml` and run `gxwf validate-tool-source galaxy-user-tool.yml --json` without `--schema-only`. Treat container-policy and structural validation failures as authoring failures, not critic feedback. If the command is unavailable, stop with `validation-not-run`; do not substitute visual inspection.
 
 Fix validation errors directly. Do not run the critic until the draft passes structural validation.
 
@@ -98,7 +112,7 @@ Fix validation errors directly. Do not run the critic until the draft passes str
 
 After structural validation passes, review the draft against `references/notes/galaxy-user-tool-critique.md`, with the original request and requirements brief in hand.
 
-Apply every concrete clarity or idiomaticity issue. Sort each fix into text-level or structural per that note: text-level fixes are applied to the named field directly; a structural one means regenerating from §3 rather than improvising an edit. Re-validate structurally after edits — a `shell_command` change can break name matching. If critique conflicts with source evidence, keep the source evidence and record the conflict.
+Apply every concrete clarity or idiomaticity issue. Sort each fix into text-level or structural per that note: text-level fixes are applied to the named field directly; a structural one means regenerating from §3 rather than improvising an edit. Re-run the policy check and `gxwf validate-tool-source` after edits — a `shell_command` or container change can invalidate either gate. If critique conflicts with source evidence, keep the source evidence and record the conflict.
 
 #### 6. Emit the UDT artifact
 

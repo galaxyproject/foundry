@@ -1,0 +1,39 @@
+{
+  "type": "cli-command",
+  "tool": "gxwf",
+  "command": "validate-tool-source",
+  "summary": "Validate Galaxy user-defined tool YAML against the upstream schema and semantic authoring checks.",
+  "source_path": "content/cli/gxwf/validate-tool-source.md",
+  "source_revision": 1,
+  "package": "@galaxy-tool-util/cli",
+  "description": "Validate a user-defined Galaxy tool source YAML (class: GalaxyUserTool / GalaxyTool) against the Galaxy DynamicToolSources schema + #22615 semantic checks",
+  "synopsis": "gxwf validate-tool-source [options] <file>",
+  "args": [
+    {
+      "raw": "file",
+      "name": "file",
+      "required": true,
+      "variadic": false,
+      "description": "Tool source YAML file"
+    }
+  ],
+  "options": [
+    {
+      "flags": "--json",
+      "name": "json",
+      "description": "Output structured JSON report",
+      "takesArgument": false,
+      "optionalArgument": false,
+      "negatable": false
+    },
+    {
+      "flags": "--schema-only",
+      "name": "schemaOnly",
+      "description": "Skip semantic (model_validator) checks; structural JSON-Schema validation only",
+      "takesArgument": false,
+      "optionalArgument": false,
+      "negatable": false
+    }
+  ],
+  "body": "# `gxwf validate-tool-source`\n\nValidate a `GalaxyUserTool` or `GalaxyTool` YAML file against the schema synced from Galaxy's `DynamicToolSources` models and the semantic checks implemented by `@galaxy-tool-util/schema`.\n\n## Output\n\nThe default output is concise human-readable diagnostics. `--json` emits a structured report with `valid` and `errors`; each error has a path, message, keyword and parameters. Exit `0` means valid, exit `1` means validation failed and exit `2` means the YAML could not be parsed.\n\n## Examples\n\n```bash\ngxwf validate-tool-source galaxy-user-tool.yml\ngxwf validate-tool-source galaxy-user-tool.yml --json\ngxwf validate-tool-source galaxy-user-tool.yml --schema-only\n```\n\n## Gotchas\n\n- Do not use `--schema-only` for an authored UDT. It skips semantic checks for blank required fields, input references, output discovery and citations.\n- This command validates the tool language, not whether a target Galaxy permits or can pull the named container. Apply the target's allowed and denied container policy separately.\n- A successful static check does not prove the image contains every command or that the tool produces its declared outputs. Confirm image contents and run the workflow test."
+}
