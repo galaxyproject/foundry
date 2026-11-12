@@ -49,6 +49,8 @@ export interface StepParity {
   calls_from: "plan_state" | "records" | null;
   tool_id: string | null;
   tool_version: string | null;
+  /** The final workflow step's `state`, else its object `tool_state`; null for a removed step or none. */
+  state: Record<string, unknown> | null;
   source: CallSource[];
   dropped_entries: string[];
 }
@@ -368,6 +370,7 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
       calls_from: plan ? "plan_state" : recordCalls.has(key) ? "records" : null,
       tool_id: str(tooled.tool_id),
       tool_version: str(tooled.tool_version),
+      state: [after?.state, after?.tool_state].find(isRecord) ?? null,
       source: calls.map(sourceOf),
       dropped_entries: removedBy.get(key) ?? [],
     };

@@ -70,6 +70,26 @@ describe("assembleNextflowParity", () => {
     expect(step("summarize")?.source).toEqual([]);
   });
 
+  it("gives each step the final workflow's state", () => {
+    expect(step("view_map_map")?.state).toEqual({
+      output_fmt: "bam",
+      require_flags: "1",
+      exclude_flags: "12",
+    });
+    expect(step("to_fastq")?.state).toEqual({ output_fmt: "fastqsanger", read_numbering: true });
+    expect(step("collate")?.state).toBeNull();
+    expect(step("chr_filter")?.state).toBeNull();
+  });
+
+  it("reads a final step's tool_state when it has no state", () => {
+    const run = inputs();
+    const steps = (run.workflow as { steps: Record<string, Record<string, unknown>> }).steps;
+    steps.collate!.tool_state = { fast: false };
+    expect(assembleNextflowParity(run).steps.find((s) => s.step === "collate")?.state).toEqual({
+      fast: false,
+    });
+  });
+
   it("joins flag records to effective entries on step and arg", () => {
     expect(row("SAMTOOLS_VIEW_MAP_MAP", "args")).toMatchObject({
       process: "SAMTOOLS_VIEW",

@@ -9,7 +9,7 @@
   - Entry `conf/modules.config#withName:SAMTOOLS_COLLATE/args` on step `collate` with no flag record.
   - Record `arg-view-map-map-header` as stray, citing the overridden `withName:SAMTOOLS_VIEW/args`.
 - expect: the decision `chr-extract-unconditional` still says the chain runs the chr extract. The report shows it contradicted by the removed step and doesn't treat it as a reason.
-- expect: the source-argument table joins `-b -f1 -F12` on `view_map_map` to a carried decision. Both tied `SAMTOOLS_VIEW_UNMAP_UNMAP` prefixes appear as open gaps under Unverified. `to_fastq`, which has no `_plan_state`, gets its call from its flag record.
+- expect: the source-argument table joins `-b -f1 -F12` on `view_map_map` to a carried decision. Both tied `SAMTOOLS_VIEW_UNMAP_UNMAP` prefixes appear as open gaps under Unverified. `to_fastq`, which has no `_plan_state`, gets its call from its flag record. The `collate` row shows that the step sets no `state`.
 - expect: tool-version rows set `samtools` 1.17 (`biocontainers/samtools:1.17--h00cdaf9_0`) beside wrappers at `1.15.1+galaxy*`, flagged as differing and marked unverified. `multiqc-not-built` appears as a design-tier drop. Source scope says there is no scope decision.
 
 ## Case: the same removal, recorded as a drop

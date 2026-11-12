@@ -100,7 +100,7 @@ For each tool step in the final workflow, give the wrapper `tool_id` and `tool_v
 - **Exposed:** each final workflow input that feeds a step, with the source param it came from where the input's `doc` or the ledger names one.
 - **Not carried:** each input in `inputs.unwired`. It is declared but changes nothing, so it is never listed as exposed. Inputs in `inputs.removed` follow, each with the ledger text that explains it, or as a finding.
 - **Fixed:** source params or controls the workflow sets to one value: the scope decision's `controls`, and flags carried into `state`.
-- **Source arguments:** one table row per kept step and effective entry in `source_args.rows`, giving the entry `id`, its `expression`, `tie` where set, and each joined record's `id`, `disposition` and `flags`. An entry with no record is a finding. List `source_args.overridden` separately as needing no record, and each `source_args.stray_records` item with its problem. For a closure, compare the flags it can set with the records' `flags` by reading, and list any flag no record covers.
+- **Source arguments:** one table row per kept step and effective entry in `source_args.rows`, giving the entry `id`, its `expression`, `tie` where set, each joined record's `id`, `disposition` and `flags`, and the step's final `state` as `steps` prints it. The command doesn't map flags to `state` parameters; a reader compares them. An entry with no record is a finding. List `source_args.overridden` separately as needing no record, and each `source_args.stray_records` item with its problem. For a closure, compare the flags it can set with the records' `flags` by reading, and list any flag no record covers.
 
 ### Behavioural changes
 

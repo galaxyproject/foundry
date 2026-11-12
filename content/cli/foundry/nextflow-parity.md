@@ -40,6 +40,7 @@ Stdout holds one JSON object:
   - `plan_state`: what the snapshot's `_plan_state` holds: `calls` (a document with a `calls` list), `text`, `none`, or `absent` for a step the snapshot lacks.
   - `calls`: the summary call paths the step translates. `calls_from` says whether they came from `_plan_state` or from flag records that name the step.
   - `tool_id` and `tool_version`: from the final workflow, or from the snapshot for a removed step.
+  - `state`: the final workflow step's `state`, else an object `tool_state`, copied as written. `null` for a removed step or a step that sets none.
   - `source`: each call's process, tool, the tool's declared versions, and the process's `container` and `conda` text.
   - `dropped_entries`: the `kind: dropped` entries whose top-level `step` names a removed step.
 - `inputs`: the diff's `added` and `removed` inputs, and `unwired`, the final inputs that feed no step.
