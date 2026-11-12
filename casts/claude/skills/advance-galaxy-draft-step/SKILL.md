@@ -21,6 +21,8 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 - Write artifact `galaxy-workflow-draft` as `galaxy-workflow-draft.gxwf.yml`. Format: `yaml`. Schema: galaxy-workflow-draft. Same draft with one additional step concretized (one loop iteration). Once every step is concrete, draft-next-step reports `draft: false` and the harness exits the loop.
 - Write artifact `galaxy-workflow` as `galaxy-workflow.gxwf.yml`. Format: `yaml`. Concrete gxformat2 workflow (`class: GalaxyWorkflow`) extracted from the fully-concretized draft at loop endstate via draft-extract: drafty steps dropped, `_plan_*` planning fields stripped, class promoted. The runnable, testable artifact that downstream Molds (implement-galaxy-workflow-test, validate-galaxy-workflow, run-workflow-test) consume.
 - Write artifact `open-requirements-ledger` as `open-requirements.ledger.yml`. Format: `yaml`. Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact.
+- Write artifact `galaxy-workflow-draft-snapshot` as `galaxy-workflow-draft.snapshot.gxwf.yml`. Format: `yaml`. Schema: galaxy-workflow-draft. Copy of the draft as the loop first received it, with every `_plan_*` field intact: the record of which source work each settled step carried. Written once and never edited.
+- Write artifact `galaxy-workflow-extracted` as `galaxy-workflow.extracted.gxwf.yml`. Format: `yaml`. Copy of the first `galaxy-workflow.gxwf.yml` this Mold extracts, frozen before the test phase. run-workflow-test diffs the final workflow against it. Written once and never edited.
 
 ## Required Tools
 
@@ -54,6 +56,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Validation
 
 - Validate `galaxy-workflow-draft.gxwf.yml` for artifact `galaxy-workflow-draft` against the galaxy-workflow-draft schema when a validator is available.
+- Validate `galaxy-workflow-draft.snapshot.gxwf.yml` for artifact `galaxy-workflow-draft-snapshot` against the galaxy-workflow-draft schema when a validator is available.
 
 ## Procedure
 
@@ -64,6 +67,8 @@ This skill is **single-entry, single-exit**: it owns the loop oracle (draft-next
 ### Sequence
 
 Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <dir>` to cache commands, wrapper summarization, and validation.
+
+Keep two snapshots, each written once and never edited afterwards. When `galaxy-workflow-draft.snapshot.gxwf.yml` is absent, copy the incoming draft there before this call changes anything. Implementation strips a step's `_plan_*` fields, so this copy is the only one that still maps every step to its source. When a call runs draft-extract and `galaxy-workflow.extracted.gxwf.yml` is absent, copy the extracted workflow there. Later phases edit `galaxy-workflow.gxwf.yml` in place, and run-workflow-test diffs it against this copy to find the steps they removed.
 
 1. **Pick.** Run draft-next-step. If `draft: false`, the loop is done: apply step 5 to any `open` blocking entry, then run draft-extract to emit the concrete `galaxy-workflow.gxwf.yml` (drafty steps dropped, `_plan_*` stripped, `class` promoted to `GalaxyWorkflow`), then return. Otherwise keep the chosen step id, and any `resolved_args` in its `_plan_state`, which implementation strips. If an `open` blocking entry against it already records the wrapper as confirmed absent, the author branch as ruled out, a found wrapper that can't serve the step, or why its wired inputs can't supply the step, go to step 5. Tool Shed misses and a tool version missing from a cache don't record that.
 2. **Resolve a wrapper.** First check for an existing pin:

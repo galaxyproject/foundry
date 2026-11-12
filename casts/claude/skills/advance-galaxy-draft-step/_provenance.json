@@ -4,11 +4,11 @@
   "mold": {
     "name": "advance-galaxy-draft-step",
     "path": "content/molds/advance-galaxy-draft-step/index.md",
-    "revision": 13,
-    "content_hash": "8ca02255f70ea0dc396b816ef1beef126e674e7204e4c86a54de2fc60fa76cab",
-    "commit": "32673995a003ce4c55b28ba68357fd91b98f3025"
+    "revision": 14,
+    "content_hash": "28ba0ae6083fe9caa1a04a683e01b91402197cec789d303f086ff7ae8f84b42a",
+    "commit": "ef1607a86adda5393d1b8287a421fd5e957f62e9"
   },
-  "cast_at": "2026-11-12T09:17:15.053Z",
+  "cast_at": "2026-11-12T10:09:13.725Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -148,8 +148,8 @@
       "evidence": "hypothesis",
       "purpose": "Read the ledger for an open blocking entry against the picked step, or any open blocking entry once no drafty step is left, check each of the step's source arguments has a disposition, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on.",
       "verification": "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that leaves fewer open blocking entries than it found.",
-      "src_hash": "7598e2733792efe69ab0351d981be3dbc5d8ab9095544ac3608a3d329f951c14",
-      "dst_hash": "7598e2733792efe69ab0351d981be3dbc5d8ab9095544ac3608a3d329f951c14",
+      "src_hash": "ad97ce1397775b7d28d03ab8dd85dff4c60f5e6ee7ad5ab85287b515094c90ef",
+      "dst_hash": "ad97ce1397775b7d28d03ab8dd85dff4c60f5e6ee7ad5ab85287b515094c90ef",
       "source": "deterministic"
     },
     {
@@ -223,6 +223,19 @@
         "kind": "yaml",
         "default_filename": "open-requirements.ledger.yml",
         "description": "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
+      },
+      {
+        "id": "galaxy-workflow-draft-snapshot",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow-draft.snapshot.gxwf.yml",
+        "schema": "[[galaxy-workflow-draft]]",
+        "description": "Copy of the draft as the loop first received it, with every `_plan_*` field intact: the record of which source work each settled step carried. Written once and never edited."
+      },
+      {
+        "id": "galaxy-workflow-extracted",
+        "kind": "yaml",
+        "default_filename": "galaxy-workflow.extracted.gxwf.yml",
+        "description": "Copy of the first `galaxy-workflow.gxwf.yml` this Mold extracts, frozen before the test phase. [[run-workflow-test]] diffs the final workflow against it. Written once and never edited."
       }
     ],
     "consumes": [

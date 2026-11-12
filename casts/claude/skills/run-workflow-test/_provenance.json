@@ -4,11 +4,11 @@
   "mold": {
     "name": "run-workflow-test",
     "path": "content/molds/run-workflow-test/index.md",
-    "revision": 8,
-    "content_hash": "6e312c6ee27ef6e45a6ace74087cd28a6509ade11f788a51ee478efce58971b6",
-    "commit": "4c747d65e84f0100611458b5e869e9641bc50a21"
+    "revision": 9,
+    "content_hash": "a8843fea1df981f0d9714f170b3b5b15651c0f422cf3b21fbc4825db9d81dc7f",
+    "commit": "ef1607a86adda5393d1b8287a421fd5e957f62e9"
   },
-  "cast_at": "2026-11-09T16:55:03.332Z",
+  "cast_at": "2026-11-12T10:09:16.955Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -19,6 +19,22 @@
     }
   ],
   "refs": [
+    {
+      "kind": "cli-command",
+      "mode": "sidecar",
+      "ref": "[[check-step-removals]]",
+      "src": "content/cli/foundry/check-step-removals.md",
+      "dst": "references/cli/check-step-removals.json",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Deterministically match the steps `gxwf diff` reports removed against the ledger's `kind: dropped` entries.",
+      "trigger": "After a green Planemo run, when the extracted-workflow snapshot exists.",
+      "verification": "Promote after a run with a gxwf release that ships `diff` blocks a green result on a removed step that has no drop entry.",
+      "src_hash": "311241b88fa5917ad10e9d38f09e70d12b710b0b1696d64852c181eddb32c3d8",
+      "dst_hash": "1f4e4b11f574ce99450b45e6f8fd75b5a6f4346b15c37237eb5865b52047cafb",
+      "source": "deterministic"
+    },
     {
       "kind": "cli-command",
       "mode": "sidecar",
@@ -61,6 +77,22 @@
       "trigger": "When Planemo reports a failed, cancelled, missing-output, or ambiguous workflow invocation result.",
       "src_hash": "e86b17c0b39b88076f1a1f177cce9ef1f868de0b36437a624e4b630e2c126559",
       "dst_hash": "e86b17c0b39b88076f1a1f177cce9ef1f868de0b36437a624e4b630e2c126559",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger/index.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Know what labels a removed step: a `kind: dropped` entry with a top-level `step` and a cited `because`, as opposed to a gap or a per-flag `source_arg` record.",
+      "trigger": "When the removed-step check reports an unlabelled step.",
+      "verification": "Promote after a test-phase run that removed a step ends red until the drop is recorded, then green.",
+      "src_hash": "ad97ce1397775b7d28d03ab8dd85dff4c60f5e6ee7ad5ab85287b515094c90ef",
+      "dst_hash": "ad97ce1397775b7d28d03ab8dd85dff4c60f5e6ee7ad5ab85287b515094c90ef",
       "source": "deterministic"
     },
     {
@@ -117,9 +149,45 @@
         "id": "workflow-test-result",
         "kind": "json",
         "default_filename": "workflow-test-result.json",
-        "description": "Structured status plus captured evidence — Planemo result, invocation/history/workflow ids, artifact paths, Galaxy mode, and (on failure) the observed modality and next reference surface — for debug-galaxy-workflow-output. Also the faithful handoff when no test exists or none could be run."
+        "description": "Structured status plus captured evidence — Planemo result, invocation/history/workflow ids, artifact paths, Galaxy mode, the removed-step check, and (on failure) the observed modality and next reference surface — for debug-galaxy-workflow-output. Also the faithful handoff when no test exists or none could be run."
       }
     ],
-    "consumes": []
+    "consumes": [
+      {
+        "id": "galaxy-workflow-extracted",
+        "description": "The workflow as [[advance-galaxy-draft-step]] first extracted it, before the test phase. Absent when the pipeline has no per-step loop; then removed steps are not checked.",
+        "optional": true,
+        "producers": [
+          "advance-galaxy-draft-step"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]], read for the `kind: dropped` entries that label removed steps. This Mold never writes it.",
+        "optional": true,
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "mature-galaxy-workflow-for-iwc",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
+        ]
+      }
+    ]
   }
 }

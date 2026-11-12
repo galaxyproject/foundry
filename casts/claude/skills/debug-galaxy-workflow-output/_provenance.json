@@ -4,11 +4,11 @@
   "mold": {
     "name": "debug-galaxy-workflow-output",
     "path": "content/molds/debug-galaxy-workflow-output/index.md",
-    "revision": 6,
-    "content_hash": "0ea72a26de30b8086e4d11fea09bc269e94320ec97fb317f6c0232cd92841009",
-    "commit": "eec35c4bdb6f486a98372cbf022cced5b84e6556"
+    "revision": 7,
+    "content_hash": "c0a2b4341041240c68f6f274c3da89e226aa242efa0054978b10107a749c1dd5",
+    "commit": "ef1607a86adda5393d1b8287a421fd5e957f62e9"
   },
-  "cast_at": "2026-10-27T03:54:45.132Z",
+  "cast_at": "2026-11-12T10:09:14.827Z",
   "refs": [
     {
       "kind": "research",
@@ -110,6 +110,21 @@
     {
       "kind": "research",
       "mode": "verbatim",
+      "ref": "[[open-requirements-ledger]]",
+      "src": "content/research/open-requirements-ledger/index.md",
+      "dst": "references/notes/open-requirements-ledger.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Hold a diagnosis against the ledger: a cause that refutes an earlier drop's `because` reopens it, and a step taken out of the workflow is recorded as a `kind: dropped` entry with a cited `because`, never as a gap.",
+      "verification": "Promote after a test-phase run reopens a drop its diagnosis refuted and restores the step.",
+      "src_hash": "ad97ce1397775b7d28d03ab8dd85dff4c60f5e6ee7ad5ab85287b515094c90ef",
+      "dst_hash": "ad97ce1397775b7d28d03ab8dd85dff4c60f5e6ee7ad5ab85287b515094c90ef",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
       "ref": "[[planemo-asserts-idioms]]",
       "src": "content/research/planemo-asserts-idioms/index.md",
       "dst": "references/notes/planemo-asserts-idioms.md",
@@ -150,9 +165,44 @@
     "consumes": [
       {
         "id": "workflow-test-result",
-        "description": "Structured run handoff from run-workflow-test: Planemo result, invocation/job/artifact context, and the observed failure modality.",
+        "description": "Structured run handoff from run-workflow-test: Planemo result, invocation/job/artifact context, the removed-step check, and the observed failure modality.",
         "producers": [
           "run-workflow-test"
+        ]
+      },
+      {
+        "id": "open-requirements-ledger",
+        "description": "Carried obligations ledger [[open-requirements-ledger]]: the drops and gaps whose justifications a diagnosis can confirm or refute.",
+        "optional": true,
+        "producers": [
+          "advance-galaxy-draft-step",
+          "apply-galaxy-workflow-changeset",
+          "compare-against-iwc-exemplar",
+          "cwl-summary-to-galaxy-data-flow",
+          "cwl-summary-to-galaxy-interface",
+          "cwl-summary-to-galaxy-template",
+          "freeform-summary-to-galaxy-data-flow",
+          "freeform-summary-to-galaxy-interface",
+          "freeform-summary-to-galaxy-template",
+          "implement-galaxy-tool-step",
+          "interview-to-galaxy-workflow-changeset",
+          "mature-galaxy-workflow-for-iwc",
+          "nextflow-summary-to-galaxy-data-flow",
+          "nextflow-summary-to-galaxy-interface",
+          "nextflow-summary-to-galaxy-reference-data",
+          "nextflow-summary-to-galaxy-template",
+          "repair-galaxy-draft-topology",
+          "workflow-brief-to-galaxy-data-flow",
+          "workflow-brief-to-galaxy-interface",
+          "workflow-brief-to-galaxy-template"
+        ]
+      },
+      {
+        "id": "galaxy-workflow-extracted",
+        "description": "The workflow as the per-step loop first extracted it, before the test phase: where a removed step is restored from.",
+        "optional": true,
+        "producers": [
+          "advance-galaxy-draft-step"
         ]
       }
     ]

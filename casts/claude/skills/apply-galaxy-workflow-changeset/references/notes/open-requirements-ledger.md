@@ -6,7 +6,7 @@ tags:
 status: draft
 created: 2026-06-16
 revised: 2026-11-12
-revision: 8
+revision: 9
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
@@ -14,6 +14,8 @@ related_molds:
   - "[[repair-galaxy-draft-topology]]"
   - "[[implement-galaxy-tool-step]]"
   - "[[nextflow-summary-to-galaxy-template]]"
+  - "[[run-workflow-test]]"
+  - "[[debug-galaxy-workflow-output]]"
 summary: "Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state."
 ---
 
@@ -207,6 +209,13 @@ prose in a brief is invisible to every later Mold; a cut recorded as a `gap` rea
 something the pipeline could not do rather than something it chose not to do. Recording
 the drop is not the same as discharging it, and a well-written entry is not a substitute
 for the work — an entry makes a cut *legible*, never *justified*.
+
+A drop that removes a workflow step names it in the entry's top-level `step`. That
+holds in the test phase too, where a step taken out to make the test pass is a drop like
+any other. [[run-workflow-test]] diffs the final workflow against the one the per-step
+loop extracted, and a green run is not a pass while a removed step has no such entry. A
+gap on the step doesn't count, and neither does a flag record, which names its step in
+`source_arg`.
 
 **A refuted justification reopens its decision.** When work you do contradicts the
 `because` another entry rests on — discovery finds the wrapper a drop assumed absent, a
