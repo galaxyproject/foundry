@@ -90,7 +90,9 @@ Nextflow's selector priority themselves.
   Priority is `withLabel` < `withName` on the process < `withName` on the
   alias < `withName` on the whole path, and a pattern must match a whole
   name. At the same rank a selected profile beats the root chain, as under
-  the legacy config parser; under the strict parser (default since Nextflow
+  the legacy config parser, unless the root chain also declares the
+  profile's selector: then the profile replaces only that selector's root
+  entries and can tie another root selector; under the strict parser (default since Nextflow
   26.04) nf-core's trailing `includeConfig 'conf/modules.config'` can win
   instead. Then a later declaration of the same selector in one config beats
   an earlier one. Level entries with different expressions are listed

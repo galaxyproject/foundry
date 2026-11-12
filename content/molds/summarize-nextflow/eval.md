@@ -192,7 +192,9 @@ whatever a scenario produces. Properties are tagged by bucket:
   for it, `effective_args` has one row whose `ids` name the entry with the
   highest rank (`withLabel` < `withName` on the process < `withName` on the
   alias < `withName` on the whole path). At the same rank a selected
-  profile's entry beats the root chain's. A qualified selector whose
+  profile's entry beats the root chain's, unless the root chain declares the
+  same selector, which then keeps its position and only that selector's root
+  entries lose. A qualified selector whose
   subworkflow doesn't call the process on that path, an entry whose selector
   names a different alias, and `.*:NAME` for an aliased call are never
   effective for it. One call name used from two subworkflows gives separate

@@ -1315,20 +1315,13 @@ function parseWorkflows(
   aliases: Map<string, string[]>,
 ): ParsedWorkflow[] {
   const workflows = new Map<string, ParsedWorkflow>();
-  const knownProcesses = new Set(processNames);
   for (const path of walk(pipelineRoot).filter((candidate) => candidate.endsWith(".nf"))) {
     const text = readText(path);
     const blocks = extractWorkflowBlocks(text);
-    const localWorkflowNames = blocks.flatMap((block) => (block.name ? [block.name] : []));
-    const importedNames = new Set(
-      parseIncludeItems(text).map((include) => include.alias ?? include.name),
-    );
+    const known = callableNames(text, blocks, processNames);
     for (const block of blocks) {
       if (!block.name) continue;
-      const calls = parseWorkflowCalls(
-        block.body,
-        new Set([...knownProcesses, ...importedNames, ...localWorkflowNames]),
-      );
+      const calls = parseWorkflowCalls(block.body, known);
       workflows.set(block.name, {
         name: block.name,
         path: relative(pipelineRoot, path),
@@ -1343,6 +1336,19 @@ function parseWorkflows(
     }
   }
   return [...workflows.values()].sort((left, right) => left.path.localeCompare(right.path));
+}
+
+/** Names a workflow in this file can call: processes, includes (by alias), and local workflows. */
+function callableNames(
+  text: string,
+  blocks: { name: string | null }[],
+  processNames: Iterable<string>,
+): Set<string> {
+  return new Set([
+    ...processNames,
+    ...parseIncludeItems(text).map((include) => include.alias ?? include.name),
+    ...blocks.flatMap((block) => (block.name ? [block.name] : [])),
+  ]);
 }
 
 function selectPrimaryWorkflow(
@@ -3206,7 +3212,12 @@ function attachConfigDirectives(
       );
     });
     process.resolved_args = assignments.map((assignment) => assignment.arg);
-    const effective = effectiveArgs(process, assignments, calls);
+    const rootSelectors = new Set(
+      matched.flatMap((selector) =>
+        selector.profile === null ? [`${selector.kind}:${selector.pattern}`] : [],
+      ),
+    );
+    const effective = effectiveArgs(process, assignments, calls, rootSelectors);
     if (effective.length > 0) process.effective_args = effective;
     const template = resolveProcessTemplate(pipelineRoot, process);
     process.template = template.template;
@@ -3227,11 +3238,14 @@ function resolvedArgId(selector: ScopedSelector, key: string, index: number): st
  * then a selected profile over the root chain (legacy parser order), then the
  * later declaration of the same selector in one config. Entries still level
  * with different expressions are a tie: include order is not modeled.
+ * A profile selector the root also declares keeps the root's map position, so it
+ * only replaces that selector's root entries.
  */
 function effectiveArgs(
   process: Process,
   assignments: { selector: ScopedSelector; arg: ResolvedArg }[],
   calls: string[],
+  rootSelectors: Set<string>,
 ): EffectiveArg[] {
   return calls.flatMap((call) =>
     EXT_ASSIGNMENTS.flatMap(([key]) => {
@@ -3244,8 +3258,14 @@ function effectiveArgs(
       const top = Math.max(...ranked.map((entry) => entry.rank));
       const topArgs = ranked.filter((entry) => entry.rank === top).map((entry) => entry.arg);
       const fromProfile = topArgs.filter((arg) => arg.profile !== undefined);
+      const appended = fromProfile.filter((arg) => !rootSelectors.has(arg.selector));
+      const merged = new Set(fromProfile.map((arg) => arg.selector));
+      const candidates =
+        appended.length > 0
+          ? appended
+          : topArgs.filter((arg) => arg.profile !== undefined || !merged.has(arg.selector));
       const latest = new Map<string, ResolvedArg>();
-      for (const arg of fromProfile.length > 0 ? fromProfile : topArgs) {
+      for (const arg of candidates) {
         latest.set(`${arg.config}\0${arg.profile ?? ""}\0${arg.selector}`, arg);
       }
       const level = [...latest.values()];
@@ -3316,12 +3336,7 @@ function entryWorkflowCalls(
   const blocks = extractWorkflowBlocks(text);
   const entry = blocks.find((block) => block.name === null);
   if (!entry) return null;
-  const known = new Set([
-    ...processNames,
-    ...parseIncludeItems(text).map((include) => include.alias ?? include.name),
-    ...blocks.flatMap((block) => (block.name ? [block.name] : [])),
-  ]);
-  return parseWorkflowCalls(entry.body, known);
+  return parseWorkflowCalls(entry.body, callableNames(text, blocks, processNames));
 }
 
 function selectedProfileNames(profile: string | undefined): string[] {

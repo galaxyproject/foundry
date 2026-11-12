@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-to-test-data/index.md",
     "revision": 4,
     "content_hash": "842e097edfb5bfbc37b62a35d5870ee2087df33919212a7965fd70dae799b189",
-    "commit": "fada24fd69f40f901fdba574e7f1204ee901d1db"
+    "commit": "9727baa6079615d9dcd77de5ea3209a7d51b8df7"
   },
-  "cast_at": "2026-11-12T07:38:21.249Z",
+  "cast_at": "2026-11-12T08:18:39.037Z",
   "refs": [
     {
       "kind": "research",
@@ -83,8 +83,8 @@
       "evidence": "corpus-observed",
       "purpose": "Input contract: read `test_selection` and the chosen `test_candidates[].inputs[]` — role, url/path, sha1, filetype — as the declared source of test data.",
       "license": "MIT",
-      "src_hash": "c89c76555021ccba6710e43af8b466b0edc503263ad7ca4436e6d2320a20279b",
-      "dst_hash": "c89c76555021ccba6710e43af8b466b0edc503263ad7ca4436e6d2320a20279b",
+      "src_hash": "d52e784f3ceddce8619b0ea883e5fa92743605f7617f98b27666bb43bc8ad8e8",
+      "dst_hash": "d52e784f3ceddce8619b0ea883e5fa92743605f7617f98b27666bb43bc8ad8e8",
       "source": "deterministic"
     },
     {
