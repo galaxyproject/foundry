@@ -24,7 +24,7 @@ Requires Node.js >= 20.
 
 ```sh
 summarize-nextflow <path-or-url> \
-  [--profile=test] \
+  [--profile=<name>] \
   [--pin=<sha-or-tag>] \
   [--out=summary.json] \
   [--no-with-nextflow] \

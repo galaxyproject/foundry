@@ -46,12 +46,11 @@ export const foundryCliMeta: CliProgramSpec = {
         {
           flags: "--profile <name>",
           name: "profile",
-          description: "Profile to resolve config under",
+          description: "Explicit profile override for candidate resolution",
           takesArgument: true,
           argumentPlaceholder: "<name>",
           optionalArgument: false,
           negatable: false,
-          defaultValue: "test",
         },
         {
           flags: "--pin <ref>",
