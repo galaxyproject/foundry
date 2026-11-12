@@ -4,11 +4,11 @@
   "mold": {
     "name": "debug-galaxy-workflow-output",
     "path": "content/molds/debug-galaxy-workflow-output/index.md",
-    "revision": 6,
-    "content_hash": "0ea72a26de30b8086e4d11fea09bc269e94320ec97fb317f6c0232cd92841009",
-    "commit": "eec35c4bdb6f486a98372cbf022cced5b84e6556"
+    "revision": 7,
+    "content_hash": "1cf77ea80a7caec9eb73fd41288387f1180969cac216eb3d53c4e99edeb1ca2c",
+    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
   },
-  "cast_at": "2026-10-27T03:54:45.132Z",
+  "cast_at": "2026-11-12T09:51:29.293Z",
   "refs": [
     {
       "kind": "research",
@@ -133,8 +133,8 @@
       "evidence": "corpus-observed",
       "purpose": "Locate which Planemo artifact or Galaxy API surface preserves the failure evidence.",
       "trigger": "When Planemo output is ambiguous, structured test JSON is available or missing because Galaxy rejected the workflow import, or rerunning can be avoided by inspecting an existing invocation.",
-      "src_hash": "3b688f5a39951ad6f937335bf1217731aefc59fef7472fcbe9f85002019a2caf",
-      "dst_hash": "3b688f5a39951ad6f937335bf1217731aefc59fef7472fcbe9f85002019a2caf",
+      "src_hash": "544c6c36900284d3d0fc3149c88ecb57442f38ae7f5424cc2936dbf849097ba2",
+      "dst_hash": "544c6c36900284d3d0fc3149c88ecb57442f38ae7f5424cc2936dbf849097ba2",
       "source": "deterministic"
     }
   ],

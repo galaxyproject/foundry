@@ -35,6 +35,17 @@ whatever a scenario produces.
   distinction, output dataset state, and whether the wrapper failure semantics
   explain the failure.
 
+## Property: an unexplained managed job failure is evidenced before any workflow change
+
+- check: llm-judged
+- assertion: when a job fails on a Planemo-managed run and its records in the
+  structured result do not explain the failure, the report cites evidence from
+  a `--no_cleanup` rerun (the job script, stdout/stderr, and the size and
+  content of the job's input datasets) or names that rerun as the next step,
+  before it recommends any change to the workflow. It does not cite job,
+  invocation, or history API queries against the managed Galaxy after the run
+  ended.
+
 ## Property: captures invocation-failure evidence
 
 - check: llm-judged
