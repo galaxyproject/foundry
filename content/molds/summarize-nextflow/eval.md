@@ -181,6 +181,19 @@ whatever a scenario produces. Properties are tagged by bucket:
   or in a config that block includes, stay out unless the caller selected that
   profile. A selected profile's entries name it in `profile`.
 
+## Property: effective arguments follow Nextflow selector priority
+
+- bucket: fidelity
+- check: deterministic
+- assertion: each `resolved_args` entry has an `id` unique within its process.
+  For every call of a process and every `key` an entry sets for it,
+  `effective_args` has one row whose `ids` name the entry with the highest
+  rank (`withLabel` < `withName` on the process < `withName` on the alias <
+  fully qualified), a selected profile's entry winning a same-rank contest
+  with the root chain's. An entry whose selector names a different alias is
+  never effective for the call. Several `ids` appear only with `tie: true`,
+  when level entries set different expressions.
+
 ## Property: re-runs are reproducible
 
 - bucket: regression
