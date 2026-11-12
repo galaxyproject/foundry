@@ -57,8 +57,10 @@ export function checkStepRemovals(diff: unknown, ledger: unknown): StepRemovalCh
   const drops = ledgerEntries(ledger).filter(isStepDrop);
   const removed_steps = Object.entries(removed).map(([step, summary]): RemovedStep => {
     const label = isRecord(summary) && typeof summary.label === "string" ? summary.label : null;
+    // A nested step's key is `<parent>/<key>`; its bare label would match other levels' steps.
+    const names = label !== null && !step.includes("/") ? [step, label] : [step];
     const dropped_entries = drops
-      .filter((entry) => entry.step === step || (label !== null && entry.step === label))
+      .filter((entry) => names.includes(entry.step))
       .map((entry) => (typeof entry.id === "string" ? entry.id : "(no id)"));
     return { step, label, dropped_entries };
   });

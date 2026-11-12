@@ -5,10 +5,10 @@
     "name": "run-workflow-test",
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 9,
-    "content_hash": "a290ffd61565efabcf9c70b57aa7f2f0b86ed65e0300a4ceed6ef1f4702d46ec",
-    "commit": "0eb5be21efbff2fba5623d165838c5adb2b0176d"
+    "content_hash": "82a262c09c5f21938acd2f81c3ae920a1563e15201c1f81507eb48ab003398c7",
+    "commit": "23ed81323d3a74198f66405fc3c0b811c035ec5f"
   },
-  "cast_at": "2026-11-12T11:49:33.489Z",
+  "cast_at": "2026-11-12T12:57:35.658Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -31,8 +31,8 @@
       "purpose": "Deterministically match the steps `gxwf diff` reports removed against the ledger's `kind: dropped` entries.",
       "trigger": "After a green Planemo run, when the extracted-workflow snapshot exists.",
       "verification": "Promote after a run blocks a green result on a removed step that has no drop entry.",
-      "src_hash": "2a6f260798656f75f90fc86c42728bb6efec7bc6e615501b2f499c604f425bef",
-      "dst_hash": "3b1f3b0227267e952bebb5ebac3464de7ecb929f9eefcdd77e49247c7ff2c41b",
+      "src_hash": "29e72d336445d48a413a5bf96d4497396b7dfd574ca19e77809328e6a36dc653",
+      "dst_hash": "00fad73e050ad5580b0a01688e2cea4a287e83c2abd7545046fe1341e3f50c4d",
       "source": "deterministic"
     },
     {
@@ -91,8 +91,8 @@
       "purpose": "Know what labels a removed step: a `kind: dropped` entry with a top-level `step` and a cited `because`, as opposed to a gap or a per-flag `source_arg` record.",
       "trigger": "When the removed-step check reports an unlabelled step.",
       "verification": "Promote after a test-phase run that removed a step ends red until the drop is recorded, then green.",
-      "src_hash": "a8d4c4ce1c89b7598eb3930f70f5a24532a727bed6b84b536217c856a804f801",
-      "dst_hash": "a8d4c4ce1c89b7598eb3930f70f5a24532a727bed6b84b536217c856a804f801",
+      "src_hash": "225ddba1f1e34a48980cb7da052ab3de93788a1e5ad81c06534fbdfbc5d96f22",
+      "dst_hash": "225ddba1f1e34a48980cb7da052ab3de93788a1e5ad81c06534fbdfbc5d96f22",
       "source": "deterministic"
     },
     {

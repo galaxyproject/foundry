@@ -212,7 +212,9 @@ for the work — an entry makes a cut *legible*, never *justified*.
 
 A drop that removes a workflow step names it in the entry's top-level `step`, including
 a step taken out in the test phase to make the test pass. [[run-workflow-test]] fails a
-green run while a step removed since extraction has no such entry.
+green run while a step removed since extraction has no such entry. Name a step inside an
+inline subworkflow by its path, its parent step's key and its own joined by `/`
+(`nested/first`), as `gxwf diff` keys it.
 
 **A refuted justification reopens its decision.** When work you do contradicts the
 `because` another entry rests on — discovery finds the wrapper a drop assumed absent, a

@@ -18,6 +18,7 @@
     "removed": {
       "filter": {
         "label": "filter",
+        "id": null,
         "type": "tool",
         "tool_id": "Filter1",
         "tool_version": "1.1.0",

@@ -16,6 +16,7 @@
     "removed": {
       "subsample_reads": {
         "label": null,
+        "id": "subsample_reads",
         "type": "tool",
         "tool_id": "Show beginning1",
         "tool_version": "1.0.2",

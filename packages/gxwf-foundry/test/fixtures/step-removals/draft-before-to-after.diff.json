@@ -21,6 +21,7 @@
     "removed": {
       "chr_filter": {
         "label": "keep only requested chromosomes",
+        "id": null,
         "type": "tool",
         "tool_id": "TODO",
         "tool_version": "TODO",

@@ -6,12 +6,15 @@ import { describe, expect, it } from "vitest";
 import YAML, { stringify } from "yaml";
 import { checkStepRemovals, StepRemovalInputError } from "../src/step-removals.js";
 
-// `gxwf diff --json` output, galaxy-tool-util-ts PR #233 at 3fd23149, on its synthetic-diff fixtures.
+// `gxwf diff --json` output, galaxy-tool-util-ts PR #233 at a5c6cd57, on its synthetic-diff fixtures
+// and on the nested-removals pair here.
 const fixture = (name: string): unknown =>
   JSON.parse(readFileSync(resolve(__dirname, "fixtures/step-removals", name), "utf8"));
 const draftToFinal = fixture("draft-before-to-after.diff.json");
 const removedLeaf = fixture("removed-leaf-step.diff.json");
 const changedStep = fixture("changed-step.diff.json");
+const nestedRemovals = fixture("nested-removals.diff.json");
+const listRelabel = fixture("list-step-relabel.diff.json");
 
 const chrDropped = {
   id: "chr-filter-dropped",
@@ -46,6 +49,26 @@ describe("checkStepRemovals", () => {
   it("matches the removed step's label as well as its key", () => {
     const byLabel = { ...chrDropped, step: "keep only requested chromosomes" };
     expect(checkStepRemovals(draftToFinal, { entries: [byLabel] }).ok).toBe(true);
+  });
+
+  it("names a step removed inside an inline subworkflow by its full key", () => {
+    const top = { ...chrDropped, id: "first-dropped", step: "first" };
+    const result = checkStepRemovals(nestedRemovals, { entries: [top] });
+    expect(result.removed_steps).toEqual([
+      { step: "first", label: "first", dropped_entries: ["first-dropped"] },
+      { step: "nested/first", label: "first", dropped_entries: [] },
+    ]);
+    expect(result.unlabelled).toEqual(["nested/first"]);
+
+    const nested = { ...top, id: "nested-first-dropped", step: "nested/first" };
+    const both = checkStepRemovals(nestedRemovals, { entries: [top, nested] });
+    expect(both.ok).toBe(true);
+    expect(both.removed_steps[1].dropped_entries).toEqual(["nested-first-dropped"]);
+    expect(checkStepRemovals(nestedRemovals, { entries: [nested] }).unlabelled).toEqual(["first"]);
+  });
+
+  it("passes a list-form relabel, which removes no step", () => {
+    expect(checkStepRemovals(listRelabel, { entries: [] }).ok).toBe(true);
   });
 
   it("ignores flag records, which carry source_arg, even when they set step", () => {

@@ -60,8 +60,8 @@ whatever a scenario produces.
 - assertion: when the handoff reports `unlabelled-step-removal`, the report
   traces each named step to the failure that led to its removal and recommends
   either restoring it from the extracted workflow or a `kind: dropped` entry
-  naming it in its top-level `step`, with a `because` that quotes primary
-  evidence. It never accepts a plain gap as the label, and it never cites
+  whose top-level `step` is the key `step_removals.unlabelled` gives, full
+  subworkflow path included, with a `because` that quotes primary evidence. It never accepts a plain gap as the label, and it never cites
   Galaxy's `validation_failed` scheduler log line as evidence that a step
   failed. A drop whose `because` the diagnosis refutes is reopened.
 
