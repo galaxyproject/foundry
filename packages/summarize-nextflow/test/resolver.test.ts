@@ -3646,6 +3646,52 @@ workflow { NFCORE_PIPE() }
     ]);
   });
 
+  test("traces calls through a workflow whose inline comment has an apostrophe", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/comment' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      "process {\n    withName: '.*:PIPE:SUB:FOO' {\n        ext.args = '-s'\n    }\n}\n",
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(
+      root,
+      "subworkflows/sub.nf",
+      "include { FOO } from '../modules/foo'\nworkflow SUB { FOO() }\n",
+    );
+    write(
+      root,
+      "workflows/pipe.nf",
+      `include { SUB } from '../subworkflows/sub'
+workflow PIPE {
+    SUB()  // the sub's files
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { PIPE } from './workflows/pipe'
+workflow NFCORE_PIPE { PIPE() }
+workflow { NFCORE_PIPE() }
+`,
+    );
+
+    const foo = (await summarize(root)).processes.find((process) => process.name === "FOO")!;
+    expect(foo.effective_args).toEqual([
+      {
+        call: "NFCORE_PIPE:PIPE:SUB:FOO",
+        key: "args",
+        ids: ["conf/modules.config#withName:.*:PIPE:SUB:FOO/args"],
+      },
+    ]);
+  });
+
   test("qualifies calls in an aliased subworkflow by the subworkflow alias", async () => {
     const root = tempPipelineRoot();
     write(
