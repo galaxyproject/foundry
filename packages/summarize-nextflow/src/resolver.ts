@@ -278,6 +278,17 @@ interface ModuleMeta {
   tools: ModuleMetaEntry[];
   input: ModuleMetaEntry[];
   output: ModuleMetaEntry[];
+  input_channels?: ModuleMetaChannel[];
+  output_emits?: ModuleMetaEmit[];
+}
+
+interface ModuleMetaChannel {
+  members: ModuleMetaEntry[];
+}
+
+interface ModuleMetaEmit {
+  emit: string;
+  members: ModuleMetaEntry[];
 }
 
 interface ModuleMetaEntry {
@@ -291,6 +302,12 @@ interface ModuleMetaEntry {
   identifier?: string;
   type?: string;
   pattern?: string;
+  emit?: string;
+  ontologies?: ModuleMetaOntology[];
+}
+
+interface ModuleMetaOntology {
+  edam?: string;
 }
 
 interface TestDataRef {
@@ -364,12 +381,17 @@ export async function resolveNextflowSummary(
   const config = existsSync(configPath) ? readText(configPath) : "";
   const workflowName = parseWorkflowName(config);
   const processFiles = discoverProcessFiles(pipelineRoot);
-  const processes = processFiles.flatMap((path) => parseProcessFile(pipelineRoot, path));
+  const processWarnings: string[] = [];
+  const processes = processFiles.flatMap((path) =>
+    parseProcessFile(pipelineRoot, path, processWarnings),
+  );
   const aliases = discoverAliases(pipelineRoot);
-  const warnings =
-    options.mulledIndexPath && !existsSync(options.mulledIndexPath)
+  const warnings = [
+    ...(options.mulledIndexPath && !existsSync(options.mulledIndexPath)
       ? [`mulled index path not found: ${options.mulledIndexPath}`]
-      : [];
+      : []),
+    ...processWarnings,
+  ];
   const {
     tools,
     perProcessSingleton,
@@ -1154,7 +1176,7 @@ function isNextflowSourceFile(path: string): boolean {
   return path.endsWith(".nf");
 }
 
-function parseProcessFile(pipelineRoot: string, path: string): Process[] {
+function parseProcessFile(pipelineRoot: string, path: string, warnings: string[]): Process[] {
   const text = maskNextflowComments(readText(path));
   return [...text.matchAll(/\bprocess\s+([A-Za-z0-9_]+)\s*\{/gu)].flatMap((match) => {
     const openIndex = match.index + match[0].lastIndexOf("{");
@@ -1176,12 +1198,14 @@ function parseProcessFile(pipelineRoot: string, path: string): Process[] {
       matchOne(body, /conda\s+"([\s\S]*?)"/u) ??
         matchOne(body, /conda\s*\([^)\n]*?\?\s*"([\s\S]*?)"/u),
     );
+    const metaPath = join(moduleDir, "meta.yml");
+    const meta = isLocalModule ? null : parseModuleMeta(metaPath, warnings);
     return {
       name,
       aliases: [],
       in_subworkflows: [],
       module_path: modulePath,
-      meta: isLocalModule ? null : parseModuleMeta(join(moduleDir, "meta.yml")),
+      meta,
       module_tests: isLocalModule ? [] : parseNfTestsInDir(pipelineRoot, join(moduleDir, "tests")),
       tool: null,
       container,
@@ -1199,19 +1223,178 @@ function parseProcessFile(pipelineRoot: string, path: string): Process[] {
   });
 }
 
-function parseModuleMeta(path: string): ModuleMeta | null {
+function parseModuleMeta(path: string, warnings: string[]): ModuleMeta | null {
   if (!existsSync(path)) return null;
-  const data = YAML.parse(readText(path)) as Record<string, unknown> | null;
+  let data: Record<string, unknown> | null;
+  try {
+    data = YAML.parse(readText(path)) as Record<string, unknown> | null;
+  } catch (error) {
+    warnings.push(`failed to parse module meta ${path}: ${formatError(error)}`);
+    return null;
+  }
   if (!data || typeof data !== "object") return null;
-  return {
+
+  const tools = parseNamedMetaEntries(data.tools);
+  const inputParsed = parseModuleMetaIo(data.input, "input", path, warnings);
+  const outputParsed = parseModuleMetaIo(data.output, "output", path, warnings);
+
+  const meta: ModuleMeta = {
     description: typeof data.description === "string" ? data.description : undefined,
     keywords: stringArray(data.keywords),
     authors: stringArray(data.authors),
     maintainers: stringArray(data.maintainers),
-    tools: parseNamedMetaEntries(data.tools),
-    input: parseNamedMetaEntries(data.input),
-    output: parseNamedMetaEntries(data.output),
+    tools,
+    input: inputParsed.flat,
+    output: outputParsed.flat,
   };
+  if (inputParsed.channels) meta.input_channels = inputParsed.channels;
+  if (outputParsed.emits) meta.output_emits = outputParsed.emits;
+  return meta;
+}
+
+function parseModuleMetaIo(
+  value: unknown,
+  section: "input" | "output",
+  path: string,
+  warnings: string[],
+): { flat: ModuleMetaEntry[]; channels?: ModuleMetaChannel[]; emits?: ModuleMetaEmit[] } {
+  if (value === undefined || value === null) return { flat: [] };
+
+  if (section === "input") {
+    if (!Array.isArray(value)) {
+      warnings.push(`unexpected module meta input shape in ${path}; expected a list`);
+      return { flat: [] };
+    }
+    if (value.length === 0) return { flat: [] };
+
+    const looksNew = value.some((item) => Array.isArray(item));
+    if (!looksNew) {
+      const flat = parseNamedMetaEntries(value);
+      if (flat.length === 0 && value.length > 0) {
+        warnings.push(`could not parse module meta input entries in ${path}`);
+      }
+      return { flat };
+    }
+
+    const channels: ModuleMetaChannel[] = [];
+    for (const item of value) {
+      const members = parseChannelMembers(item, path, warnings, "input");
+      if (members.length > 0) channels.push({ members });
+    }
+    if (channels.length === 0) {
+      warnings.push(`could not parse module meta input channels in ${path}`);
+      return { flat: [] };
+    }
+    return {
+      flat: channels.flatMap((channel) => channel.members),
+      channels,
+    };
+  }
+
+  // output
+  if (typeof value === "object" && !Array.isArray(value) && value !== null) {
+    const emits = parseOutputEmitMap(value as Record<string, unknown>, path, warnings);
+    if (emits.length === 0) {
+      warnings.push(`could not parse module meta output emits in ${path}`);
+      return { flat: [] };
+    }
+    return {
+      flat: emits.flatMap((emit) => emit.members),
+      emits,
+    };
+  }
+
+  if (!Array.isArray(value)) {
+    warnings.push(`unexpected module meta output shape in ${path}; expected a list or emit map`);
+    return { flat: [] };
+  }
+  if (value.length === 0) return { flat: [] };
+
+  const transitional = value.every(
+    (item) =>
+      item &&
+      typeof item === "object" &&
+      !Array.isArray(item) &&
+      Object.keys(item as object).length === 1 &&
+      Array.isArray(Object.values(item as object)[0]),
+  );
+  if (transitional) {
+    const asMap: Record<string, unknown> = {};
+    for (const item of value) {
+      const [emit, members] = Object.entries(item as Record<string, unknown>)[0]!;
+      asMap[emit] = members;
+    }
+    const emits = parseOutputEmitMap(asMap, path, warnings);
+    if (emits.length === 0) {
+      warnings.push(`could not parse module meta output emits in ${path}`);
+      return { flat: [] };
+    }
+    return {
+      flat: emits.flatMap((emit) => emit.members),
+      emits,
+    };
+  }
+
+  const flat = parseNamedMetaEntries(value);
+  if (flat.length === 0 && value.length > 0) {
+    warnings.push(`could not parse module meta output entries in ${path}`);
+  }
+  return { flat };
+}
+
+function parseOutputEmitMap(
+  value: Record<string, unknown>,
+  path: string,
+  warnings: string[],
+): ModuleMetaEmit[] {
+  const emits: ModuleMetaEmit[] = [];
+  for (const [emit, raw] of Object.entries(value)) {
+    const members = parseEmitMembers(raw, path, warnings, emit);
+    if (members.length === 0) continue;
+    emits.push({
+      emit,
+      members: members.map((member) => ({ ...member, emit })),
+    });
+  }
+  return emits;
+}
+
+function parseEmitMembers(
+  value: unknown,
+  path: string,
+  warnings: string[],
+  emit: string,
+): ModuleMetaEntry[] {
+  if (!Array.isArray(value)) {
+    warnings.push(`unexpected module meta output members for emit '${emit}' in ${path}`);
+    return [];
+  }
+  // Current nf-core shape: list of channel tuples (list of lists).
+  if (value.some((item) => Array.isArray(item))) {
+    return value.flatMap((item) => parseChannelMembers(item, path, warnings, "output"));
+  }
+  // Transitional shape: flat list of single-key member objects.
+  return parseNamedMetaEntries(value);
+}
+
+function parseChannelMembers(
+  value: unknown,
+  path: string,
+  warnings: string[],
+  section: "input" | "output",
+): ModuleMetaEntry[] {
+  if (Array.isArray(value)) {
+    const members = parseNamedMetaEntries(value);
+    if (members.length === 0 && value.length > 0) {
+      warnings.push(`could not parse module meta ${section} channel members in ${path}`);
+    }
+    return members;
+  }
+  if (value && typeof value === "object") {
+    return parseNamedMetaEntries([value]);
+  }
+  warnings.push(`unexpected module meta ${section} channel shape in ${path}`);
+  return [];
 }
 
 function parseNamedMetaEntries(value: unknown): ModuleMetaEntry[] {
@@ -1221,7 +1404,7 @@ function parseNamedMetaEntries(value: unknown): ModuleMetaEntry[] {
     return Object.entries(item as Record<string, unknown>).flatMap(([name, details]) => {
       if (!details || typeof details !== "object" || Array.isArray(details)) return [];
       const record = details as Record<string, unknown>;
-      return {
+      const entry: ModuleMetaEntry = {
         name,
         description: stringValue(record.description),
         homepage: stringValue(record.homepage),
@@ -1233,8 +1416,23 @@ function parseNamedMetaEntries(value: unknown): ModuleMetaEntry[] {
         type: stringValue(record.type),
         pattern: stringValue(record.pattern),
       };
+      const ontologies = parseModuleMetaOntologies(record.ontologies);
+      if (ontologies) entry.ontologies = ontologies;
+      return entry;
     });
   });
+}
+
+function parseModuleMetaOntologies(value: unknown): ModuleMetaOntology[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const ontologies = value.flatMap((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const record = item as Record<string, unknown>;
+    const entry: ModuleMetaOntology = {};
+    if (typeof record.edam === "string") entry.edam = record.edam;
+    return Object.keys(entry).length > 0 ? [entry] : [];
+  });
+  return ontologies;
 }
 
 function stringArray(value: unknown): string[] {
