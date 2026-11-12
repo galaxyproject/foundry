@@ -853,6 +853,63 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/rnaseq)", () =>
     expect(byName.gff!.asset_kind).toBe("gff");
   });
 
+  itIfRnaseqFixture("parses current nf-core module meta input/output for RNA-seq modules", () => {
+    const r = spawnSync("node", [CLI, RNASEQ_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+      maxBuffer: SPAWN_MAX_BUFFER,
+    });
+    expect(r.status).toBe(0);
+    const data = JSON.parse(r.stdout);
+    expect(validateSummary(data).valid).toBe(true);
+
+    const withMeta = (
+      data.processes as {
+        name: string;
+        module_path: string;
+        meta: {
+          input: { name: string }[];
+          output: { name: string; emit?: string; ontologies?: { edam?: string }[] }[];
+          input_channels?: unknown[];
+          output_emits?: { emit: string }[];
+        } | null;
+      }[]
+    ).filter(
+      (process) => process.meta !== null && process.module_path.includes("modules/nf-core/"),
+    );
+
+    const emptyOutput = withMeta.filter((process) => process.meta!.output.length === 0);
+    expect(emptyOutput.map((process) => process.name)).toEqual([]);
+
+    const dupradar = withMeta.find((process) => process.name === "DUPRADAR");
+    expect(dupradar?.meta?.input.map((entry) => entry.name)).toEqual(
+      expect.arrayContaining(["meta", "bam", "meta2", "gtf"]),
+    );
+    expect(dupradar?.meta?.output_emits?.map((entry) => entry.emit)).toEqual(
+      expect.arrayContaining([
+        "scatter2d",
+        "boxplot",
+        "hist",
+        "dupmatrix",
+        "intercept_slope",
+        "multiqc",
+        "session_info",
+        "versions",
+      ]),
+    );
+    expect(dupradar?.meta?.output.length).toBeGreaterThan(0);
+
+    const featureCounts = withMeta.find((process) => process.name === "SUBREAD_FEATURECOUNTS");
+    const counts = featureCounts?.meta?.output.find(
+      (entry) => entry.emit === "counts" && entry.name.includes("featureCounts"),
+    );
+    expect(counts).toEqual(
+      expect.objectContaining({
+        emit: "counts",
+        ontologies: expect.arrayContaining([{ edam: "http://edamontology.org/format_3475" }]),
+      }),
+    );
+  });
+
   itIfRnaseqFixture(
     "emits no reference_rebuilds[] for RNA-seq (positive-form idiom is a known gap)",
     () => {
@@ -1080,6 +1137,38 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
 });
 
 describe("summarize-nextflow CLI — real pipeline tree (nf-core/sarek)", () => {
+  itIfSarekFixture(
+    "parses sarek module meta without schema or resolver errors",
+    () => {
+      const r = spawnSync("node", [CLI, SAREK_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+        encoding: "utf8",
+        maxBuffer: SPAWN_MAX_BUFFER,
+      });
+      expect(r.status).toBe(0);
+      const data = JSON.parse(r.stdout);
+      const validation = validateSummary(data);
+      if (!validation.valid) console.error("sarek meta errors:", validation.errors.slice(0, 10));
+      expect(validation.valid).toBe(true);
+
+      const withMeta = (
+        data.processes as {
+          name: string;
+          meta: { output: unknown[]; output_emits?: { emit: string }[] } | null;
+        }[]
+      ).filter((process) => process.meta !== null);
+      expect(withMeta.length).toBeGreaterThan(50);
+      expect(withMeta.some((process) => (process.meta?.output.length ?? 0) > 0)).toBe(true);
+      const bwa = withMeta.find((process) => process.name === "BWA_MEM");
+      expect(bwa?.meta?.output.length).toBeGreaterThan(0);
+      expect(
+        (data.warnings as string[]).some((warning) =>
+          warning.includes("failed to parse module meta"),
+        ),
+      ).toBe(false);
+    },
+    30_000,
+  );
+
   itIfSarekFixture(
     "emits reference_assets and reference_rebuilds for Sarek's PREPARE_GENOME",
     () => {
