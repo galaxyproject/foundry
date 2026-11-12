@@ -29,7 +29,7 @@ Without `--json`, each unlabelled step prints on stderr, inputs that feed no ste
 - `ok`: whether every removed step is labelled.
 - `removed_steps`: one `{step, label, dropped_entries}` per removed step, in the diff's order. `dropped_entries` lists the ids of the entries that label it.
 - `unlabelled`: the keys of removed steps no entry labels.
-- `unwired_inputs`: the diff's `unwired_inputs`, the AFTER inputs that feed no step. Reported only; they never change the exit code.
+- `unwired_inputs`: the diff's `unwired_inputs`, the AFTER inputs that feed no step. Reported only, they never change the exit code.
 
 ## Examples
 

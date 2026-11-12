@@ -5,10 +5,10 @@
     "name": "run-workflow-test",
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 9,
-    "content_hash": "273b6127b8977fbcc2bdddfb67741e42333392015ffa904a0a75677a1c86d2af",
-    "commit": "5e1f57a2fe7c9eacb1f918dc40de3dc312db3a99"
+    "content_hash": "a290ffd61565efabcf9c70b57aa7f2f0b86ed65e0300a4ceed6ef1f4702d46ec",
+    "commit": "0eb5be21efbff2fba5623d165838c5adb2b0176d"
   },
-  "cast_at": "2026-11-12T11:44:02.147Z",
+  "cast_at": "2026-11-12T11:49:33.489Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -31,8 +31,8 @@
       "purpose": "Deterministically match the steps `gxwf diff` reports removed against the ledger's `kind: dropped` entries.",
       "trigger": "After a green Planemo run, when the extracted-workflow snapshot exists.",
       "verification": "Promote after a run blocks a green result on a removed step that has no drop entry.",
-      "src_hash": "d361f02a0c324dfafd5156462a450eab47fda56f806f60fa6204b370d804e0af",
-      "dst_hash": "fca39efc3613391f1b9ba16247086533f2f2ec2cdc8ad105cf0ea052945c3395",
+      "src_hash": "2a6f260798656f75f90fc86c42728bb6efec7bc6e615501b2f499c604f425bef",
+      "dst_hash": "3b1f3b0227267e952bebb5ebac3464de7ecb929f9eefcdd77e49247c7ff2c41b",
       "source": "deterministic"
     },
     {
@@ -155,7 +155,7 @@
     "consumes": [
       {
         "id": "galaxy-workflow-extracted",
-        "description": "The workflow as [[advance-galaxy-draft-step]] first extracted it, before the test phase. Absent when the pipeline has no per-step loop; then removed steps are not checked.",
+        "description": "The workflow as [[advance-galaxy-draft-step]] first extracted it, before the test phase. Absent when the pipeline has no per-step loop, and then removed steps are not checked.",
         "optional": true,
         "producers": [
           "advance-galaxy-draft-step"
