@@ -1,12 +1,12 @@
 import { checkWorkflowBrief } from "../workflow-brief.js";
-import { readMarkdownFile } from "./validate-markdown.js";
+import { readInputOrExit } from "../lib/read-input.js";
 
 export interface WorkflowBriefCheckOptions {
   json?: boolean;
 }
 
 export function runCheckWorkflowBrief(path: string, options: WorkflowBriefCheckOptions): never {
-  const result = checkWorkflowBrief(readMarkdownFile(path));
+  const result = checkWorkflowBrief(readInputOrExit(path));
   if (options.json) {
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   } else {

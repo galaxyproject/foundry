@@ -1,20 +1,13 @@
-import { readFileSync } from "node:fs";
 import YAML from "yaml";
-import { checkStepRemovals, StepRemovalInputError } from "../step-removals.js";
+import { readInputOrExit } from "../lib/read-input.js";
+import {
+  checkStepRemovals,
+  StepRemovalInputError,
+  type StepRemovalCheck,
+} from "../step-removals.js";
 
 export interface StepRemovalsCheckOptions {
   json?: boolean;
-}
-
-function readInput(path: string, parse: (text: string) => unknown): unknown {
-  try {
-    return parse(readFileSync(path === "-" ? 0 : path, "utf8"));
-  } catch (error) {
-    process.stderr.write(
-      `error reading ${path}: ${error instanceof Error ? error.message : String(error)}\n`,
-    );
-    process.exit(1);
-  }
 }
 
 export function runCheckStepRemovals(
@@ -22,9 +15,9 @@ export function runCheckStepRemovals(
   ledgerPath: string,
   options: StepRemovalsCheckOptions,
 ): never {
-  const diff = readInput(diffPath, JSON.parse);
-  const ledger = readInput(ledgerPath, YAML.parse);
-  let result;
+  const diff = readInputOrExit<unknown>(diffPath, JSON.parse);
+  const ledger = readInputOrExit<unknown>(ledgerPath, YAML.parse);
+  let result: StepRemovalCheck;
   try {
     result = checkStepRemovals(diff, ledger);
   } catch (error) {

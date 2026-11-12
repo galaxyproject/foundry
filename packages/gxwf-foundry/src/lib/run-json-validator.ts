@@ -3,22 +3,12 @@
 //   1 — input error (missing file, malformed JSON)
 //   3 — schema-validation failure
 
-import { readFileSync } from "node:fs";
 import process from "node:process";
+import { readInputOrExit } from "./read-input.js";
 import type { SchemaValidator } from "./validator.js";
 
 export function runJsonValidator(path: string, validator: SchemaValidator): never {
-  let data: unknown;
-  try {
-    data = JSON.parse(readFileSync(path, "utf8"));
-  } catch (err) {
-    process.stderr.write(
-      `error reading ${path}: ${err instanceof Error ? err.message : String(err)}\n`,
-    );
-    process.exit(1);
-  }
-
-  const result = validator.validate(data);
+  const result = validator.validate(readInputOrExit(path, JSON.parse));
   if (result.valid) {
     process.stdout.write(`${path}: valid\n`);
     process.exit(0);
