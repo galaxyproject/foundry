@@ -7,7 +7,7 @@ import YAML, { stringify } from "yaml";
 import { checkStepRemovals, StepRemovalInputError } from "../src/step-removals.js";
 
 // `gxwf diff --json` output, galaxy-tool-util-ts PR #233 at a5c6cd57, on its synthetic-diff fixtures
-// and on the nested-removals pair here.
+// and on the nested-removals and list-removal pairs here.
 const fixture = (name: string): unknown =>
   JSON.parse(readFileSync(resolve(__dirname, "fixtures/step-removals", name), "utf8"));
 const draftToFinal = fixture("draft-before-to-after.diff.json");
@@ -15,6 +15,7 @@ const removedLeaf = fixture("removed-leaf-step.diff.json");
 const changedStep = fixture("changed-step.diff.json");
 const nestedRemovals = fixture("nested-removals.diff.json");
 const listRelabel = fixture("list-step-relabel.diff.json");
+const listRemoval = fixture("list-removal.diff.json");
 
 const chrDropped = {
   id: "chr-filter-dropped",
@@ -65,6 +66,17 @@ describe("checkStepRemovals", () => {
     expect(both.ok).toBe(true);
     expect(both.removed_steps[1].dropped_entries).toEqual(["nested-first-dropped"]);
     expect(checkStepRemovals(nestedRemovals, { entries: [nested] }).unlabelled).toEqual(["first"]);
+  });
+
+  it("keys a removed list-form step by its label, not its id", () => {
+    const result = checkStepRemovals(listRemoval, { entries: [] });
+    expect(result.removed_steps).toEqual([
+      { step: "second cat", label: "second cat", dropped_entries: [] },
+    ]);
+    const byKey = { ...chrDropped, id: "second-dropped", step: "second cat" };
+    expect(checkStepRemovals(listRemoval, { entries: [byKey] }).ok).toBe(true);
+    const byId = { ...byKey, step: "second" };
+    expect(checkStepRemovals(listRemoval, { entries: [byId] }).unlabelled).toEqual(["second cat"]);
   });
 
   it("does not count a drop without a reason", () => {
