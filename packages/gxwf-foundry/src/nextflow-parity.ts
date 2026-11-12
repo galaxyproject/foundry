@@ -371,8 +371,10 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
   const outputsRemoved = removedOutputs
     .filter((name): name is string => typeof name === "string")
     .map((output) => {
-      const source = sources.get(output);
-      const source_step = source ? source.slice(0, source.lastIndexOf("/")) || source : null;
+      const source = sources.get(output) ?? "";
+      const slash = source.lastIndexOf("/");
+      const head = slash < 0 ? source : source.slice(0, slash);
+      const source_step = snapshotSteps.has(head) ? head : null;
       return {
         output,
         source_step,

@@ -29,10 +29,16 @@ Follow the procedure below and use the artifact/reference sections as the runtim
   Ephemeral run: `npx --package @galaxy-foundry/gxwf-foundry foundry`.
   Check: `foundry --help`.
   Docs: https://github.com/galaxyproject/foundry/blob/main/packages/gxwf-foundry/README.md
+- **`gxwf`** (gxwf). `npm install -g '@galaxy-tool-util/cli@^1.15.0'`.
+  Ephemeral run: `npx --yes --package @galaxy-tool-util/cli@1.15.0 gxwf`.
+  Check: `gxwf --help | grep -q draft-validate`.
+  Docs: https://github.com/jmchilton/galaxy-tool-util-ts/tree/main/packages/cli
+  Bundled reference: `references/cli/gxwf.md`.
 
 ## Load Upfront
 
 - `references/cli/nextflow-parity.json`: CLI command reference packaged as a sidecar. Join the summary, ledger, snapshot, final workflow and their diff deterministically, so the report renders joins and findings instead of re-deriving them.
+- `references/cli/gxwf.md`: CLI tool reference copied verbatim into the bundle. Runs `gxwf diff --json` on the snapshot and the final workflow; `diff` needs a release newer than the pinned one.
 - `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Read each record kind the report links to: step drops, flag records under Source arguments, scope records under Source scope, plain gaps and decisions.
 
 ## Load On Demand

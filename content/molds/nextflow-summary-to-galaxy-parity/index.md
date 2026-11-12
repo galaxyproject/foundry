@@ -30,6 +30,14 @@ output_artifacts:
     default_filename: nextflow-galaxy-parity-report.md
     description: "Reviewable Markdown report of how the final workflow differs from the Nextflow source: outputs, tool versions, parameters and inputs, behaviour, scope, unverified items, and every difference with no recorded reason."
 references:
+  - kind: cli-tool
+    ref: "[[gxwf]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Runs `gxwf diff --json` on the snapshot and the final workflow; `diff` needs a release newer than the pinned one."
+    verification: "Promote once the pinned `@galaxy-tool-util/cli` release ships `gxwf diff`."
   - kind: cli-command
     ref: "[[nextflow-parity]]"
     used_at: runtime

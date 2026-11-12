@@ -159,6 +159,25 @@ describe("assembleNextflowParity", () => {
     expect(result.other_drops.map((d) => d.id)).toEqual(["multiqc-not-built"]);
   });
 
+  it("gives a removed output sourced from an input no source step", () => {
+    const fromInput = inputs();
+    const diff = fromInput.diff as { outputs: { removed: string[] } };
+    diff.outputs.removed.push("chr_echo");
+    (fromInput.snapshot as { outputs: Record<string, unknown> }).outputs.chr_echo = {
+      outputSource: "chr",
+    };
+    const result = assembleNextflowParity(fromInput);
+    expect(result.outputs.removed[1]).toEqual({
+      output: "chr_echo",
+      source_step: null,
+      dropped_entries: [],
+    });
+    expect(result.findings).toContainEqual({
+      kind: "output-removed-unrecorded",
+      subject: "chr_echo",
+    });
+  });
+
   it("marks a call with no step as covered by a drop naming one of its units", () => {
     const narrowed = inputs();
     const snapshot = narrowed.snapshot as { steps: Record<string, unknown> };

@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-parity",
     "path": "content/molds/nextflow-summary-to-galaxy-parity/index.md",
     "revision": 1,
-    "content_hash": "3949e6ba03a17ac260604ae100a781310d76be0019617010b6a0d38ec000783a",
-    "commit": "4ff48eda3b0357215bff23ff0e5d657e61b7366c"
+    "content_hash": "d87fe438abfcc7f9b7edec7b16088f9d075eda18b0850acab4cc1d1eea3c66c0",
+    "commit": "da95a929f58b4e3f007d71d9c99221ba8854761a"
   },
-  "cast_at": "2026-11-12T16:11:06.595Z",
+  "cast_at": "2026-11-12T16:23:21.695Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -23,6 +23,21 @@
       "verification": "Promote after a nextflow-to-galaxy run's report lists every finding the command emitted and no difference the command marked recorded as unrecorded.",
       "src_hash": "ed47376a82d2d4f5dfc990e7aaf0c7ef7fdc8e901e6a9da544fe1897a2de6ccc",
       "dst_hash": "c72fa9982b32a0d15b09d5837ee89d72026186780d7fa087a0b09b0ac8d1209a",
+      "source": "deterministic"
+    },
+    {
+      "kind": "cli-tool",
+      "mode": "verbatim",
+      "ref": "[[gxwf]]",
+      "src": "content/cli/gxwf/index.md",
+      "dst": "references/cli/gxwf.md",
+      "used_at": "runtime",
+      "load": "upfront",
+      "evidence": "hypothesis",
+      "purpose": "Runs `gxwf diff --json` on the snapshot and the final workflow; `diff` needs a release newer than the pinned one.",
+      "verification": "Promote once the pinned `@galaxy-tool-util/cli` release ships `gxwf diff`.",
+      "src_hash": "84dd506877b9f44e1c453b2e00f4f1cd23c4676162e70906f79c58ea0fbdc290",
+      "dst_hash": "84dd506877b9f44e1c453b2e00f4f1cd23c4676162e70906f79c58ea0fbdc290",
       "source": "deterministic"
     },
     {
