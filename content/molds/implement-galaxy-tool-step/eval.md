@@ -20,7 +20,7 @@ This file is the **abstract oracle**: properties any run of `implement-galaxy-to
 ## Property: every source argument gets exactly one disposition
 
 - check: deterministic + llm-judged
-- assertion: when the chosen step's `_plan_state` carries `resolved_args`, the re-emitted ledger has exactly one record for each flag an effective entry can set, and one `not_applicable` record for each entry a higher-ranked selector overrides, naming the winner. Each record's `source_arg` names this step and the entry. A record is a `carried` decision whose binding is present in the step's `state`, a `not_applicable` decision with a reason, an open `kind: dropped` entry with a cited `because`, or, for a flag tied entries set differently, an open gap naming each tied entry. No flag record sets a top-level `step`. A flag bound to a value other than the one the expression sets, without a record that says so, is a failure, and so is binding an overridden entry's flags or a tied flag.
+- assertion: when the chosen step's `_plan_state` carries `resolved_args`, the re-emitted ledger has exactly one record for each flag each listed entry can set. Each record's `source_arg` has `step` set to this step and `arg` set to the entry's `id`. A record is a `carried` decision whose binding is present in the step's `state`, a `not_applicable` decision with a reason, an open `kind: dropped` entry with a cited `because`, or, for a flag entries marked `tie: true` set differently, an open gap naming the other tied entries' `id`s. No flag record sets a top-level `step`. A flag bound to a value other than the one the expression sets, without a record that says so, is a failure, and so is binding a tied flag.
 
 ## Property: a Tool Shed step names its tool by full versioned id
 

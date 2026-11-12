@@ -35,12 +35,22 @@
   `SAMTOOLS_VIEW_MAP_UNMAP`, `SAMTOOLS_VIEW_UNMAP_MAP`, and
   `SAMTOOLS_VIEW_UNMAP_UNMAP` carry `'-b -f1 -F12'`, `'-b -f8 -F260'`,
   `'-b -f4 -F264'`, and `'-b -f12 -F256'` respectively in
-  `_plan_state.resolved_args`, each with its own `prefix` entry and with
-  `invoked_as` naming the alias. No step carries another alias's entries or
-  `SAMTOOLS_CHR`'s, and a step translating `SAMTOOLS_PE` keeps a plain-text
-  `_plan_state`. Each `expression` parses back to the summary's string,
-  closures included. The collate steps carry `args2: '-N'`. `gxwf
-  draft-validate --json` exits 0.
+  `_plan_state.resolved_args`, each with its own `prefix` entry and with the
+  `id` the alias's `effective_args` rows name. No step carries another
+  alias's entries or `SAMTOOLS_CHR`'s, and a step translating `SAMTOOLS_PE`
+  keeps a plain-text `_plan_state`. Each `expression` parses back to the
+  summary's string, closures included. The collate steps carry
+  `args2: '-N'`. `gxwf draft-validate --json` exits 0.
+
+## Case: an overridden entry stays out of `_plan_state`
+
+- fixture: the bamtofastq case above, with one more synthetic
+  `SAMTOOLS_VIEW` entry in `resolved_args`: `args: '-h'` from
+  `withName:SAMTOOLS_VIEW` in a module `nextflow.config`. Each view alias's
+  `effective_args` row for `args` still names only the alias's own entry.
+- expect: no step's `_plan_state.resolved_args` contains the `'-h'` entry.
+  Each view step lists the alias's `args` and `prefix` entries only, as in
+  the case above.
 
 ## Case: collection inputs use gxformat2-compatible structure
 

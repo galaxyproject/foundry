@@ -37,16 +37,17 @@ the oracle here is applied to whatever a scenario produces.
 
 - bucket: handoff
 - check: deterministic + llm-judged
-- assertion: every non-Resolved tool step with at least one `resolved_args`
-  entry whose selector can match the call it translates has a `_plan_state`
-  that parses as a YAML mapping with `resolved_args` and `intent`. Each listed entry has `process` set, and
-  its `key`, `expression`, `selector`, `config`, and any `profile` equal an
-  entry of that process in `summary-nextflow.json`. No entry whose selector
-  can match the translated call is missing, and none whose selector names a
-  different alias is present. A step with no applicable entry keeps a
-  plain-text `_plan_state`. A Resolved step with applicable entries has, in
-  the re-emitted ledger, a disposition for every flag instead. A
-  paraphrase of the flags in place of the entries is a failure.
+- assertion: every non-Resolved tool step whose call has an `effective_args`
+  row in `summary-nextflow.json` has a `_plan_state` that parses as a YAML
+  mapping with `resolved_args` and `intent`. Its `resolved_args` lists exactly
+  the entries those rows name: each `id`, `key`, `expression`, `selector`,
+  `config`, and any `profile` equals the summary entry with that `id`, and
+  entries of a `tie` row carry `tie: true`. An entry no row names for the
+  call, such as one a higher-ranked selector overrides or one for a
+  different alias, is absent. A step whose call has no row keeps a
+  plain-text `_plan_state`. A Resolved step with rows has, in the re-emitted
+  ledger, a disposition for every flag instead. A paraphrase of the flags in
+  place of the entries is a failure.
 
 ## Property: collection inputs use gxformat2-compatible structure
 
