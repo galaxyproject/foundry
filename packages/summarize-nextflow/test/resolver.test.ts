@@ -2,7 +2,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
-import { buildSummary } from "../src/index.js";
+import { buildSummary, validateSummary } from "../src/index.js";
 
 interface SummaryLike {
   profiles: {
@@ -3309,7 +3309,9 @@ workflow PIPE { FOO_A(); SUB() }
 `,
     );
 
-    const foo = (await summarize(root)).processes.find((process) => process.name === "FOO")!;
+    const summary = await summarize(root);
+    expect(validateSummary(summary).valid).toBe(true);
+    const foo = summary.processes.find((process) => process.name === "FOO")!;
     const id = (selector: string, key: string) => `conf/modules.config#${selector}/${key}`;
 
     expect(foo.resolved_args.map((arg) => arg.id)).toEqual([
@@ -3432,6 +3434,7 @@ workflow PIPE { FOO(); BAR() }
     );
 
     const summary = await summarize(root);
+    expect(validateSummary(summary).valid).toBe(true);
     const byName = Object.fromEntries(summary.processes.map((process) => [process.name, process]));
 
     expect(byName.FOO!.resolved_args.map((arg) => arg.id)).toEqual([
