@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import YAML from "yaml";
 import { buildSummary } from "@galaxy-foundry/summarize-nextflow";
+import { InputShapeError } from "../src/ledger.js";
 import { assembleNextflowParity, type NextflowParityInputs } from "../src/nextflow-parity.js";
 
 // A bamtofastq-shaped run: the diff is `gxwf diff --json` (galaxy-tool-util-ts #233 at a5c6cd57)
@@ -178,10 +179,55 @@ describe("assembleNextflowParity", () => {
     });
   });
 
+  it("maps every row of a call to the step one row's records name", () => {
+    const template = inputs();
+    const steps = (template.snapshot as { steps: Record<string, Record<string, unknown>> }).steps;
+    delete steps.view_map_map!._plan_state;
+    const ledger = template.ledger as { decisions: { id: string }[] };
+    ledger.decisions = ledger.decisions.filter((d) => d.id !== "arg-view-map-map-prefix");
+    const result = assembleNextflowParity(template);
+    const prefix = result.source_args.rows.find(
+      (r) => r.call === `${CALL}SAMTOOLS_VIEW_MAP_MAP` && r.key === "prefix",
+    );
+    expect(prefix).toMatchObject({ steps: ["view_map_map"], steps_from: "records" });
+    expect(result.findings).toContainEqual({
+      kind: "source-arg-unrecorded",
+      subject: "view_map_map",
+      detail: `${ARG}SAMTOOLS_VIEW_MAP_MAP/prefix`,
+    });
+    expect(result.findings).not.toContainEqual(expect.objectContaining({ kind: "call-unmapped" }));
+  });
+
+  it("rejects a snapshot or workflow the diff didn't compare", () => {
+    const mismatched = inputs();
+    delete (mismatched.workflow as { steps: Record<string, unknown> }).steps.collate;
+    expect(() => assembleNextflowParity(mismatched)).toThrow(InputShapeError);
+    const extra = inputs();
+    (extra.snapshot as { steps: Record<string, unknown> }).steps.extra = { tool_id: "TODO" };
+    expect(() => assembleNextflowParity(extra)).toThrow(InputShapeError);
+  });
+
+  it("reports a flag record whose source_arg lacks a step or arg", () => {
+    const broken = inputs();
+    (broken.ledger as { entries: unknown[] }).entries.push({
+      id: "arg-collate-args",
+      status: "open",
+      kind: "dropped",
+      source_arg: { step: "collate" },
+      units: "`-f -r` from `ext.args`",
+      because: "no fast-mode input",
+    });
+    expect(assembleNextflowParity(broken).findings).toContainEqual({
+      kind: "source-arg-malformed",
+      subject: "arg-collate-args",
+    });
+  });
+
   it("marks a call with no step as covered by a drop naming one of its units", () => {
     const narrowed = inputs();
-    const snapshot = narrowed.snapshot as { steps: Record<string, unknown> };
-    delete snapshot.steps.collate;
+    // Absent from both sides, as a design that never built the step would be.
+    delete (narrowed.snapshot as { steps: Record<string, unknown> }).steps.collate;
+    delete (narrowed.workflow as { steps: Record<string, unknown> }).steps.collate;
     (narrowed.ledger as { entries: unknown[] }).entries.push({
       id: "collate-not-designed",
       status: "open",
