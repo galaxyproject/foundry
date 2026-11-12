@@ -29,6 +29,8 @@ foundry validate-markdown <schema> <document.md>   # shared section schemas
 foundry validate-workflow-brief <brief.md>         # experimental RFC/WIP
 foundry check-workflow-brief <brief.md> [--json]    # exit 4 for declared blockers
 foundry check-step-removals <diff.json> <ledger.yml> [--json]  # exit 4 for unlabelled removed steps
+foundry check-scope-records <ledger.yml> [summary.json] [--json]  # exit 4 for scope-record problems
+foundry nextflow-parity --summary <s> --ledger <l> --snapshot <d> --workflow <w> --diff <j>  # parity joins as JSON
 ```
 
 `summarize-nextflow` wraps `@galaxy-foundry/summarize-nextflow`. The validators exit `0` for valid input, `3` for schema-validation failure, and `1` for input errors (missing file, malformed JSON/YAML).

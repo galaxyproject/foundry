@@ -19,11 +19,27 @@ export {
   type WorkflowBriefSection,
 } from "./workflow-brief.js";
 export {
-  checkStepRemovals,
-  StepRemovalInputError,
-  type RemovedStep,
-  type StepRemovalCheck,
-} from "./step-removals.js";
+  InputShapeError,
+  ledgerDecisions,
+  ledgerEntries,
+  type LedgerRecord,
+  type SourceArg,
+} from "./ledger.js";
+export { checkStepRemovals, type RemovedStep, type StepRemovalCheck } from "./step-removals.js";
+export {
+  checkScopeRecords,
+  citationProblems,
+  type ScopeControl,
+  type ScopeDrop,
+  type ScopeProblem,
+  type ScopeRecordCheck,
+  type ScopeSummary,
+} from "./scope-records.js";
+export {
+  assembleNextflowParity,
+  type NextflowParity,
+  type NextflowParityInputs,
+} from "./nextflow-parity.js";
 export { workflowBriefValidator } from "./commands/validate-workflow-brief.js";
 export { testsFormatSchema } from "./schemas/tests-format/tests.schema.generated.js";
 

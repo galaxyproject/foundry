@@ -1,0 +1,75 @@
+# Shaped like iwc-lab#8 and #7: the chr filter and collate fast mode left the workflow with no record.
+decisions:
+  - id: chr-extract-unconditional
+    decided_by: nextflow-summary-to-galaxy-data-flow
+    decision: "Run the chr extract on every sample; an empty chr keeps all contigs."
+    rationale: "params.chr defaults to null and the chain reads the chr-filtered BAM."
+  - id: arg-view-map-map-args
+    decided_by: implement-galaxy-tool-step
+    source_arg:
+      step: view_map_map
+      arg: conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/args
+      flags: ["-b", "-f1", "-F12"]
+    disposition: carried
+    decision: "BAM output, require flag 1, exclude flags 4 and 8, all set in `state`."
+    rationale: "The wrapper exposes output format and both flag filters."
+  - id: arg-view-map-map-prefix
+    decided_by: implement-galaxy-tool-step
+    source_arg:
+      step: view_map_map
+      arg: conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/prefix
+    disposition: not_applicable
+    decision: "Galaxy names the output dataset."
+    rationale: "The prefix only names the `.map_map` BAM."
+  - id: arg-view-map-map-header
+    decided_by: implement-galaxy-tool-step
+    source_arg:
+      step: view_map_map
+      arg: conf/modules.config#withName:SAMTOOLS_VIEW/args
+      flags: ["-h"]
+    disposition: carried
+    decision: "Header kept."
+    rationale: "Copied from the process-level selector."
+  - id: arg-view-unmap-unmap-args
+    decided_by: implement-galaxy-tool-step
+    source_arg:
+      step: view_unmap_unmap
+      arg: conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/args
+      flags: ["-b", "-f12", "-F256"]
+    disposition: carried
+    decision: "BAM output, require flags 4 and 8, exclude flag 256, all set in `state`."
+    rationale: "The wrapper exposes output format and both flag filters."
+  - id: arg-to-fastq-args
+    decided_by: nextflow-summary-to-galaxy-template
+    source_arg:
+      step: to_fastq
+      arg: conf/modules.config#withName:SAMTOOLS_FASTQ/args
+      flags: ["-N"]
+    disposition: carried
+    decision: "`read_numbering: true` in `state`."
+    rationale: "The wrapper's read-numbering option appends /1 and /2."
+entries:
+  - id: arg-view-unmap-unmap-prefix-tie
+    status: open
+    raised_by: implement-galaxy-tool-step
+    source_arg:
+      step: view_unmap_unmap
+      arg: conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix
+    unmet: "output name for unmapped pairs"
+    missing: "tied with conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix~2"
+  - id: arg-view-unmap-unmap-prefix-tie-2
+    status: open
+    raised_by: implement-galaxy-tool-step
+    source_arg:
+      step: view_unmap_unmap
+      arg: conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix~2
+    unmet: "output name for unmapped pairs"
+    missing: "tied with conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix"
+  - id: multiqc-not-built
+    status: open
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-data-flow
+    units: "`MULTIQC` report aggregation"
+    because: "the summary's MULTIQC process has no config the run could carry; searched 2026-11-10"
+    unmet: "aggregated QC report"
+    missing: "no step aggregates QC"

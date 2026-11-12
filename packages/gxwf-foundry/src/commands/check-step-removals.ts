@@ -1,10 +1,7 @@
 import YAML from "yaml";
 import { readInputOrExit } from "../lib/read-input.js";
-import {
-  checkStepRemovals,
-  StepRemovalInputError,
-  type StepRemovalCheck,
-} from "../step-removals.js";
+import { InputShapeError } from "../ledger.js";
+import { checkStepRemovals, type StepRemovalCheck } from "../step-removals.js";
 
 export interface StepRemovalsCheckOptions {
   json?: boolean;
@@ -23,7 +20,7 @@ export function runCheckStepRemovals(
   try {
     result = checkStepRemovals(diff, ledger);
   } catch (error) {
-    if (!(error instanceof StepRemovalInputError)) throw error;
+    if (!(error instanceof InputShapeError)) throw error;
     process.stderr.write(`${error.message}\n`);
     process.exit(3);
   }

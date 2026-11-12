@@ -1,0 +1,72 @@
+class: GalaxyWorkflow
+label: nf-core/bamtofastq
+doc: Final workflow after the test phase, shaped like nf-core/bamtofastq.
+inputs:
+  reads:
+    type: data
+    doc: Aligned reads (BAM).
+  chr:
+    type: string
+    optional: true
+    doc: Contigs to keep (params.chr).
+  samtools_collate_fast:
+    type: boolean
+    default: false
+    doc: Collate fast mode (params.samtools_collate_fast).
+  reads_in_memory:
+    type: int
+    default: 100000
+    doc: Reads held in memory in fast mode (params.reads_in_memory).
+outputs:
+  unmapped_bam:
+    outputSource: view_unmap_unmap/outputsam
+  fastq:
+    outputSource: to_fastq/output
+steps:
+  view_map_map:
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/samtools_view/samtools_view/1.15.1+galaxy2
+    tool_version: 1.15.1+galaxy2
+    in:
+      input: reads
+    out:
+      - id: outputsam
+    state:
+      output_fmt: bam
+      require_flags: "1"
+      exclude_flags: "12"
+  view_unmap_unmap:
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/samtools_view/samtools_view/1.15.1+galaxy2
+    tool_version: 1.15.1+galaxy2
+    in:
+      input: reads
+    out:
+      - id: outputsam
+    state:
+      output_fmt: bam
+      require_flags: "12"
+      exclude_flags: "256"
+  collate:
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/samtools_collate/samtools_collate/1.15.1+galaxy0
+    tool_version: 1.15.1+galaxy0
+    doc: Fast mode not wired; the wrapper has no -r.
+    in:
+      input: view_map_map/outputsam
+    out:
+      - id: output
+  to_fastq:
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/samtools_fastx/samtools_fastx/1.15.1+galaxy2
+    tool_version: 1.15.1+galaxy2
+    in:
+      input: collate/output
+    out:
+      - id: output
+    state:
+      output_fmt: fastqsanger
+      read_numbering: true
+  summarize:
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/fastq_info/fastq_info/0.25.1+galaxy0
+    tool_version: 0.25.1+galaxy0
+    in:
+      input: to_fastq/output
+    out:
+      - id: output

@@ -1,0 +1,99 @@
+class: GalaxyWorkflowDraft
+label: nf-core/bamtofastq
+doc: Pre-loop draft snapshot, shaped like nf-core/bamtofastq.
+inputs:
+  reads:
+    type: data
+    doc: Aligned reads (BAM).
+  chr:
+    type: string
+    optional: true
+    doc: Contigs to keep (params.chr).
+  samtools_collate_fast:
+    type: boolean
+    default: false
+    doc: Collate fast mode (params.samtools_collate_fast).
+  reads_in_memory:
+    type: int
+    default: 100000
+    doc: Reads held in memory in fast mode (params.reads_in_memory).
+outputs:
+  chr_alignment:
+    outputSource: chr_filter/TODO_filtered
+  unmapped_bam:
+    outputSource: view_unmap_unmap/TODO_output
+  fastq:
+    outputSource: to_fastq/output
+steps:
+  chr_filter:
+    label: keep only requested chromosomes
+    tool_id: TODO
+    in:
+      TODO_input: reads
+      TODO_regions: chr
+    out:
+      - id: TODO_filtered
+    _plan_state: |
+      calls: ["NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_CHR"]
+      resolved_args:
+        - {"id":"conf/modules.config#withName:SAMTOOLS_CHR/args","key":"args","expression":"{ \"-b ${params.chr}\" }","selector":"withName:SAMTOOLS_CHR","config":"conf/modules.config"}
+      intent: |
+        Keep alignments on the contigs named by chr.
+  view_map_map:
+    tool_id: TODO
+    in:
+      TODO_input: chr_filter/TODO_filtered
+    out:
+      - id: TODO_output
+    _plan_state: |
+      calls: ["NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_MAP_MAP"]
+      resolved_args:
+        - {"id":"conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/args","key":"args","expression":"'-b -f1 -F12'","selector":"withName:SAMTOOLS_VIEW_MAP_MAP","config":"conf/modules.config"}
+        - {"id":"conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/prefix","key":"prefix","expression":"{ \"${meta.id}.map_map\" }","selector":"withName:SAMTOOLS_VIEW_MAP_MAP","config":"conf/modules.config"}
+      intent: |
+        Keep pairs whose read and mate both mapped.
+  view_unmap_unmap:
+    tool_id: TODO
+    in:
+      TODO_input: chr_filter/TODO_filtered
+    out:
+      - id: TODO_output
+    _plan_state: |
+      calls: ["NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_UNMAP_UNMAP"]
+      resolved_args:
+        - {"id":"conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/args","key":"args","expression":"'-b -f12 -F256'","selector":"withName:SAMTOOLS_VIEW_UNMAP_UNMAP","config":"conf/modules.config"}
+        - {"id":"conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix","key":"prefix","expression":"{ \"${meta.id}.unmap_unmap\" }","selector":"withName:SAMTOOLS_VIEW_UNMAP_UNMAP","config":"conf/modules.config","tie":true}
+        - {"id":"conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix~2","key":"prefix","expression":"{ \"${meta.id}.unmapped\" }","selector":"withName:SAMTOOLS_VIEW_UNMAP_UNMAP","config":"conf/modules.config","tie":true}
+      intent: |
+        Keep pairs whose read and mate are both unmapped.
+  collate:
+    tool_id: TODO
+    in:
+      TODO_input: view_map_map/TODO_output
+      TODO_fast: samtools_collate_fast
+      TODO_reads_in_memory: reads_in_memory
+    out:
+      - id: TODO_output
+    _plan_state: |
+      calls: ["NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_COLLATE"]
+      resolved_args:
+        - {"id":"conf/modules.config#withName:SAMTOOLS_COLLATE/args","key":"args","expression":"{ params.samtools_collate_fast ? \"-f -r ${params.reads_in_memory}\" : '' }","selector":"withName:SAMTOOLS_COLLATE","config":"conf/modules.config"}
+      intent: |
+        Group reads by name; fast mode when samtools_collate_fast.
+  to_fastq:
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/samtools_fastx/samtools_fastx/1.15.1+galaxy2
+    tool_version: 1.15.1+galaxy2
+    in:
+      input: collate/TODO_output
+    out:
+      - id: output
+    state:
+      output_fmt: fastqsanger
+      read_numbering: true
+  summarize:
+    tool_id: TODO
+    in:
+      TODO_input: to_fastq/output
+    out:
+      - id: TODO_report
+    _plan_state: Count reads per output FASTQ.

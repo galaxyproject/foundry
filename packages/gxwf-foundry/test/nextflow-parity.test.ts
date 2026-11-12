@@ -1,0 +1,211 @@
+import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+import YAML from "yaml";
+import { buildSummary } from "@galaxy-foundry/summarize-nextflow";
+import { assembleNextflowParity, type NextflowParityInputs } from "../src/nextflow-parity.js";
+
+// A bamtofastq-shaped run: the diff is `gxwf diff --json` (galaxy-tool-util-ts #233 at a5c6cd57)
+// of the snapshot against the final workflow, and the summary is built from `pipeline/`.
+const dir = resolve(__dirname, "fixtures/nextflow-parity/bamtofastq");
+const read = (name: string) => readFileSync(resolve(dir, name), "utf8");
+const inputs = (): NextflowParityInputs => ({
+  summary: JSON.parse(read("summary-nextflow.json")),
+  ledger: YAML.parse(read("open-requirements.ledger.yml")),
+  snapshot: YAML.parse(read("galaxy-workflow-draft.snapshot.gxwf.yml")),
+  workflow: YAML.parse(read("galaxy-workflow.gxwf.yml")),
+  diff: JSON.parse(read("parity-diff.json")),
+});
+const CALL = "NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:";
+const ARG = "conf/modules.config#withName:";
+
+describe("assembleNextflowParity", () => {
+  const parity = assembleNextflowParity(inputs());
+  const step = (key: string) => parity.steps.find((s) => s.step === key);
+  const row = (call: string, key: string) =>
+    parity.source_args.rows.find((r) => r.call === CALL + call && r.key === key);
+
+  it("keeps the committed summary equal to one built from the pipeline", async () => {
+    const live = (await buildSummary(resolve(dir, "pipeline"), {
+      withNextflow: false,
+      fetchTestData: false,
+      validate: true,
+    })) as { processes: unknown; tools: unknown };
+    const committed = inputs().summary as { processes: unknown; tools: unknown };
+    expect(live.processes).toEqual(committed.processes);
+    expect(live.tools).toEqual(committed.tools);
+  });
+
+  it("maps each step to its calls and status", () => {
+    expect(
+      parity.steps.map((s) => [s.step, s.status, s.plan_state, s.calls_from, s.calls.length]),
+    ).toEqual([
+      ["chr_filter", "removed", "calls", "plan_state", 1],
+      ["view_map_map", "kept", "calls", "plan_state", 1],
+      ["view_unmap_unmap", "kept", "calls", "plan_state", 1],
+      ["collate", "kept", "calls", "plan_state", 1],
+      ["to_fastq", "kept", "none", "records", 1],
+      ["summarize", "kept", "text", null, 0],
+    ]);
+    expect(step("to_fastq")?.calls).toEqual([`${CALL}SAMTOOLS_FASTQ`]);
+  });
+
+  it("joins the source tool to the final wrapper", () => {
+    expect(step("view_map_map")).toMatchObject({
+      tool_id: "toolshed.g2.bx.psu.edu/repos/iuc/samtools_view/samtools_view/1.15.1+galaxy2",
+      tool_version: "1.15.1+galaxy2",
+      source: [
+        {
+          call: `${CALL}SAMTOOLS_VIEW_MAP_MAP`,
+          process: "SAMTOOLS_VIEW",
+          tool: "samtools",
+          tool_versions: ["1.17"],
+          container: "biocontainers/samtools:1.17--h00cdaf9_0",
+          conda: "bioconda::samtools=1.17",
+        },
+      ],
+    });
+    expect(step("summarize")?.source).toEqual([]);
+  });
+
+  it("joins flag records to effective entries on step and arg", () => {
+    expect(row("SAMTOOLS_VIEW_MAP_MAP", "args")).toMatchObject({
+      process: "SAMTOOLS_VIEW",
+      steps: ["view_map_map"],
+      steps_from: "plan_state",
+      entries: [
+        {
+          id: `${ARG}SAMTOOLS_VIEW_MAP_MAP/args`,
+          expression: "'-b -f1 -F12'",
+          records: [
+            {
+              id: "arg-view-map-map-args",
+              step: "view_map_map",
+              collection: "decisions",
+              disposition: "carried",
+              flags: ["-b", "-f1", "-F12"],
+            },
+          ],
+        },
+      ],
+    });
+    const tie = row("SAMTOOLS_VIEW_UNMAP_UNMAP", "prefix");
+    expect(tie?.tie).toBe(true);
+    expect(tie?.entries.map((e) => e.records.map((r) => [r.id, r.disposition]))).toEqual([
+      [["arg-view-unmap-unmap-prefix-tie", "gap"]],
+      [["arg-view-unmap-unmap-prefix-tie-2", "gap"]],
+    ]);
+    expect(row("SAMTOOLS_FASTQ", "args")).toMatchObject({
+      steps: ["to_fastq"],
+      steps_from: "records",
+    });
+  });
+
+  it("lists overridden entries and stray records", () => {
+    expect(parity.source_args.overridden).toEqual([
+      { process: "SAMTOOLS_VIEW", id: `${ARG}SAMTOOLS_VIEW/args`, key: "args", expression: "'-h'" },
+    ]);
+    expect(parity.source_args.stray_records).toEqual([
+      {
+        id: "arg-view-map-map-header",
+        step: "view_map_map",
+        arg: `${ARG}SAMTOOLS_VIEW/args`,
+        problem: "not-effective",
+      },
+    ]);
+  });
+
+  it("reports every unrecorded difference as a finding", () => {
+    expect(parity.findings).toEqual([
+      { kind: "step-removed-unrecorded", subject: "chr_filter" },
+      { kind: "output-removed-unrecorded", subject: "chr_alignment", detail: "chr_filter" },
+      { kind: "input-unwired", subject: "chr" },
+      { kind: "input-unwired", subject: "samtools_collate_fast" },
+      { kind: "input-unwired", subject: "reads_in_memory" },
+      {
+        kind: "source-arg-unrecorded",
+        subject: "collate",
+        detail: `${ARG}SAMTOOLS_COLLATE/args`,
+      },
+      { kind: "source-arg-stray", subject: "arg-view-map-map-header", detail: "not-effective" },
+    ]);
+  });
+
+  it("separates design drops from step, flag and scope records", () => {
+    expect(parity.other_drops.map((d) => d.id)).toEqual(["multiqc-not-built"]);
+    expect(parity.scope).toEqual({ ok: true, decision: null, drops: [], problems: [] });
+    expect(parity.outputs.removed).toEqual([
+      { output: "chr_alignment", source_step: "chr_filter", dropped_entries: [] },
+    ]);
+  });
+
+  it("labels a removed step and its output once a drop names the step", () => {
+    const withDrop = inputs();
+    (withDrop.ledger as { entries: unknown[] }).entries.push({
+      id: "chr-filter-dropped",
+      status: "open",
+      kind: "dropped",
+      raised_by: "debug-galaxy-workflow-output",
+      step: "chr_filter",
+      units: "`SAMTOOLS_CHR`",
+      because: "samtools view rejected the region list",
+    });
+    const result = assembleNextflowParity(withDrop);
+    expect(result.steps[0]?.dropped_entries).toEqual(["chr-filter-dropped"]);
+    expect(result.outputs.removed[0]?.dropped_entries).toEqual(["chr-filter-dropped"]);
+    expect(result.findings.map((f) => f.kind)).not.toContain("step-removed-unrecorded");
+    expect(result.findings.map((f) => f.kind)).not.toContain("output-removed-unrecorded");
+    expect(result.other_drops.map((d) => d.id)).toEqual(["multiqc-not-built"]);
+  });
+
+  it("marks a call with no step as covered by a drop naming one of its units", () => {
+    const narrowed = inputs();
+    const snapshot = narrowed.snapshot as { steps: Record<string, unknown> };
+    delete snapshot.steps.collate;
+    (narrowed.ledger as { entries: unknown[] }).entries.push({
+      id: "collate-not-designed",
+      status: "open",
+      kind: "dropped",
+      units: "`SAMTOOLS_COLLATE`",
+      because: "fast collation has no wrapper input",
+    });
+    const result = assembleNextflowParity(narrowed);
+    const collate = result.source_args.rows.find((r) => r.call === `${CALL}SAMTOOLS_COLLATE`);
+    expect(collate).toMatchObject({ steps: [], covered_by: ["collate-not-designed"] });
+    expect(result.findings).not.toContainEqual(expect.objectContaining({ kind: "call-unmapped" }));
+
+    (narrowed.ledger as { entries: { id: string }[] }).entries.pop();
+    expect(assembleNextflowParity(narrowed).findings).toContainEqual({
+      kind: "call-unmapped",
+      subject: `${CALL}SAMTOOLS_COLLATE`,
+    });
+  });
+});
+
+describe("foundry nextflow-parity", () => {
+  const run = (args: string[]) =>
+    spawnSync(
+      process.execPath,
+      ["--import", "tsx", resolve(__dirname, "../src/bin/foundry.ts"), "nextflow-parity", ...args],
+      { encoding: "utf8" },
+    );
+  const files = [
+    ["--summary", "summary-nextflow.json"],
+    ["--ledger", "open-requirements.ledger.yml"],
+    ["--snapshot", "galaxy-workflow-draft.snapshot.gxwf.yml"],
+    ["--workflow", "galaxy-workflow.gxwf.yml"],
+    ["--diff", "parity-diff.json"],
+  ].flatMap(([flag, name]) => [flag!, resolve(dir, name!)]);
+
+  it("prints the joins, exits 0 with findings, 3 on a bad shape and 1 on a missing file", () => {
+    const result = run(files);
+    expect(result.status).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual(assembleNextflowParity(inputs()));
+
+    const notADiff = files.map((arg) => (arg.endsWith("parity-diff.json") ? files[1]! : arg));
+    expect(run(notADiff).status).toBe(3);
+    const missing = files.map((arg) => (arg.endsWith("parity-diff.json") ? `${arg}.nope` : arg));
+    expect(run(missing).status).toBe(1);
+  }, 30_000);
+});

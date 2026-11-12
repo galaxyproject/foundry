@@ -4,7 +4,8 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import YAML, { stringify } from "yaml";
-import { checkStepRemovals, StepRemovalInputError } from "../src/step-removals.js";
+import { InputShapeError } from "../src/ledger.js";
+import { checkStepRemovals } from "../src/step-removals.js";
 
 // `gxwf diff --json` output, galaxy-tool-util-ts PR #233 at 4d086efa, on its synthetic-diff fixtures
 // and on the nested-removals and list-removal pairs here.
@@ -148,9 +149,9 @@ describe("checkStepRemovals", () => {
   });
 
   it("rejects input that is not a gxwf diff or a ledger", () => {
-    expect(() => checkStepRemovals({ steps: {} }, {})).toThrow(StepRemovalInputError);
-    expect(() => checkStepRemovals(draftToFinal, { entries: {} })).toThrow(StepRemovalInputError);
-    expect(() => checkStepRemovals(draftToFinal, "not a ledger")).toThrow(StepRemovalInputError);
+    expect(() => checkStepRemovals({ steps: {} }, {})).toThrow(InputShapeError);
+    expect(() => checkStepRemovals(draftToFinal, { entries: {} })).toThrow(InputShapeError);
+    expect(() => checkStepRemovals(draftToFinal, "not a ledger")).toThrow(InputShapeError);
   });
 });
 

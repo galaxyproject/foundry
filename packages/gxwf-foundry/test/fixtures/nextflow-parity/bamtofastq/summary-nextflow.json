@@ -1,0 +1,293 @@
+{
+  "source": {
+    "ecosystem": "nf-core",
+    "workflow": "bamtofastq",
+    "url": "ssh://git@github.com/galaxyproject/foundry.git",
+    "version": "4ff48eda3b0357215bff23ff0e5d657e61b7366c",
+    "license": null,
+    "slug": "nf-core-bamtofastq"
+  },
+  "params": [],
+  "sample_sheets": [],
+  "profiles": [],
+  "tools": [
+    {
+      "name": "samtools",
+      "version": "1.17",
+      "version_constraint": null,
+      "biocontainer": null,
+      "bioconda": "bioconda::samtools=1.17",
+      "docker": null,
+      "singularity": null,
+      "wave": null
+    }
+  ],
+  "processes": [
+    {
+      "name": "SAMTOOLS_COLLATE",
+      "aliases": [],
+      "in_subworkflows": [
+        "ALIGNMENT_TO_FASTQ"
+      ],
+      "module_path": "modules/nf-core/samtools/collate/main.nf",
+      "meta": null,
+      "module_tests": [],
+      "tool": "samtools",
+      "container": "biocontainers/samtools:1.17--h00cdaf9_0",
+      "conda": "bioconda::samtools=1.17",
+      "inputs": [],
+      "outputs": [],
+      "when": null,
+      "script_excerpt": "'samtools collate'",
+      "publish_dir": null,
+      "publish_dir_matches": [],
+      "resolved_args": [
+        {
+          "id": "conf/modules.config#withName:SAMTOOLS_COLLATE/args",
+          "key": "args",
+          "expression": "{ params.samtools_collate_fast ? \"-f -r ${params.reads_in_memory}\" : '' }",
+          "selector": "withName:SAMTOOLS_COLLATE",
+          "config": "conf/modules.config"
+        }
+      ],
+      "template": null,
+      "effective_args": [
+        {
+          "call": "NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_COLLATE",
+          "key": "args",
+          "ids": [
+            "conf/modules.config#withName:SAMTOOLS_COLLATE/args"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SAMTOOLS_FASTQ",
+      "aliases": [],
+      "in_subworkflows": [
+        "ALIGNMENT_TO_FASTQ"
+      ],
+      "module_path": "modules/nf-core/samtools/fastq/main.nf",
+      "meta": null,
+      "module_tests": [],
+      "tool": "samtools",
+      "container": "biocontainers/samtools:1.17--h00cdaf9_0",
+      "conda": "bioconda::samtools=1.17",
+      "inputs": [],
+      "outputs": [],
+      "when": null,
+      "script_excerpt": "'samtools fastq'",
+      "publish_dir": null,
+      "publish_dir_matches": [],
+      "resolved_args": [
+        {
+          "id": "conf/modules.config#withName:SAMTOOLS_FASTQ/args",
+          "key": "args",
+          "expression": "'-N'",
+          "selector": "withName:SAMTOOLS_FASTQ",
+          "config": "conf/modules.config"
+        }
+      ],
+      "template": null,
+      "effective_args": [
+        {
+          "call": "NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_FASTQ",
+          "key": "args",
+          "ids": [
+            "conf/modules.config#withName:SAMTOOLS_FASTQ/args"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SAMTOOLS_VIEW",
+      "aliases": [
+        "SAMTOOLS_CHR",
+        "SAMTOOLS_VIEW_MAP_MAP",
+        "SAMTOOLS_VIEW_UNMAP_UNMAP"
+      ],
+      "in_subworkflows": [
+        "ALIGNMENT_TO_FASTQ"
+      ],
+      "module_path": "modules/nf-core/samtools/view/main.nf",
+      "meta": null,
+      "module_tests": [],
+      "tool": "samtools",
+      "container": "biocontainers/samtools:1.17--h00cdaf9_0",
+      "conda": "bioconda::samtools=1.17",
+      "inputs": [],
+      "outputs": [],
+      "when": null,
+      "script_excerpt": "'samtools view'",
+      "publish_dir": null,
+      "publish_dir_matches": [],
+      "resolved_args": [
+        {
+          "id": "conf/modules.config#withName:SAMTOOLS_VIEW/args",
+          "key": "args",
+          "expression": "'-h'",
+          "selector": "withName:SAMTOOLS_VIEW",
+          "config": "conf/modules.config"
+        },
+        {
+          "id": "conf/modules.config#withName:SAMTOOLS_CHR/args",
+          "key": "args",
+          "expression": "{ \"-b ${params.chr}\" }",
+          "selector": "withName:SAMTOOLS_CHR",
+          "config": "conf/modules.config"
+        },
+        {
+          "id": "conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/args",
+          "key": "args",
+          "expression": "'-b -f1 -F12'",
+          "selector": "withName:SAMTOOLS_VIEW_MAP_MAP",
+          "config": "conf/modules.config"
+        },
+        {
+          "id": "conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/prefix",
+          "key": "prefix",
+          "expression": "{ \"${meta.id}.map_map\" }",
+          "selector": "withName:SAMTOOLS_VIEW_MAP_MAP",
+          "config": "conf/modules.config"
+        },
+        {
+          "id": "conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/args",
+          "key": "args",
+          "expression": "'-b -f12 -F256'",
+          "selector": "withName:SAMTOOLS_VIEW_UNMAP_UNMAP",
+          "config": "conf/modules.config"
+        },
+        {
+          "id": "conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix",
+          "key": "prefix",
+          "expression": "{ \"${meta.id}.unmap_unmap\" }",
+          "selector": "withName:SAMTOOLS_VIEW_UNMAP_UNMAP",
+          "config": "conf/modules.config"
+        },
+        {
+          "id": "conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix~2",
+          "key": "prefix",
+          "expression": "{ \"${meta.id}.unmapped\" }",
+          "selector": "withName:SAMTOOLS_VIEW_UNMAP_UNMAP",
+          "config": "conf/modules.config"
+        }
+      ],
+      "template": null,
+      "effective_args": [
+        {
+          "call": "NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_CHR",
+          "key": "args",
+          "ids": [
+            "conf/modules.config#withName:SAMTOOLS_CHR/args"
+          ]
+        },
+        {
+          "call": "NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_MAP_MAP",
+          "key": "args",
+          "ids": [
+            "conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/args"
+          ]
+        },
+        {
+          "call": "NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_MAP_MAP",
+          "key": "prefix",
+          "ids": [
+            "conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/prefix"
+          ]
+        },
+        {
+          "call": "NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_UNMAP_UNMAP",
+          "key": "args",
+          "ids": [
+            "conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/args"
+          ]
+        },
+        {
+          "call": "NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_UNMAP_UNMAP",
+          "key": "prefix",
+          "ids": [
+            "conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix",
+            "conf/modules.config#withName:SAMTOOLS_VIEW_UNMAP_UNMAP/prefix~2"
+          ],
+          "tie": true
+        }
+      ]
+    }
+  ],
+  "subworkflows": [
+    {
+      "name": "NFCORE_BAMTOFASTQ",
+      "path": "main.nf",
+      "kind": "pipeline",
+      "aliases": [],
+      "calls": [
+        "BAMTOFASTQ"
+      ],
+      "inputs": [],
+      "outputs": [],
+      "tests": []
+    },
+    {
+      "name": "ALIGNMENT_TO_FASTQ",
+      "path": "subworkflows/local/alignment_to_fastq.nf",
+      "kind": "pipeline",
+      "aliases": [],
+      "calls": [
+        "SAMTOOLS_CHR",
+        "SAMTOOLS_COLLATE",
+        "SAMTOOLS_FASTQ",
+        "SAMTOOLS_VIEW_MAP_MAP",
+        "SAMTOOLS_VIEW_UNMAP_UNMAP"
+      ],
+      "inputs": [],
+      "outputs": [],
+      "tests": [],
+      "invocations": [
+        {
+          "caller": "BAMTOFASTQ",
+          "caller_path": "workflows/bamtofastq.nf",
+          "arguments": [],
+          "bindings": []
+        }
+      ]
+    }
+  ],
+  "workflow": {
+    "name": "BAMTOFASTQ",
+    "channels": [],
+    "edges": [],
+    "conditionals": []
+  },
+  "reference_assets": [],
+  "reference_rebuilds": [],
+  "test_candidates": [
+    {
+      "id": "profile:test",
+      "kind": "profile",
+      "name": "test",
+      "path": null,
+      "effective_profiles": [
+        "test"
+      ],
+      "params_delta": {},
+      "inputs": [],
+      "outputs": [],
+      "execution_mode": "real",
+      "scope": "primary",
+      "disposition": "selected",
+      "rationale": "explicit caller profile override",
+      "assert_workflow_success": null,
+      "snapshot": null,
+      "prose_assertions": []
+    }
+  ],
+  "test_selection": {
+    "status": "selected",
+    "selected_candidate_id": "profile:test",
+    "rationale": "the conventional test profile carries test-input evidence and primary coverage"
+  },
+  "warnings": [
+    "workflow graph extraction is intentionally partial in resolver v1",
+    "selected Nextflow entrypoint: main.nf"
+  ]
+}

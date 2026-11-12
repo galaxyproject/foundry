@@ -6,6 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import yaml from "js-yaml";
+import { checkScopeRecords, type ScopeSummary } from "@galaxy-foundry/gxwf-foundry";
 import { buildSummary } from "@galaxy-foundry/summarize-nextflow";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -28,120 +29,14 @@ const SCENARIO_DROPS = [
   "scope-annotation",
 ];
 
-interface Control {
-  control: string;
-  value: string | boolean;
-  from: string;
-}
-interface ScopeDecision {
-  id: string;
-  decided_by: string;
-  scope: { candidate?: string; controls: Control[] };
-}
-interface ScopeDrop {
-  id: string;
-  status: string;
-  kind: string;
-  raised_by: string;
-  scope_branch: { decision: string; selected_by: Control[] };
-  units: string;
-  because: string;
-  step?: unknown;
-  source_arg?: unknown;
-}
-interface Ledger {
-  decisions: object[];
-  entries: object[];
-}
-interface Summary {
-  params: { name: string; type?: string; default?: unknown; enum?: unknown[] }[];
-  profiles: { name: string }[];
-  processes: { name: string; aliases?: string[] }[];
-  subworkflows: { name: string; calls?: string[] }[];
-  test_candidates: { id: string; params_delta?: Record<string, unknown> }[];
-  workflow: { conditionals: { guard: string; affects: string[] }[] };
-}
-
-function readLedger(): Ledger {
-  return yaml.load(readFileSync(ledgerPath, "utf-8")) as Ledger;
-}
-
-function scopeRecords(ledger: Ledger): { scope: ScopeDecision; drops: ScopeDrop[] } {
-  const scopes = ledger.decisions.filter((d): d is ScopeDecision => "scope" in d);
-  expect(scopes).toHaveLength(1);
-  const drops = ledger.entries.filter((e): e is ScopeDrop => "scope_branch" in e);
-  return { scope: scopes[0]!, drops };
-}
-
-const unitNames = (drop: ScopeDrop): string[] =>
-  [...drop.units.matchAll(/`([A-Z][A-Z0-9_]+)`/g)].map(([, name]) => name!);
-
-const controlKey = ({ control, value }: Control): string => `${control}=${String(value)}`;
-
-// Resolves a `from` citation (`<array>[<key>]` plus an optional field) and checks it backs the value.
-function checkCitation(summary: Summary, { control, value, from }: Control): void {
-  const match =
-    /^(params|profiles|test_candidates|workflow\.conditionals)\[([^\]]+)\](?:\.(\w+))?$/.exec(from);
-  expect(match, `unparseable from: ${from}`).not.toBeNull();
-  const [, array, key, field] = match!;
-  const param = control.startsWith("params.") ? control.slice("params.".length) : undefined;
-  if (array === "params") {
-    const entry = summary.params.find((p) => p.name === key);
-    expect(entry, from).toBeDefined();
-    expect(param, from).toBe(key);
-    if (field === "enum") expect(entry!.enum, from).toContain(value);
-    else if (field === "default") expect(entry!.default, from).toBe(value);
-    else {
-      expect(field, from).toBeUndefined();
-      expect([entry!.type, value], from).toEqual(["boolean", true]);
-    }
-  } else if (array === "profiles") {
-    expect(control).toBe("profile");
-    expect(key).toBe(value);
-    expect(summary.profiles.map((p) => p.name)).toContain(key);
-  } else if (array === "test_candidates") {
-    const candidate = summary.test_candidates.find((c) => c.id === key);
-    expect(candidate, from).toBeDefined();
-    if (field === "params_delta") {
-      expect(param, from).toBeDefined();
-      expect(candidate!.params_delta?.[param!], from).toBe(value);
-    } else {
-      expect(field, from).toBeUndefined();
-      // The candidate's file stem must be the value or end in `_<value>`.
-      const stem = /([^/]+)\.nf\.test::/.exec(key!)?.[1] ?? "";
-      expect([stem, `_${stem}`.endsWith(`_${String(value)}`)], from).toEqual([stem, true]);
-    }
-  } else {
-    const conditional = summary.workflow.conditionals.find((c) => c.affects.includes(key!));
-    expect(conditional, from).toBeDefined();
-    expect(param, from).toBeDefined();
-    expect(conditional!.guard).toContain(param!);
-    expect(conditional!.guard).toContain(String(value));
-  }
-}
+const readLedger = (): unknown => yaml.load(readFileSync(ledgerPath, "utf-8"));
 
 describe("sarek scope ledger fixture", () => {
   it("records one scope decision and an open scope drop per excluded branch", () => {
-    const { scope, drops } = scopeRecords(readLedger());
-    expect(scope.decided_by).toBe("nextflow-summary-to-galaxy-interface");
-    expect(scope.scope.controls.length).toBeGreaterThan(0);
-    expect(drops.map((d) => d.id)).toEqual(expect.arrayContaining(SCENARIO_DROPS));
-    const fixed = new Set(scope.scope.controls.map(controlKey));
-    for (const drop of drops) {
-      expect(drop, drop.id).toMatchObject({
-        status: "open",
-        kind: "dropped",
-        raised_by: "nextflow-summary-to-galaxy-interface",
-        scope_branch: { decision: scope.id },
-      });
-      expect(drop.scope_branch.selected_by.length, drop.id).toBeGreaterThan(0);
-      for (const control of drop.scope_branch.selected_by)
-        expect(fixed.has(controlKey(control)), `${drop.id}: ${controlKey(control)}`).toBe(false);
-      expect(unitNames(drop).length, drop.id).toBeGreaterThan(0);
-      expect(drop.because, drop.id).toContain(scope.id);
-      expect(drop.step, drop.id).toBeUndefined();
-      expect(drop.source_arg, drop.id).toBeUndefined();
-    }
+    const check = checkScopeRecords(readLedger());
+    expect(check.problems).toEqual([]);
+    expect(check.decision?.controls.length).toBeGreaterThan(0);
+    expect(check.drops.map((d) => d.id)).toEqual(expect.arrayContaining(SCENARIO_DROPS));
   });
 
   itIfSarek("cites only controls, candidates and units the sarek summary holds", async () => {
@@ -149,20 +44,7 @@ describe("sarek scope ledger fixture", () => {
       withNextflow: false,
       fetchTestData: false,
       validate: false,
-    })) as Summary;
-    const { scope, drops } = scopeRecords(readLedger());
-
-    if (scope.scope.candidate)
-      expect(summary.test_candidates.map((c) => c.id)).toContain(scope.scope.candidate);
-    for (const control of scope.scope.controls) checkCitation(summary, control);
-
-    const units = new Set([
-      ...summary.subworkflows.flatMap((s) => [s.name, ...(s.calls ?? [])]),
-      ...summary.processes.flatMap((p) => [p.name, ...(p.aliases ?? [])]),
-    ]);
-    for (const drop of drops) {
-      for (const control of drop.scope_branch.selected_by) checkCitation(summary, control);
-      for (const name of unitNames(drop)) expect(units, `${drop.id}: ${name}`).toContain(name);
-    }
+    })) as ScopeSummary;
+    expect(checkScopeRecords(readLedger(), summary).problems).toEqual([]);
   });
 });
