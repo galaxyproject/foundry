@@ -89,7 +89,7 @@ Read the differences from the workflows and the summary, and the reasons from th
 
 ### Outputs
 
-List every output of the snapshot as carried, renamed or reshaped (`outputs.changed`), or removed. For a removed output, give the drops in its `dropped_entries`, which name its source step or the output itself, or list it as a finding. Then list the outputs the design tier never declared, from the drops in `other_drops` and the scope drops whose `units` or `unmet` name an output, each with its `because`.
+List every output of the snapshot as carried, renamed or reshaped (`outputs.changed`), or removed. For a removed output, give the drops in its `dropped_entries`, or list it as a finding when there are none. Then list the outputs the design tier never declared, from the drops in `other_drops` and the scope drops whose `units` or `unmet` name an output, each with its `because`.
 
 ### Tool versions
 
@@ -104,7 +104,7 @@ For each tool step in the final workflow, give the wrapper `tool_id` and `tool_v
 
 ### Behavioural changes
 
-List each change between the snapshot and the final workflow that changes what a step does: a removed step, a replaced `tool_id`, a changed settled `state` value, a new or removed `when`, or a connection between settled ports that moved. Skip changes that only replace a `TODO` sentinel or a `TODO_*` port with the value the design asked for. Link each change to the ledger entry that records it: a step drop by its `step`, a flag record by `source_arg.step`, or a decision or entry whose text names the step. A removed step repair folded into another has no drop, so it is still a finding. Say that it may be a fold.
+List each change between the snapshot and the final workflow that changes what a step does: a removed step, a replaced `tool_id`, a changed settled `state` value, a new or removed `when`, or a connection between settled ports that moved. Skip changes that only replace a `TODO` sentinel or a `TODO_*` port with the value the design asked for. Link each change to the ledger entry that records it: a step drop by its `step`, a flag record by `source_arg.step`, or a decision or entry whose text names the step. A step that repair folded into another has no drop, so it is still a finding. Say that it may be a fold.
 
 ### Source scope
 

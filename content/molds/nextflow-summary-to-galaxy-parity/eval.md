@@ -22,7 +22,7 @@
 
 - bucket: fidelity
 - check: deterministic
-- assertion: the table has a row for each kept step and each entry id in `nextflow-galaxy-parity.json`'s `source_args.rows` that names it, and each row lists exactly the records the JSON joined to it. Overridden entries are not rows that need a record, and stray records are listed with their problem.
+- assertion: the table has a row for each kept step and each entry id in `nextflow-galaxy-parity.json`'s `source_args.rows` that names it, and each row lists exactly the records the JSON joined to it. Overridden entries are listed as needing no record, and stray records are listed with their problem.
 
 ## Property: scope rows come from scope records only
 

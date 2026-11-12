@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-parity",
     "path": "content/molds/nextflow-summary-to-galaxy-parity/index.md",
     "revision": 1,
-    "content_hash": "47924898a9b17fcf5d76465d9cf2e41866d5fb7eab841ac08dfc692f4ac84121",
-    "commit": "c111bb970513ae5b35141b118e9b3722824d2d63"
+    "content_hash": "63534149ee4de4927f82f702c71c3c9c890244d0a46f7a6304fbd9967de04f5e",
+    "commit": "a9311739d07ec9b8d2d1b3fa6245bb0174a3d810"
   },
-  "cast_at": "2026-11-12T17:20:40.102Z",
+  "cast_at": "2026-11-12T17:27:23.463Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -21,8 +21,8 @@
       "evidence": "hypothesis",
       "purpose": "Join the summary, ledger, snapshot, final workflow and their diff deterministically, so the report renders joins and findings instead of re-deriving them.",
       "verification": "Promote after a nextflow-to-galaxy run's report lists every finding the command emitted and no difference the command marked recorded as unrecorded.",
-      "src_hash": "9c00f117cb66d2fbfa4583e0c9a9ed5ac44e232db0302741e32904f3472e8b6b",
-      "dst_hash": "5b0bbcddca64a117fc4fa92a5e8fcc3b03709363440b607add6f16d4cb0cec03",
+      "src_hash": "ba0dbc8418a86a0c6664a4da852e562176810388ca8d80792dcadb4593508eb4",
+      "dst_hash": "b4b9b771ae05003e7d10a6cc4f6f811c9f9dbfcddbc53d3699557424277b2bde",
       "source": "deterministic"
     },
     {
