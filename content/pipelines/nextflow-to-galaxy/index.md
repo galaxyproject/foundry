@@ -37,6 +37,4 @@ phases:
 
 # NEXTFLOW → GALAXY
 
-Direct path. Lifted from `content/meta/harness-pipelines.md` §"NEXTFLOW → GALAXY".
-
 Replaces the prior-art hand-authored `nf-to-galaxy` skill — same goal, decomposed into Molds, validation-driven (gxwf static schema replaces the prose caveat catalog).

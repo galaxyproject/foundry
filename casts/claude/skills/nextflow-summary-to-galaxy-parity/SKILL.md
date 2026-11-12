@@ -38,7 +38,7 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 ## Load Upfront
 
 - `references/cli/nextflow-parity.json`: CLI command reference packaged as a sidecar. Join the summary, ledger, snapshot, final workflow and their diff deterministically, so the report renders joins and findings instead of re-deriving them.
-- `references/cli/gxwf.md`: CLI tool reference copied verbatim into the bundle. Runs `gxwf diff --json` on the snapshot and the final workflow; `diff` needs a release newer than the pinned one.
+- `references/cli/gxwf.md`: CLI tool reference copied verbatim into the bundle. Run `gxwf diff --json` on the snapshot and the final workflow.
 - `references/notes/open-requirements-ledger.md`: Research note copied verbatim into the bundle. Read each record kind the report links to: step drops, flag records under Source arguments, scope records under Source scope, plain gaps and decisions.
 
 ## Load On Demand
@@ -52,16 +52,16 @@ Follow the procedure below and use the artifact/reference sections as the runtim
 
 ## Procedure
 
-Report how the finished Galaxy workflow differs from the Nextflow pipeline it was translated from. Run it once the test phase has settled, whether the test passed or not. The report only reports. It doesn't change the workflow or the ledger, it doesn't send the run back into the test loop, and it doesn't judge whether a difference is acceptable. It says what changed, links each difference to the ledger record that gives its reason, and lists every difference with no recorded reason as a finding.
+Report how the finished Galaxy workflow differs from the Nextflow pipeline it was translated from, whether the test passed or not. Say what changed, link each difference to the ledger record that gives its reason, and list every difference with no recorded reason as a finding. You must not change the workflow, the ledger or the test result, and must not judge whether a difference is acceptable.
 
-The ledger alone isn't enough. A run can remove a step, leave an input unwired or drop a flag without writing any ledger entry, so read the differences from the workflows and the summary, and read the reasons from the ledger.
+Read the differences from the workflows and the summary, and the reasons from the ledger. A difference with no ledger entry is still a difference.
 
 ### Sequence
 
-1. **Diff the designed workflow against the final one.** Run `gxwf diff --json galaxy-workflow-draft.snapshot.gxwf.yml galaxy-workflow.gxwf.yml` and save the output as `nextflow-galaxy-parity.diff.json`. Diff the snapshot, not `galaxy-workflow.extracted.gxwf.yml`: only the snapshot keeps `_plan_state.calls` and shows what the per-step loop removed.
+1. **Diff the designed workflow against the final one.** Run `gxwf diff --json galaxy-workflow-draft.snapshot.gxwf.yml galaxy-workflow.gxwf.yml` and save the output as `nextflow-galaxy-parity.diff.json`. Diff the snapshot, not `galaxy-workflow.extracted.gxwf.yml`.
 2. **Join deterministically.** Run nextflow-parity with the summary, the ledger, the snapshot, the final workflow and the diff, and save its JSON as `nextflow-galaxy-parity.json` beside the report. Render from that JSON. Don't re-derive a join it printed. When either command fails, say so at the top of the report, give its error, and write each section from the files directly, marking every row unverified.
 3. **Write the report** with the sections below, in this order. Name each step, input, output and entry by its key or `id`, so a reader can find it.
-4. **Hand off.** Emit `nextflow-galaxy-parity-report.md`. Leave the workflow, the ledger and the test result as they were.
+4. **Hand off.** Emit `nextflow-galaxy-parity-report.md`.
 
 ### Report sections
 
@@ -71,14 +71,14 @@ List every output of the snapshot as carried, renamed or reshaped (`outputs.chan
 
 #### Tool versions
 
-For each tool step in the final workflow, give the wrapper `tool_id` and `tool_version` beside the source: each call's process, its tool's declared versions, and the process's `container` and `conda` text. For an embedded user-defined tool, the wrapper's software requirement is in the final workflow: compare it. For a Tool Shed wrapper, the requirement isn't in any input. A wrapper version that starts with the software version, such as `1.15.1+galaxy2`, is evidence of it but not proof, so mark that comparison unverified. Flag every comparison where the versions differ. A tool with several declared versions differs from a wrapper that matches only one of them.
+For each tool step in the final workflow, give the wrapper `tool_id` and `tool_version` beside the source: each call's process, its tool's declared versions, and the process's `container` and `conda` text. For an embedded user-defined tool, the wrapper's software requirement is in the final workflow: compare it. No input carries a Tool Shed wrapper's requirement. Compare with the software version a wrapper version starts with, such as `1.15.1` in `1.15.1+galaxy2`, and mark the comparison unverified. Flag every comparison where the versions differ. A tool with several declared versions differs from a wrapper that matches only one of them.
 
 #### Parameters and inputs
 
 - **Exposed:** each final workflow input that feeds a step, with the source param it came from where the input's `doc` or the ledger names one.
 - **Not carried:** each input in `inputs.unwired`. It is declared but changes nothing, so it is never listed as exposed. Inputs in `inputs.removed` follow, each with the ledger text that explains it, or as a finding.
 - **Fixed:** source params or controls the workflow sets to one value: the scope decision's `controls`, and flags carried into `state`.
-- **Source arguments:** one table row per kept step and effective entry in `source_args.rows`, giving the entry `id`, its `expression`, `tie` where set, and each joined record's `id`, `disposition` and `flags`. An entry with no record is a finding. List `source_args.overridden` separately as needing no record, and each `source_args.stray_records` item with its problem. A closure's flags can't be checked against its records without evaluating it, so for a closure, compare the flags it can set with the records' `flags` by reading, and list any flag no record covers.
+- **Source arguments:** one table row per kept step and effective entry in `source_args.rows`, giving the entry `id`, its `expression`, `tie` where set, and each joined record's `id`, `disposition` and `flags`. An entry with no record is a finding. List `source_args.overridden` separately as needing no record, and each `source_args.stray_records` item with its problem. For a closure, compare the flags it can set with the records' `flags` by reading, and list any flag no record covers.
 
 #### Behavioural changes
 
@@ -94,9 +94,7 @@ List what nothing in the run checked: open gaps and tie gaps, surrendered entrie
 
 #### Findings
 
-List every item in the JSON's `findings`, then every difference you found while writing the sections that has no recorded reason. Give each its kind, its subject and the section it came from. Don't rank them, and don't say which are acceptable.
-
-Later review or maturation of the workflow can read this report as evidence of what it doesn't carry from the source.
+A table with columns `kind`, `subject`, `detail` and `section`: one row per item in the JSON's `findings`, with its `kind`, `subject` and `detail` as printed, then one row per difference you found while writing the sections that has no recorded reason. Don't rank them, and don't say which are acceptable.
 
 ## Feedback Mode
 

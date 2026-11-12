@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-parity",
     "path": "content/molds/nextflow-summary-to-galaxy-parity/index.md",
     "revision": 1,
-    "content_hash": "f4e8940fa20d09d12a3f1726c8f606fe7efdccebf95c78dbb0727f564cdf24be",
-    "commit": "d63d5b662fbbc677f9982ec939714998162fec4c"
+    "content_hash": "47924898a9b17fcf5d76465d9cf2e41866d5fb7eab841ac08dfc692f4ac84121",
+    "commit": "c111bb970513ae5b35141b118e9b3722824d2d63"
   },
-  "cast_at": "2026-11-12T17:04:14.436Z",
+  "cast_at": "2026-11-12T17:20:40.102Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -34,8 +34,8 @@
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
-      "purpose": "Runs `gxwf diff --json` on the snapshot and the final workflow; `diff` needs a release newer than the pinned one.",
-      "verification": "Promote once the pinned `@galaxy-tool-util/cli` release ships `gxwf diff`.",
+      "purpose": "Run `gxwf diff --json` on the snapshot and the final workflow.",
+      "verification": "Promote once the pinned `@galaxy-tool-util/cli` release includes `gxwf diff`.",
       "src_hash": "84dd506877b9f44e1c453b2e00f4f1cd23c4676162e70906f79c58ea0fbdc290",
       "dst_hash": "84dd506877b9f44e1c453b2e00f4f1cd23c4676162e70906f79c58ea0fbdc290",
       "source": "deterministic"

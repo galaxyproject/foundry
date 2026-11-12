@@ -1,36 +1,34 @@
 # nextflow-summary-to-galaxy-parity eval
 
-This file is the **abstract oracle** for the `nextflow-summary-to-galaxy-parity` Mold: properties any report must satisfy, independent of fixture. Concrete runs and their expected values live in `scenarios.md`.
-
 ## Property: the report changes nothing
 
 - bucket: handoff
 - check: deterministic
-- assertion: the final workflow, the ledger and the test result are byte-identical before and after the Mold runs. The run's next action never depends on the report.
+- assertion: the final workflow, the ledger and the test result are byte-identical before and after the Mold runs.
 
 ## Property: every command finding is reported
 
 - bucket: fidelity
 - check: deterministic
-- assertion: each `findings[]` item `foundry nextflow-parity` emits for the run's five inputs appears in the report's Findings section with its kind and subject.
+- assertion: each `findings[]` item in `nextflow-galaxy-parity.json` has a row in the report's Findings table with the same `kind` and `subject`. Rerunning `foundry nextflow-parity` on the run's five inputs reproduces that JSON.
 
 ## Property: no difference reads as carried without a reason
 
 - bucket: fidelity
 - check: deterministic
-- assertion: every removed step and removed output in the parity JSON appears in the report, either with the ledger `id` that drops it or as a finding. Every input in `inputs.unwired` appears as not carried and never as exposed.
+- assertion: every removed step and removed output in `nextflow-galaxy-parity.json` appears in the report, either with the ledger `id` that drops it or as a finding. Every input in `inputs.unwired` appears as not carried and never as exposed.
 
 ## Property: the source-argument table is complete
 
 - bucket: fidelity
 - check: deterministic
-- assertion: the table has a row for each kept step and each entry id in `source_args.rows` that names it, and each row lists exactly the records the parity JSON joined to it. Overridden entries are not rows that need a record, and stray records are listed with their problem.
+- assertion: the table has a row for each kept step and each entry id in `nextflow-galaxy-parity.json`'s `source_args.rows` that names it, and each row lists exactly the records the JSON joined to it. Overridden entries are not rows that need a record, and stray records are listed with their problem.
 
 ## Property: scope rows come from scope records only
 
 - bucket: fidelity
 - check: deterministic
-- assertion: the Source scope section lists the decision carrying `scope` and exactly the entries whose `scope_branch.decision` names it. A drop without `scope_branch` never appears there, and a ledger with no scope decision yields a one-line section.
+- assertion: the Source scope section lists the ledger decision carrying `scope` and exactly the entries whose `scope_branch.decision` names it, the same set as the JSON's `scope.drops`. A drop without `scope_branch` never appears there, and a ledger with no scope decision yields a one-line section.
 
 ## Property: links point at real ledger records
 
