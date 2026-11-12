@@ -6,11 +6,11 @@
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 20,
     "content_hash": "d8e6759095994ad000fb8b78018da070761a5abfb8cf0a80c6c59b550a272501",
-    "commit": "871b5e6deadfd56aeb5e2ba92eb8f6f50c8449ee"
+    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-11-10T14:45:10.085Z",
+  "cast_at": "2026-11-12T04:18:26.251Z",
   "cast_date": "2026-05-08",
   "cast_revision": 11,
   "cast_history": [
@@ -96,8 +96,8 @@
       "evidence": "corpus-observed",
       "purpose": "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence.",
       "trigger": "When extracting tools, versions, containers, conda directives, or environment equivalences.",
-      "src_hash": "8d0ee1e9be303348f56c63bdaf776ba36ef6802d9deb0db5ab6152913309c591",
-      "dst_hash": "8d0ee1e9be303348f56c63bdaf776ba36ef6802d9deb0db5ab6152913309c591",
+      "src_hash": "ac0cc0e8b86a35a952edfb84e611b8561225e92ace1fa6e92172399647ec1f36",
+      "dst_hash": "ac0cc0e8b86a35a952edfb84e611b8561225e92ace1fa6e92172399647ec1f36",
       "source": "deterministic"
     },
     {

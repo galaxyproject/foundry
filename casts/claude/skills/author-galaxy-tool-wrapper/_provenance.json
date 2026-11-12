@@ -4,11 +4,11 @@
   "mold": {
     "name": "author-galaxy-tool-wrapper",
     "path": "content/molds/author-galaxy-tool-wrapper/index.md",
-    "revision": 8,
-    "content_hash": "77446daafedbcc6754902533a0280d2f0418d1bb8f92e042562404dbc75c9023",
-    "commit": "53d1b93e584ed09195044c9e688ed835997b2eeb"
+    "revision": 9,
+    "content_hash": "52dde31f77865e86065b84a098be85be43795a0e586402f18dd8191b6841771a",
+    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
   },
-  "cast_at": "2026-11-11T16:56:50.837Z",
+  "cast_at": "2026-11-12T04:17:38.424Z",
   "cast_date": "2026-05-08",
   "cast_revision": 1,
   "cast_history": [
@@ -31,8 +31,8 @@
       "purpose": "Map Nextflow container/conda evidence to Galaxy UDT container and package provenance.",
       "trigger": "When a missing Galaxy user-defined tool must be authored from a Nextflow process with container or conda directives.",
       "verification": "Author one UDT from nf-core/bacass or nf-core/rnaseq process evidence and confirm the note improves requirements/container extraction.",
-      "src_hash": "8d0ee1e9be303348f56c63bdaf776ba36ef6802d9deb0db5ab6152913309c591",
-      "dst_hash": "8d0ee1e9be303348f56c63bdaf776ba36ef6802d9deb0db5ab6152913309c591",
+      "src_hash": "ac0cc0e8b86a35a952edfb84e611b8561225e92ace1fa6e92172399647ec1f36",
+      "dst_hash": "ac0cc0e8b86a35a952edfb84e611b8561225e92ace1fa6e92172399647ec1f36",
       "source": "deterministic"
     },
     {
@@ -61,8 +61,8 @@
       "load": "upfront",
       "evidence": "corpus-observed",
       "purpose": "Field contract, expression syntax, script placement, and package inference for a `GalaxyUserTool` definition.",
-      "src_hash": "94fbbfe2fe4a12379b72609a6360ca4c3f360246ba74e4fe3442bb8705fb9e6e",
-      "dst_hash": "94fbbfe2fe4a12379b72609a6360ca4c3f360246ba74e4fe3442bb8705fb9e6e",
+      "src_hash": "2a90d75df295a677672d18d50c92911c040241fcbb188c46a7d6d73757a11b29",
+      "dst_hash": "2a90d75df295a677672d18d50c92911c040241fcbb188c46a7d6d73757a11b29",
       "source": "deterministic"
     },
     {

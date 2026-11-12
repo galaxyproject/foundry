@@ -24,8 +24,19 @@
 - fixture: `nf-core/rnaseq` 3.24.0, process `RIBODETECTOR`
   (`modules/nf-core/ribodetector/main.nf`), with a [[discover-shed-tool]]
   result of `status: miss`.
-- expect: package `ribodetector` 0.3.3 and container
-  `community.wave.seqera.io/library/ribodetector:0.3.3--ad3d7071e408b502`, not
-  an invented BioContainers tag. The `shell_command` runs `ribodetector_cpu`,
-  the source's branch without an accelerator, with `-l` from an integer
-  read-length input.
+- expect: call `recommend_biocontainer` with `ribodetector=0.3.3` and use its
+  verified exact-version result,
+  `quay.io/biocontainers/ribodetector:0.3.3--pyhdfd78af_0`, rather than the Wave
+  image. The `shell_command` runs `ribodetector_cpu`, the source's branch without
+  an accelerator, with `-l` from an integer read-length input.
+
+## Case: custom Docker Hub image with no BioContainers equivalent
+
+- fixture: `OceanOmics-amplicon-nf` commit `416807e`, LULU process using
+  `mahsamousavi/lulu:2019`, with a [[discover-shed-tool]] result of `status:
+  miss` and no package evidence that resolves through `recommend_biocontainer`.
+- expect: under the default Galaxy policy, stops before writing
+  `galaxy-user-tool.yml` and returns an unresolved container requirement. It
+  names the source image as provenance and offers a BioContainers image, an
+  evidenced target allowlist exception, or an unresolved step as the available
+  outcomes.

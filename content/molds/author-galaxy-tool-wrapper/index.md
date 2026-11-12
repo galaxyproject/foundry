@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-11-10
-revision: 8
+revised: 2026-11-12
+revision: 9
 related_notes:
   - "[[nextflow-patterns]]"
   - "[[summary-nextflow]]"
@@ -96,9 +96,13 @@ Extract the minimum executable contract:
 - Input parameters with Galaxy-compatible names, types, labels, defaults, help text, and datatypes when evidenced.
 - Output datasets or collections with formats and `from_work_dir` / discovery rules.
 
-Prefer BioContainers or directly evidenced containers. If only Conda/package evidence exists, record what is known and avoid guessing an image tag.
+Assume the target uses Galaxy's default UDT allowlist unless the caller provides evidence that it differs. Under that default, emit only an image below `quay.io/biocontainers/`. A source Docker Hub, Wave, or other registry image remains provenance, not an eligible UDT `container`.
 
-Nothing downstream of this Mold re-resolves the container. Galaxy deployments can re-resolve a generated tool's image against verified biocontainers, but that is off by default upstream and absent here — the image written is the image that runs. Where the source evidences no container, infer packages from the command per §7 of the authoring note rather than deferring the choice.
+When the source supplies a pinned `quay.io/biocontainers` image, use it after confirming it provides every invoked command. Otherwise derive canonical Conda package specs from the source and call `recommend_biocontainer` when that operation is available. Use an exact-version result when `verified` is not false. A `name_only` result changes the evidenced version, so surface it for confirmation before use. If the operation is unavailable, returns no image, or cannot verify the result, do not guess a tag.
+
+For a command that needs only shell builtins or core utilities, use a known allowed general-purpose BioContainers image such as `quay.io/biocontainers/python:3.13`, after confirming the required commands exist. Nothing downstream of this Mold re-resolves the image.
+
+If the source image is outside the default allowlist and no permitted equivalent is established, stop before drafting. Return an unresolved container requirement with three options: build or locate a suitable BioContainers image, provide evidence that the target Galaxy allows the source image, or leave the step unresolved. Do not defer this failure to workflow testing.
 
 ### 3. Generate the structured draft
 
@@ -108,7 +112,9 @@ Nothing constrains this draft to the schema as it is written, so the rules in th
 
 ### 4. Validate structurally
 
-Validate the draft against the available Galaxy user-tool validator or schema surface before critique. Treat structural validation failures as authoring failures, not critic feedback.
+Check the container policy before schema validation. Under the default policy, parse the image reference and require registry `quay.io`, a repository below `biocontainers/`, and a pinned tag or digest. If the caller supplied a different target allowlist, require positive evidence that the selected image matches it. A source image's existence is not policy evidence.
+
+Validate the draft against the available Galaxy user-tool validator or schema surface before critique. Treat container-policy and structural validation failures as authoring failures, not critic feedback.
 
 Fix validation errors directly. Do not run the critic until the draft passes structural validation.
 

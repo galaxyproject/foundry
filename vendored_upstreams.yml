@@ -131,14 +131,14 @@
 
 - local: content/prompts/galaxy/custom-tool-structured/upstream.prompt
   source: $GALAXY/lib/galaxy/agents/prompts/custom_tool_structured.md
-  pinned_ref: 4d235b615e60bdb8c7e7d9ada100245068c8e4d9
+  pinned_ref: 09ab857133f28853e5d8ff553aafcbce77aa2eb6
   framing: content/prompts/galaxy/custom-tool-structured/index.md
   license: MIT
   license_file: LICENSES/galaxy.LICENSE
 
 - local: content/research/galaxy-user-tool-authoring-help/galaxy-user-tool-authoring-help.yml
   source: $GALAXY/client/src/components/Tool/authoringHelp.yml
-  pinned_ref: 5af1d03c929748006dd53ad451e5cb1fd140399a
+  pinned_ref: 09ab857133f28853e5d8ff553aafcbce77aa2eb6
   framing: content/research/galaxy-user-tool-authoring-help/index.md
   license: MIT
   license_file: LICENSES/galaxy.LICENSE

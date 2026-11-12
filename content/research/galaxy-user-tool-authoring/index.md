@@ -5,19 +5,20 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-08-24
-revised: 2026-11-10
-revision: 2
+revised: 2026-11-12
+revision: 3
 component: tool_util_models
 related_notes:
   - "[[component-nextflow-containers-and-envs]]"
   - "[[galaxy-user-tool-critique]]"
   - "[[galaxy-user-tool-authoring-help]]"
 sources:
-  - "https://github.com/galaxyproject/galaxy/blob/4d235b615e60bdb8c7e7d9ada100245068c8e4d9/lib/galaxy/agents/prompts/custom_tool_structured.md"
+  - "https://github.com/galaxyproject/galaxy/blob/09ab857133f28853e5d8ff553aafcbce77aa2eb6/lib/galaxy/agents/prompts/custom_tool_structured.md"
   - "https://github.com/galaxyproject/galaxy/blob/4d235b615e60bdb8c7e7d9ada100245068c8e4d9/lib/galaxy/agents/prompts/custom_tool_container_critic.md"
-  - "https://github.com/galaxyproject/galaxy/blob/5af1d03c929748006dd53ad451e5cb1fd140399a/client/src/components/Tool/authoringHelp.yml"
+  - "https://github.com/galaxyproject/galaxy/blob/09ab857133f28853e5d8ff553aafcbce77aa2eb6/client/src/components/Tool/authoringHelp.yml"
   - "https://github.com/galaxyproject/galaxy/blob/7c18ab768ac112bddf485cfcb5c074a83165c591/lib/galaxy/jobs/command_factory.py"
   - "https://github.com/galaxyproject/galaxy/blob/7c18ab768ac112bddf485cfcb5c074a83165c591/lib/galaxy/tool_util/deps/requirements.py"
+  - "https://github.com/galaxyproject/galaxy-mcp/blob/935381cf674af7bcacb15f05df972b1e209e99ce/python/src/galaxy_mcp/server.py"
   - "https://github.com/common-workflow-language/cwl-utils/blob/v0.41/cwl_utils/expression.py"
 summary: "What validates in a GalaxyUserTool definition — fields, expression syntax, script placement, package inference — from Galaxy's prompts, authoring help and code."
 ---
@@ -136,11 +137,18 @@ shell_command: python script.py
 
 **The failure mode to check for:** a command that runs a script by name (`python script.py`) with no `configfiles` entry whose `filename` is exactly that name. The file will not exist at runtime. Either add the configfile or inline the script — a half-completed choice is broken, not partial.
 
-## 7. Container, and inferring packages when no image is evidenced
+## 7. Container policy and package-based image resolution
 
-*Target-neutral apart from the `container` field name.*
+Galaxy servers restrict the images UDTs may use. The default allowlist is
+`quay.io/biocontainers/*`. Unless the target server provides evidence of a
+different allowlist, an authored UDT must use an image below that namespace.
+Docker Hub, Wave and other registry images from a source workflow remain
+provenance, not directly usable `container` values.
 
-Prefer a container the source actually evidences. For a tool derived from another workflow engine, the source's own container or conda directive is stronger evidence than anything inferred from a command string — see [[component-nextflow-containers-and-envs]].
+Prefer a pinned `quay.io/biocontainers` image the source already evidences. Confirm
+that it contains every program the command invokes. For any other source image,
+recover pinned Conda package evidence from the process, its `environment.yml`, or
+the commands and imports it uses. See [[component-nextflow-containers-and-envs]].
 
 Where nothing is evidenced, infer the dependencies from the command rather than guessing an image tag. The method:
 
@@ -149,7 +157,28 @@ Where nothing is evidenced, infer the dependencies from the command rather than 
 - Set a version **only** when the command itself pins one (`samtools=1.17`). Otherwise leave it unset — never guess a version, and never invent an image tag or build suffix.
 - Ignore shell builtins and coreutils-level commands (`echo`, `cat`, `cut`, `cd`, `mkdir`, pipes, redirects). If the command is only such builtins, the correct answer is **no packages** — an empty result, not a guess.
 
-Then resolve a `quay.io/biocontainers` image from those packages. Pick an image you are confident exists. **Do not assume anything re-resolves it later:** some Galaxy deployments re-resolve the container against verified biocontainers after generation, but that is off by default, and nothing in a Foundry harness does it at all. Assume the image named is the image that runs. If no suitable image is known, say so rather than guessing.
+Pass the resulting `name` or `name=version` entries to
+`recommend_biocontainer` when that operation is available. One package resolves
+a single-package image and several resolve a mulled-v2 image. Use
+`data.image` only when `match_quality` is `exact_version` and `verified` is not
+false. A `name_only` result substituted a newer built tag, so show that change
+for confirmation before use. If the operation is unavailable, returns no image,
+or reports `verified: false`, do not guess a tag.
+
+A command containing only shell builtins or core utilities still needs a
+container. Use a known allowed general-purpose image such as
+`quay.io/biocontainers/python:3.13`, after confirming it contains the required
+commands.
+
+The image written is the image that runs. Before structural validation, parse
+the reference and check it against the target policy. Under the default, require
+registry `quay.io`, a repository below `biocontainers/`, and a pinned tag or
+digest. A target-specific exception requires positive allowlist evidence. When
+no permitted image is established, stop before emitting the UDT and return an
+unresolved container requirement. Do not submit a probe job or postpone the
+failure until workflow testing. When direct registration returns an HTTP 400
+that lists allowed images, treat that response as target policy evidence and
+revise or stop.
 
 ## 8. Resource requirements
 
@@ -174,5 +203,8 @@ requirements:
 The source prompts assume Galaxy's own agent runtime. Three assumptions do not carry:
 
 - **No output grammar.** Upstream constrains generation with `output_type=UserToolSourceAuthoringView`, so a malformed draft is impossible by construction and the prose only has to nudge. Here the draft is free text and every rule above has to actually hold, checked by explicit validation rather than assumed.
-- **No container re-resolution.** Upstream can hand a draft to a dedicated package-inference step and a deterministic quay.io lookup. Nothing downstream of a cast does that, which is why §7 folds the inference method into authoring instead of deferring it.
+- **Container resolution happens during authoring.** Upstream can hand a draft
+  to a dedicated package-inference step and deterministic quay.io lookup. A
+  Foundry cast must call `recommend_biocontainer` itself when available and
+  must not defer resolution to a later phase.
 - **No `CritiqueReport` apply-loop.** The critique criteria are in [[galaxy-user-tool-critique]]; the structured edit transport they travel on upstream is not reproduced.
