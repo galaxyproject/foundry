@@ -4,6 +4,16 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import YAML from "yaml";
 import { normalizeGitUrl } from "./git-url.js";
+import {
+  EXT_KEYS,
+  effectiveArgs,
+  selectorName,
+  selectorRanks,
+  type EffectiveArg,
+  type RankedArg,
+  type ResolvedArg,
+  type Selector,
+} from "./selector-precedence.js";
 
 interface SampleSheetColumn {
   name: string;
@@ -223,26 +233,6 @@ interface ChannelIO {
   shape: string;
   description?: string;
   topic: string | null;
-}
-
-interface ResolvedArg {
-  /** Names the assignment: config, profile, selector, and key, with `~n` for repeats. */
-  id: string;
-  key: "args" | "args2" | "prefix";
-  expression: string;
-  selector: string;
-  config: string;
-  /** Set when the assignment came from a selected profile. Omitted for the root chain. */
-  profile?: string;
-}
-
-/** The entries of one `key` that take effect for one call, by Nextflow selector priority. */
-interface EffectiveArg {
-  /** Nextflow's fully qualified call name, e.g. `NFCORE_X:X:SUB:FOO_B`. */
-  call: string;
-  key: ResolvedArg["key"];
-  ids: string[];
-  tie?: true;
 }
 
 interface PublishDirMatch {
@@ -1361,11 +1351,7 @@ function selectPrimaryWorkflow(
   for (const processName of processNames) {
     for (const alias of aliases.get(processName) ?? []) knownProcesses.add(alias);
   }
-  const byName = new Map<string, ParsedWorkflow>();
-  for (const workflow of workflows) {
-    byName.set(workflow.name, workflow);
-    for (const alias of workflow.aliases) byName.set(alias, workflow);
-  }
+  const byName = workflowsByCallName(workflows);
   const reach = new Map<string, Set<string>>();
 
   function transitiveReach(name: string, visiting: Set<string>): Set<string> {
@@ -1424,6 +1410,16 @@ function selectPrimaryWorkflow(
   );
   const finalists = terminal.length > 0 ? terminal : candidates;
   return [...finalists].sort(tiebreak)[0] ?? null;
+}
+
+/** Each workflow by its name and its include aliases. */
+function workflowsByCallName(workflows: ParsedWorkflow[]): Map<string, ParsedWorkflow> {
+  const byName = new Map<string, ParsedWorkflow>();
+  for (const workflow of workflows) {
+    byName.set(workflow.name, workflow);
+    for (const alias of workflow.aliases) byName.set(alias, workflow);
+  }
+  return byName;
 }
 
 function stripWorkflowBody(workflow: ParsedWorkflow): Subworkflow {
@@ -2059,11 +2055,7 @@ function buildSubworkflowInvocations(
   workflows: ParsedWorkflow[],
 ): Map<string, SubworkflowInvocation[]> {
   const result = new Map<string, SubworkflowInvocation[]>();
-  const calleesByName = new Map<string, ParsedWorkflow>();
-  for (const workflow of workflows) {
-    calleesByName.set(workflow.name, workflow);
-    for (const alias of workflow.aliases) calleesByName.set(alias, workflow);
-  }
+  const calleesByName = workflowsByCallName(workflows);
   for (const caller of workflows) {
     const mainBlock = extractMainBlock(caller.body);
     for (const invocation of extractCallInvocations(mainBlock)) {
@@ -3143,17 +3135,18 @@ function parseProseAssertions(text: string): string[] {
     .filter((assertion) => !assertion.startsWith("snapshot("));
 }
 
-const EXT_ASSIGNMENTS = [
-  ["args", "ext\\.args(?!\\w)"],
-  ["args2", "ext\\.args2(?!\\w)"],
-  ["prefix", "ext\\.prefix(?!\\w)"],
-] as const;
+const EXT_ASSIGNMENTS = EXT_KEYS.map((key) => [key, `ext\\.${key}(?!\\w)`] as const);
 
-interface ScopedSelector extends SelectorBlock {
+interface ConfigSelector extends SelectorBlock {
   config: string;
   profile: string | null;
   /** 1-based count of this `kind:pattern` within its config and profile. */
   ordinal: number;
+}
+
+interface ScopedSelector extends ConfigSelector {
+  /** A selected profile's selector the root chain never declares. */
+  appended: boolean;
 }
 
 /**
@@ -3174,51 +3167,15 @@ function attachConfigDirectives(
 
   for (const process of summary.processes) {
     const calls = callPaths.get(process.name) ?? [process.name, ...process.aliases];
-    const matched = selectors.filter((selector) =>
-      calls.some((call) => selectorRank(selector.kind, selector.pattern, process, call) !== null),
-    );
-    const publish = matched.flatMap((selector) =>
-      extractAssignments(selector.body, "publishDir").map((expression) =>
-        withProfile(
-          {
-            expression,
-            selector: `${selector.kind}:${selector.pattern}`,
-            config: selector.config,
-          },
-          selector.profile,
-        ),
-      ),
-    );
-    process.publish_dir_matches = publish;
-    if (process.publish_dir === null && publish.length > 0) {
-      process.publish_dir = publish.map((match) => match.expression).join("\n");
+    const directives = configDirectives(process, calls, selectors);
+    process.publish_dir_matches = directives.publish_dir_matches;
+    if (process.publish_dir === null && directives.publish_dir_matches.length > 0) {
+      process.publish_dir = directives.publish_dir_matches
+        .map((match) => match.expression)
+        .join("\n");
     }
-    const assignments = matched.flatMap((selector) => {
-      const name = `${selector.kind}:${selector.pattern}`;
-      return EXT_ASSIGNMENTS.flatMap(([key, pattern]) =>
-        extractAssignments(selector.body, pattern).map((expression, index) => ({
-          selector,
-          arg: withProfile(
-            {
-              id: resolvedArgId(selector, key, index),
-              key,
-              expression,
-              selector: name,
-              config: selector.config,
-            },
-            selector.profile,
-          ),
-        })),
-      );
-    });
-    process.resolved_args = assignments.map((assignment) => assignment.arg);
-    const rootSelectors = new Set(
-      matched.flatMap((selector) =>
-        selector.profile === null ? [`${selector.kind}:${selector.pattern}`] : [],
-      ),
-    );
-    const effective = effectiveArgs(process, assignments, calls, rootSelectors);
-    if (effective.length > 0) process.effective_args = effective;
+    process.resolved_args = directives.resolved_args;
+    if (directives.effective_args.length > 0) process.effective_args = directives.effective_args;
     const template = resolveProcessTemplate(pipelineRoot, process);
     process.template = template.template;
     if (template.warning) summary.warnings.push(template.warning);
@@ -3226,55 +3183,55 @@ function attachConfigDirectives(
   }
 }
 
+/** The `publishDir` and `ext.*` assignments of every selector reaching one of `calls`. */
+function configDirectives(
+  process: Process,
+  calls: string[],
+  selectors: ScopedSelector[],
+): {
+  publish_dir_matches: PublishDirMatch[];
+  resolved_args: ResolvedArg[];
+  effective_args: EffectiveArg[];
+} {
+  const matched = selectors.flatMap((selector) => {
+    const ranks = selectorRanks(selector, process, calls);
+    return ranks.size > 0 ? [{ selector, ranks, name: selectorName(selector) }] : [];
+  });
+  const publish_dir_matches = matched.flatMap(({ selector, name }) =>
+    extractAssignments(selector.body, "publishDir").map((expression) =>
+      withProfile({ expression, selector: name, config: selector.config }, selector.profile),
+    ),
+  );
+  const ranked: RankedArg[] = matched.flatMap(({ selector, ranks, name }) =>
+    EXT_ASSIGNMENTS.flatMap(([key, pattern]) =>
+      extractAssignments(selector.body, pattern).map((expression, index) => ({
+        ranks,
+        appended: selector.appended,
+        arg: withProfile(
+          {
+            id: resolvedArgId(selector, key, index),
+            key,
+            expression,
+            selector: name,
+            config: selector.config,
+          },
+          selector.profile,
+        ),
+      })),
+    ),
+  );
+  return {
+    publish_dir_matches,
+    resolved_args: ranked.map((entry) => entry.arg),
+    effective_args: effectiveArgs(calls, ranked),
+  };
+}
+
 function resolvedArgId(selector: ScopedSelector, key: string, index: number): string {
   const source = selector.profile ? `${selector.config}[${selector.profile}]` : selector.config;
   const ordinal = selector.ordinal > 1 ? `~${selector.ordinal}` : "";
   const repeat = index > 0 ? `~${index + 1}` : "";
-  return `${source}#${selector.kind}:${selector.pattern}${ordinal}/${key}${repeat}`;
-}
-
-/**
- * Per call and `key`, the entries Nextflow applies. A higher selector rank wins,
- * then a selected profile over the root chain (legacy parser order), then the
- * later declaration of the same selector in one config. Entries still level
- * with different expressions are a tie: include order is not modeled.
- * A profile selector the root also declares keeps the root's map position, so it
- * only replaces that selector's root entries.
- */
-function effectiveArgs(
-  process: Process,
-  assignments: { selector: ScopedSelector; arg: ResolvedArg }[],
-  calls: string[],
-  rootSelectors: Set<string>,
-): EffectiveArg[] {
-  return calls.flatMap((call) =>
-    EXT_ASSIGNMENTS.flatMap(([key]) => {
-      const ranked = assignments.flatMap(({ selector, arg }) => {
-        if (arg.key !== key) return [];
-        const rank = selectorRank(selector.kind, selector.pattern, process, call);
-        return rank === null ? [] : [{ arg, rank }];
-      });
-      if (ranked.length === 0) return [];
-      const top = Math.max(...ranked.map((entry) => entry.rank));
-      const topArgs = ranked.filter((entry) => entry.rank === top).map((entry) => entry.arg);
-      const fromProfile = topArgs.filter((arg) => arg.profile !== undefined);
-      const appended = fromProfile.filter((arg) => !rootSelectors.has(arg.selector));
-      const merged = new Set(fromProfile.map((arg) => arg.selector));
-      const candidates =
-        appended.length > 0
-          ? appended
-          : topArgs.filter((arg) => arg.profile !== undefined || !merged.has(arg.selector));
-      const latest = new Map<string, ResolvedArg>();
-      for (const arg of candidates) {
-        latest.set(`${arg.config}\0${arg.profile ?? ""}\0${arg.selector}`, arg);
-      }
-      const level = [...latest.values()];
-      if (new Set(level.map((arg) => arg.expression)).size === 1) {
-        return [{ call, key, ids: [level[0]!.id] }];
-      }
-      return [{ call, key, ids: level.map((arg) => arg.id), tie: true as const }];
-    }),
-  );
+  return `${source}#${selectorName(selector)}${ordinal}/${key}${repeat}`;
 }
 
 /**
@@ -3291,11 +3248,7 @@ function processCallPaths(
   processNames: Set<string>,
   aliasToCanonical: Map<string, string>,
 ): Map<string, string[]> {
-  const byName = new Map<string, ParsedWorkflow>();
-  for (const workflow of workflows) {
-    byName.set(workflow.name, workflow);
-    for (const alias of workflow.aliases) byName.set(alias, workflow);
-  }
+  const byName = workflowsByCallName(workflows);
   const includesByFile = new Map<string, Map<string, string>>();
   const includes = (file: string): Map<string, string> => {
     let bound = includesByFile.get(file);
@@ -3391,10 +3344,10 @@ function enqueueIncludes(
   }
 }
 
-function selectorsIn(text: string, config: string, profile: string | null): ScopedSelector[] {
+function selectorsIn(text: string, config: string, profile: string | null): ConfigSelector[] {
   const counts = new Map<string, number>();
   return parseProcessSelectors(maskNamedBlocks(text, "profiles")).map((selector) => {
-    const name = `${selector.kind}:${selector.pattern}`;
+    const name = selectorName(selector);
     const ordinal = (counts.get(name) ?? 0) + 1;
     counts.set(name, ordinal);
     return { ...selector, config, profile, ordinal };
@@ -3404,14 +3357,15 @@ function selectorsIn(text: string, config: string, profile: string | null): Scop
 /**
  * Root-chain selectors, plus selectors from each selected profile's body and
  * the `includeConfig` files that body reaches. The first declaration of a
- * profile name wins, matching `parseProfiles`.
+ * profile name wins, matching `parseProfiles`. A profile selector the root
+ * chain never declares is `appended` after the root's.
  */
 function collectScopedSelectors(
   pipelineRoot: string,
   selectedProfiles: string[],
 ): ScopedSelector[] {
   const rootConfig = join(pipelineRoot, "nextflow.config");
-  const selectors: ScopedSelector[] = [];
+  const selectors: ConfigSelector[] = [];
   const seen = new Set<string>();
   const queue: { path: string; depth: number; profile: string | null }[] = [];
   if (existsSync(rootConfig)) queue.push({ path: rootConfig, depth: 0, profile: null });
@@ -3478,12 +3432,16 @@ function collectScopedSelectors(
       current.profile,
     );
   }
-  return selectors;
+  const rootNames = new Set(
+    selectors.flatMap((selector) => (selector.profile === null ? [selectorName(selector)] : [])),
+  );
+  return selectors.map((selector) => ({
+    ...selector,
+    appended: selector.profile !== null && !rootNames.has(selectorName(selector)),
+  }));
 }
 
-interface SelectorBlock {
-  kind: "withName" | "withLabel";
-  pattern: string;
+interface SelectorBlock extends Selector {
   body: string;
 }
 
@@ -3538,45 +3496,6 @@ function parseProcessLabels(body: string): string[] {
   return [...body.matchAll(/\blabel\s+(?:(['"])([^'"]+)\1|([A-Za-z_][A-Za-z0-9_]*))/gu)].map(
     (match) => match[2] ?? match[3]!,
   );
-}
-
-/**
- * Rank at which a selector reaches one call path: label 0, then the process name,
- * the alias, and the full path, deduplicated as Nextflow does. Patterns match whole names.
- */
-function selectorRank(
-  kind: "withName" | "withLabel",
-  pattern: string,
-  process: Process,
-  path: string,
-): number | null {
-  if (kind === "withLabel") {
-    const labels = process.labels ?? [];
-    if (!isRegexSelector(pattern)) return labels.includes(pattern) ? 0 : null;
-    const regex = compileSelector(pattern);
-    return regex !== null && labels.some((label) => regex.test(label)) ? 0 : null;
-  }
-  const regex = isRegexSelector(pattern) ? compileSelector(pattern) : undefined;
-  const matches = (candidate: string) =>
-    regex === undefined ? candidate === pattern : regex !== null && regex.test(candidate);
-  const names = unique([process.name, path.split(":").at(-1)!, path]);
-  for (let index = names.length - 1; index >= 0; index--) {
-    if (matches(names[index]!)) return index + 1;
-  }
-  return null;
-}
-
-function isRegexSelector(pattern: string): boolean {
-  return /[.+*?^$()[\]\\|]/u.test(pattern);
-}
-
-function compileSelector(pattern: string): RegExp | null {
-  if (pattern.length > 200) return null;
-  try {
-    return new RegExp(`^(?:${pattern})$`, "u");
-  } catch {
-    return null;
-  }
 }
 
 function extractAssignments(body: string, namePattern: string): string[] {
