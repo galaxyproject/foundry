@@ -3137,6 +3137,8 @@ interface ScopedSelector extends SelectorBlock {
  * includes inside `profiles { }` apply only for a profile named by `--profile`,
  * and those entries carry `profile`. Closure text stays verbatim. A script that
  * is only `template 'file'` also loads that file from the module's `templates/` directory.
+ * An `ext.when` outside `profiles { }` becomes a `workflow.conditionals[]` entry whose
+ * guard is the closure body and whose `affects` are the call names the selector matches.
  */
 function attachConfigDirectives(
   summary: Summary,
@@ -3181,6 +3183,21 @@ function attachConfigDirectives(
         ),
       );
     });
+    // shortcut: `SUB:NAME` and regex/label selectors list bare call names (and a never-called
+    // canonical name for regex/label); upgrade if `Conditional` gains selector provenance.
+    for (const selector of matched.filter((entry) => entry.profile === null)) {
+      const names = [process.name, ...process.aliases].filter((name) =>
+        selectorMatchesProcess(selector.kind, selector.pattern, { ...process, name, aliases: [] }),
+      );
+      for (const expression of extractAssignments(selector.body, "ext\\.when(?!\\w)")) {
+        const guard = expression.replace(/^\{([\s\S]*)\}$/u, "$1").trim();
+        const existing = summary.workflow.conditionals.find(
+          (entry) => entry.guard === guard && entry.branch === "default",
+        );
+        if (existing) existing.affects = unique([...existing.affects, ...names]);
+        else summary.workflow.conditionals.push({ guard, branch: "default", affects: names });
+      }
+    }
     const template = resolveProcessTemplate(pipelineRoot, process);
     process.template = template.template;
     if (template.warning) summary.warnings.push(template.warning);

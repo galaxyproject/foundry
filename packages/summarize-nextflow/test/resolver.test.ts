@@ -77,7 +77,7 @@ interface SummaryLike {
     outputs?: { name: string; shape: string; topic: string | null }[];
     tests: { name: string; path: string }[];
   }[];
-  workflow: { name: string };
+  workflow: { name: string; conditionals: { guard: string; branch: string; affects: string[] }[] };
   test_candidates?: {
     id: string;
     kind: string;
@@ -3164,6 +3164,80 @@ workflow PIPE { FOO(); BAR(); BAZ(); LOW(); QUIET() }
     expect(byName.QUIET?.publish_dir).toBeNull();
     expect(byName.QUIET?.resolved_args).toEqual([]);
     expect(byName.QUIET?.template).toBeNull();
+  });
+
+  test("records ext.when selector gates as workflow conditionals", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/ext-when' }
+includeConfig 'conf/modules.config'
+profiles {
+    test {
+        process {
+            withName: 'S1' {
+                ext.args = '--test'
+                ext.when = false
+            }
+        }
+    }
+}
+`,
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'GATE_A' {
+        ext.when = { !params.no_a }
+    }
+    withName: 'S1' {
+        ext.when = { !params.no_stats }
+    }
+    withName: 'S2' {
+        ext.when = { !params.no_stats }
+    }
+}
+`,
+    );
+    write(root, "modules/gate.nf", "process GATE {\n  script:\n  'gate'\n}\n");
+    write(root, "modules/s1.nf", "process S1 {\n  script:\n  's1'\n}\n");
+    write(root, "modules/s2.nf", "process S2 {\n  script:\n  's2'\n}\n");
+    write(root, "modules/c.nf", "process C {\n  script:\n  'c'\n}\n");
+    write(
+      root,
+      "main.nf",
+      `include { GATE as GATE_A } from './modules/gate'
+include { GATE as GATE_B } from './modules/gate'
+include { S1 } from './modules/s1'
+include { S2 } from './modules/s2'
+include { C } from './modules/c'
+workflow PIPE {
+    GATE_A()
+    GATE_B()
+    S1()
+    S2()
+    if (params.run_c) {
+        C()
+    }
+}
+`,
+    );
+
+    const summary = await summarize(root);
+    const s1 = summary.processes.find((process) => process.name === "S1");
+
+    // The test profile selector is collected (its ext.args shows), but its ext.when is not a gate.
+    expect(s1?.resolved_args).toContainEqual(expect.objectContaining({ profile: "test" }));
+    expect(summary.workflow.conditionals).toHaveLength(3);
+    expect(summary.workflow.conditionals).toEqual(
+      expect.arrayContaining([
+        { guard: "params.run_c", branch: "default", affects: ["C"] },
+        { guard: "!params.no_a", branch: "default", affects: ["GATE_A"] },
+        { guard: "!params.no_stats", branch: "default", affects: ["S1", "S2"] },
+      ]),
+    );
   });
 
   test("ignores process selectors shipped under tests/", async () => {
