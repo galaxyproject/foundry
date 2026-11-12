@@ -46,5 +46,4 @@ gxwf diff --json galaxy-workflow.extracted.gxwf.yml galaxy-workflow.gxwf.yml \
 - Only entries under `entries` count. A decision under `decisions` labels nothing.
 - An entry's `status` doesn't matter. An open drop and a surrendered one both label the step.
 - The check reads the step list only. It says nothing about whether a drop's `because` is cited or still true.
-- `gxwf diff` compares only top-level steps and doesn't compare an inline subworkflow's `run`, so a step removed inside an inline subworkflow doesn't show up at all.
-- A list-form step's identity is its `label`, else its `id`. Adding or changing that label in the AFTER workflow reads as one removed step plus one added step with the same tool and connections, so the check reports the old key unlabelled. Restore the old label rather than recording a drop.
+- It checks only the top-level steps `gxwf diff` lists. A step removed inside an inline subworkflow is not among them.

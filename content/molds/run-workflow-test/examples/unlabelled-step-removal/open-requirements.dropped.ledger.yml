@@ -1,0 +1,17 @@
+entries:
+  - id: multiqc-general-stats-only
+    status: open
+    raised_by: implement-galaxy-tool-step
+    step: aggregate_reports
+    unmet: "per-module MultiQC sections beyond General Statistics"
+    missing: "the source configures no MultiQC modules besides FastQC"
+    note: ""
+  - id: subsample-reads-dropped
+    status: open
+    kind: dropped
+    raised_by: debug-galaxy-workflow-output
+    step: subsample_reads
+    units: "the `Show beginning1` step keeping the first 400,000 lines"
+    because: "Galaxy logged `workflow tool request state: ... validation_failed` for subsample_reads"
+    unmet: "FastQC runs on the first 100,000 reads only"
+    missing: "removed during the test phase"

@@ -6,9 +6,9 @@
     "path": "content/molds/apply-galaxy-workflow-changeset/index.md",
     "revision": 4,
     "content_hash": "f589ff84acc67e2172a57ce26ae44b865786d5d739615309b0085c323c0389f0",
-    "commit": "ef1607a86adda5393d1b8287a421fd5e957f62e9"
+    "commit": "5e1f57a2fe7c9eacb1f918dc40de3dc312db3a99"
   },
-  "cast_at": "2026-11-12T10:09:13.797Z",
+  "cast_at": "2026-11-12T11:43:59.875Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -52,8 +52,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the change-set discharges, and append a blocking entry for an edited region whose output the rewired inputs cannot supply, so an edit-introduced gap is recorded rather than discovered downstream.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "ad97ce1397775b7d28d03ab8dd85dff4c60f5e6ee7ad5ab85287b515094c90ef",
-      "dst_hash": "ad97ce1397775b7d28d03ab8dd85dff4c60f5e6ee7ad5ab85287b515094c90ef",
+      "src_hash": "a8d4c4ce1c89b7598eb3930f70f5a24532a727bed6b84b536217c856a804f801",
+      "dst_hash": "a8d4c4ce1c89b7598eb3930f70f5a24532a727bed6b84b536217c856a804f801",
       "source": "deterministic"
     },
     {

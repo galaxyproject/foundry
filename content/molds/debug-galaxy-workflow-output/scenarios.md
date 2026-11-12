@@ -2,11 +2,11 @@
 
 ## Case: distinguish failure surfaces
 
-- fixture: failed Planemo workflow test with structured output, invocation id,
-  at least one failed or missing output, and access to Galaxy API details.
-- expect: classifies the first failure surface as workflow import rejection,
-  tool/job failure, workflow invocation failure, collection output mismatch,
-  missing workflow output, or assertion mismatch before proposing repairs.
+- fixture: `content/molds/review-galaxy-workflow/examples/planemo-failure/`,
+  whose `workflow-test-result.json` reports an unmet `has_text` assertion on
+  `MultiQC Report` after the job succeeded.
+- expect: classifies the first failure surface as an assertion mismatch, not a
+  tool/job failure, before proposing any repair.
 
 ## Case: job failure reference capture
 

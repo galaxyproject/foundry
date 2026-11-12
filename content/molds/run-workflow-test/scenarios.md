@@ -1,10 +1,5 @@
 # run-workflow-test scenarios
 
-Fixtures are the committed review fixtures under
-`content/molds/review-galaxy-workflow/examples/`. Each ships the
-`workflow-test-result.json` this Mold is expected to produce, so a run is
-checked against a real artifact rather than a description of one.
-
 ## Case: passing test preserves the Galaxy handles a debug Mold needs
 
 - fixture: `content/molds/review-galaxy-workflow/examples/clean-passing/`
@@ -46,9 +41,9 @@ checked against a real artifact rather than a description of one.
 
 ## Case: a step removed in the test phase without a drop entry fails a green run
 
-- fixture: `examples/unlabelled-step-removal/` (`galaxy-workflow.extracted.gxwf.yml`,
-  `galaxy-workflow.gxwf.yml`, `galaxy-workflow.gxwf-tests.yml`,
-  `open-requirements.ledger.yml`)
+- fixture: `content/molds/run-workflow-test/examples/unlabelled-step-removal/`
+  (`galaxy-workflow.extracted.gxwf.yml`, `galaxy-workflow.gxwf.yml`,
+  `galaxy-workflow.gxwf-tests.yml`, `open-requirements.ledger.yml`)
 - expect: Planemo passes (`planemo_result.failed == 0`), but `status: "fail"`
   with `failure_modality: "unlabelled-step-removal"` and
   `next_reference_surface: "step-removal check"`. `step_removals.unlabelled` is
@@ -56,9 +51,15 @@ checked against a real artifact rather than a description of one.
   `subsample-reads-validation-failed`, is a gap, not a `kind: dropped` entry.
   `artifacts.step_diff_json` names the saved diff. The result matches the
   fixture's `workflow-test-result.json`.
-- variant: add a `kind: dropped` entry with `step: subsample_reads` to the
-  ledger, and the same run is `status: "pass"`, with that entry's id in
-  `step_removals.removed_steps[0].dropped_entries`.
+
+## Case: a drop entry labels the removed step whatever its `because`
+
+- fixture: `content/molds/run-workflow-test/examples/unlabelled-step-removal/` with
+  `open-requirements.dropped.ledger.yml` as the ledger
+- expect: `status: "pass"` with `step_removals.ok: true`, `unlabelled: []`, and
+  `removed_steps[0].dropped_entries: ["subsample-reads-dropped"]`. The entry's
+  `because` cites only the `validation_failed` log line. Judging it is
+  [[debug-galaxy-workflow-output]]'s job, not this check's.
 
 ## Case: no snapshot leaves the status to Planemo
 
@@ -76,9 +77,4 @@ because nothing ran. No case asserts either until a fixture binds them.
 
 No fixture exercises `failure_modality: "workflow-import-rejected"` either.
 
-No fixture exercises `failure_modality: "step-removal-check-error"`. `gxwf diff`
-isn't in a released `@galaxy-tool-util/cli` yet, so every run on the pinned 1.15
-would hit it.
-
-No case covers a step removed inside an inline subworkflow: `gxwf diff` doesn't
-compare inline `run` contents, so the check can't see it.
+No fixture exercises `failure_modality: "step-removal-check-error"`.

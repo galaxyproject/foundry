@@ -5,10 +5,10 @@
     "name": "run-workflow-test",
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 9,
-    "content_hash": "8ba053c5a136ca81d1def528b13206a2c5bfd0010b89f2227d5e488c958e2a8e",
-    "commit": "c48a8ee22702d52b6a07b895d997f318c95afbe4"
+    "content_hash": "273b6127b8977fbcc2bdddfb67741e42333392015ffa904a0a75677a1c86d2af",
+    "commit": "5e1f57a2fe7c9eacb1f918dc40de3dc312db3a99"
   },
-  "cast_at": "2026-11-12T11:14:18.425Z",
+  "cast_at": "2026-11-12T11:44:02.147Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -30,9 +30,9 @@
       "evidence": "hypothesis",
       "purpose": "Deterministically match the steps `gxwf diff` reports removed against the ledger's `kind: dropped` entries.",
       "trigger": "After a green Planemo run, when the extracted-workflow snapshot exists.",
-      "verification": "Promote after a run with a gxwf release that ships `diff` blocks a green result on a removed step that has no drop entry.",
-      "src_hash": "5c73e496e063ddb7a4247d67406703aa77f04cba9d66f1a2f68b6c3730bee12b",
-      "dst_hash": "bf27d48859b7aa86bba25f624575afc4a82f9aa036aee715325c6cbb90cecbbc",
+      "verification": "Promote after a run blocks a green result on a removed step that has no drop entry.",
+      "src_hash": "d361f02a0c324dfafd5156462a450eab47fda56f806f60fa6204b370d804e0af",
+      "dst_hash": "fca39efc3613391f1b9ba16247086533f2f2ec2cdc8ad105cf0ea052945c3395",
       "source": "deterministic"
     },
     {
@@ -91,8 +91,8 @@
       "purpose": "Know what labels a removed step: a `kind: dropped` entry with a top-level `step` and a cited `because`, as opposed to a gap or a per-flag `source_arg` record.",
       "trigger": "When the removed-step check reports an unlabelled step.",
       "verification": "Promote after a test-phase run that removed a step ends red until the drop is recorded, then green.",
-      "src_hash": "ad97ce1397775b7d28d03ab8dd85dff4c60f5e6ee7ad5ab85287b515094c90ef",
-      "dst_hash": "ad97ce1397775b7d28d03ab8dd85dff4c60f5e6ee7ad5ab85287b515094c90ef",
+      "src_hash": "a8d4c4ce1c89b7598eb3930f70f5a24532a727bed6b84b536217c856a804f801",
+      "dst_hash": "a8d4c4ce1c89b7598eb3930f70f5a24532a727bed6b84b536217c856a804f801",
       "source": "deterministic"
     },
     {
