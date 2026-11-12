@@ -6,9 +6,9 @@
     "path": "content/molds/freeform-summary-to-galaxy-data-flow/index.md",
     "revision": 3,
     "content_hash": "22613db4e710f58b29bfd2d6fe1d49f167afe451e09afefb2efd755b4a6e4da1",
-    "commit": "dbca2bc5f97809d449e0bb01cbddd6101e5ef959"
+    "commit": "fada24fd69f40f901fdba574e7f1204ee901d1db"
   },
-  "cast_at": "2026-11-12T03:43:23.705Z",
+  "cast_at": "2026-11-12T07:38:20.163Z",
   "refs": [
     {
       "kind": "pattern",
@@ -111,8 +111,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the narrative leaves open — a described transformation with no named tool, an implied intermediate the source never states, an ordering the prose doesn't fix.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "42c831ee56a2e97a17a854f83e61f8327d3f19a72e551a6e401da227515789f0",
-      "dst_hash": "42c831ee56a2e97a17a854f83e61f8327d3f19a72e551a6e401da227515789f0",
+      "src_hash": "ca811eaac08b4468b9ebf49b8c1da0c8c7eb938ac01c4b0d87eaa7776462cb29",
+      "dst_hash": "ca811eaac08b4468b9ebf49b8c1da0c8c7eb938ac01c4b0d87eaa7776462cb29",
       "source": "deterministic"
     }
   ],

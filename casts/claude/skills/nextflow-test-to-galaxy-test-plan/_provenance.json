@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-test-to-galaxy-test-plan/index.md",
     "revision": 8,
     "content_hash": "fa769216f621ef25470c9fb907df1278635c0a1e022b647b9462ff7b92469291",
-    "commit": "36e85683bcf079ecb80ac56ef69ceb36f78f9fe6"
+    "commit": "fada24fd69f40f901fdba574e7f1204ee901d1db"
   },
-  "cast_at": "2026-11-12T04:10:49.282Z",
+  "cast_at": "2026-11-12T07:38:21.199Z",
   "refs": [
     {
       "kind": "research",
@@ -144,8 +144,8 @@
       "evidence": "corpus-observed",
       "purpose": "Read summarized nf-test profiles, snapshot fixtures, selected test data, params, and expected outputs.",
       "license": "MIT",
-      "src_hash": "a56989c9d9ba530e1113fe1a28e81378fb4ec19b6b7893f48797c746e0bbd65b",
-      "dst_hash": "a56989c9d9ba530e1113fe1a28e81378fb4ec19b6b7893f48797c746e0bbd65b",
+      "src_hash": "c89c76555021ccba6710e43af8b466b0edc503263ad7ca4436e6d2320a20279b",
+      "dst_hash": "c89c76555021ccba6710e43af8b466b0edc503263ad7ca4436e6d2320a20279b",
       "source": "deterministic"
     },
     {

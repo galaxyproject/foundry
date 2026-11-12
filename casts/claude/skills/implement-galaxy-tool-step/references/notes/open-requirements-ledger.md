@@ -180,7 +180,7 @@ entries:
 - Entries marked `tie: true` with the same `key` are tied: the summary can't tell which one Nextflow reads last. A flag every tied entry sets the same way is recorded as usual. Any other flag of a tied entry is an open gap (no `kind`), whose `missing` names the other tied entries' `id`s, and it stays out of `state`.
 - Each flag an effective entry can set has exactly one record. Flags with the same disposition can share a record and are listed together in `flags`. Read a closure as written, never evaluate it. List every flag it can set, and in `rationale` or `because`, name the `params` or `meta` field each conditional flag depends on.
 - A record names its step inside `source_arg`, never in a top-level `step`, so a dropped or tied flag never reads as a dropped step or a step gap.
-- `source_arg.arg` is the summary entry's `id`. Join records to the summary on `source_arg.step` and `source_arg.arg`, not on the record's own `id`.
+- `source_arg.arg` is the summary entry's `id`. Join records to the summary on `source_arg.step` and `source_arg.arg`, not on the record's own `id`. While the step keeps a `_plan_state`, its `calls` names the summary call paths the step translates.
 
 ## How to use the ledger
 
