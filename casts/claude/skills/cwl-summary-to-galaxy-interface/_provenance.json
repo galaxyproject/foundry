@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-interface/index.md",
     "revision": 3,
     "content_hash": "9e6b0aaea5d1662a0515cd932352e418d1539da95ed81b4e8193ce0c98d48640",
-    "commit": "fc28186c50a9f2e9d491d877befd6acc5f48755a"
+    "commit": "198340b39b664787b37d9898df7d4af7489f9d80"
   },
-  "cast_at": "2026-11-12T14:32:36.926Z",
+  "cast_at": "2026-11-12T14:53:18.521Z",
   "refs": [
     {
       "kind": "research",
@@ -118,8 +118,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's input, output, and label decisions settle, and append interface obligations the CWL summary leaves open — an unmapped secondaryFiles bundle, an unpinned parameter default, a collection shape the source types don't determine.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "751de34971e8c3248ff856dca01a53339aa7e58548a416bc5dd5366e2f62878f",
-      "dst_hash": "751de34971e8c3248ff856dca01a53339aa7e58548a416bc5dd5366e2f62878f",
+      "src_hash": "fda02227598a214c680bce07d0be3f7fe1b238df384c2d9d5df8159eccdfa7b8",
+      "dst_hash": "fda02227598a214c680bce07d0be3f7fe1b238df384c2d9d5df8159eccdfa7b8",
       "source": "deterministic"
     },
     {

@@ -217,11 +217,11 @@ entries:
 ```
 
 - A branch control is a summary value that selects which analyses run: a `params` entry such as `step`, `aligner` or `tools`, a profile such as `mutect`, or a `workflow.conditionals[]` guard.
-- `control` is `params.<name>` or `profile`. `from` names where the summary holds the value: `<array>[<name or id>]` with an optional field, as in `params[aligner].enum`, `params[concatenate_vcfs]` for a boolean set `true`, `profiles[mutect]`, `test_candidates[<id>].params_delta` or `workflow.conditionals[<a name in affects>]`. When a control has no `enum`, as with sarek's `tools`, cite a test candidate whose `id` names the value, such as `test_candidates[tests/variant_calling_mutect2.nf.test::dynamically-generated]`, with no field. That citation rests on the name alone: the candidate's `params_delta` may not show the value, as with sarek's generated candidates, which all inherit `test`'s. A free-text control with no such value, such as sarek's `umi_read_structure`, goes in `because` instead.
+- `control` is `params.<name>` or `profile`. `from` names where the summary holds the value: `<array>[<name or id>]` with an optional field, as in `params[aligner].enum`, `params[concatenate_vcfs]` for a boolean set `true`, `profiles[mutect]`, `test_candidates[<id>].params_delta` or `workflow.conditionals[<a name in affects>]`. When a control has no `enum`, cite a test candidate whose `id` names the value, such as `test_candidates[tests/variant_calling_mutect2.nf.test::dynamically-generated]`, with no field. A free-text control with no such value, such as sarek's `umi_read_structure`, goes in `because` instead.
 - Record one drop per branch family (somatic calling, alternative aligners, annotation), not per process. Pipeline plumbing such as initialisation and CSV writing is not a branch.
 - `units` names the summary's own subworkflows and processes, backticked, so a reader can join them to the summary.
 - `because` names the scope decision and says what puts the branch outside it.
-- A scope drop names no top-level `step` and has no `source_arg`. An excluded branch never became a step, so the [[run-workflow-test]] step-removal check never reads it, and `scope_branch` tells it apart from a flag record.
+- A scope drop has no top-level `step` and no `source_arg`.
 
 Later Molds work inside the scope. They design no step, `when:` arm or fan-in for an excluded branch and carry its drop through `open`.
 

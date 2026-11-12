@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-data-flow/index.md",
     "revision": 3,
     "content_hash": "ed3f1d14cab3958ec321bcc108dd6274bec965cd502763ce0d5abd060a90f28b",
-    "commit": "fc28186c50a9f2e9d491d877befd6acc5f48755a"
+    "commit": "198340b39b664787b37d9898df7d4af7489f9d80"
   },
-  "cast_at": "2026-11-12T14:32:36.868Z",
+  "cast_at": "2026-11-12T14:53:18.452Z",
   "refs": [
     {
       "kind": "pattern",
@@ -177,8 +177,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones this brief's wiring and collection decisions settle, and append data-flow obligations the CWL summary can't settle — a scatter shape Galaxy can't express directly, an expression-derived value with no Galaxy equivalent, a `linkMerge`/`pickValue` fan-in with no settled Galaxy form.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "751de34971e8c3248ff856dca01a53339aa7e58548a416bc5dd5366e2f62878f",
-      "dst_hash": "751de34971e8c3248ff856dca01a53339aa7e58548a416bc5dd5366e2f62878f",
+      "src_hash": "fda02227598a214c680bce07d0be3f7fe1b238df384c2d9d5df8159eccdfa7b8",
+      "dst_hash": "fda02227598a214c680bce07d0be3f7fe1b238df384c2d9d5df8159eccdfa7b8",
       "source": "deterministic"
     },
     {

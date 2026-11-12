@@ -56,12 +56,12 @@ The output is not a gxformat2 skeleton and not a workflow schema. It is a design
 
 Decide which source branch the workflow carries before choosing inputs, using the branch controls the Source scope section of open-requirements-ledger defines. A pipeline whose branches all fit one workflow needs no scope decision.
 
-- Honour a scope the caller supplied. Otherwise follow the candidate `test_selection` selects: its `params_delta` and `effective_profiles` name the branch the source's own test runs, and parameter defaults fill the rest. When `test_selection.status` is `needs-scope-choice`, pick the candidate whose `params_delta` changes the fewest branch controls from their defaults, from the primary candidates when there are any. Break a tie by preferring `default.nf.test` or `main.nf.test`, then a case not named as a stub, then the first listed. Mark the decision `confidence: low` and carry on.
+- Honour a scope the caller supplied. Otherwise follow the candidate `test_selection` selects: its `params_delta` and `effective_profiles` name the branch the source's own test runs, and parameter defaults fill the rest. When `test_selection.status` is `needs-scope-choice`, pick the candidate whose `params_delta` changes the fewest branch controls from their defaults, from the primary candidates when there are any. Break a tie by preferring `default.nf.test` or `main.nf.test`, then the first listed. Mark the decision `confidence: low` and carry on.
 - Record the choice as a scope decision and each excluded branch family as an open scope drop in the ledger, in the shape that section gives.
-- In the brief, state the selected scope and its candidate `id`, and list the excluded branches by their drop `id`s. The test skills read the candidate from there.
+- In the brief, state the selected scope and its candidate `id`, and list the excluded branches by their drop `id`s.
 - A control the scope fixes is not a workflow input. A control left open inside the scope, such as a QC toggle, is one.
 
-The direct Nextflow-to-Galaxy pipeline runs without a human gate, so never stop to ask which branch to build. A caller who wants to choose the scope supplies it, or goes through nextflow-summary-to-workflow-brief for an expert-reviewed brief.
+Never stop to ask which branch to build.
 
 ## Feedback Mode
 
