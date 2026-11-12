@@ -7,7 +7,7 @@ import { buildSummary } from "@galaxy-foundry/summarize-nextflow";
 import { InputShapeError } from "../src/ledger.js";
 import { assembleNextflowParity, type NextflowParityInputs } from "../src/nextflow-parity.js";
 
-// A bamtofastq-shaped run: the diff is `gxwf diff --json` (galaxy-tool-util-ts #233 at a5c6cd57)
+// A bamtofastq-shaped run: the diff is `gxwf diff --json` (galaxy-tool-util-ts #233 at 4d086efa)
 // of the snapshot against the final workflow, and the summary is built from `pipeline/`.
 const dir = resolve(__dirname, "fixtures/nextflow-parity/bamtofastq");
 const read = (name: string) => readFileSync(resolve(dir, name), "utf8");
