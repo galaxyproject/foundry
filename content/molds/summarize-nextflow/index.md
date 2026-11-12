@@ -7,8 +7,8 @@ tags:
   - source/nextflow
 status: reviewed
 created: 2026-04-30
-revised: 2026-11-10
-revision: 20
+revised: 2026-11-12
+revision: 21
 output_artifacts:
   - id: summary-nextflow
     kind: json
@@ -182,9 +182,16 @@ A single JSON document conforming to [[summary-nextflow]] (`packages/summarize-n
           "config": "modules/nf-core/minimap2/align/nextflow.config" }
       ],
       "resolved_args": [
-        { "key": "args", "expression": "'-x sr'",
+        { "id": "modules/nf-core/minimap2/align/nextflow.config#withName:MINIMAP2_ALIGN/args",
+          "key": "args", "expression": "'-x sr'",
           "selector": "withName:MINIMAP2_ALIGN",
           "config": "modules/nf-core/minimap2/align/nextflow.config" }
+      ],
+      "effective_args": [                                     // one row per call path and key
+        { "call": "NFCORE_RNASEQ:RNASEQ:MINIMAP2_CONSENSUS", "key": "args",
+          "ids": ["modules/nf-core/minimap2/align/nextflow.config#withName:MINIMAP2_ALIGN/args"] },
+        { "call": "NFCORE_RNASEQ:RNASEQ:MINIMAP2_POLISH", "key": "args",
+          "ids": ["modules/nf-core/minimap2/align/nextflow.config#withName:MINIMAP2_ALIGN/args"] }
       ],
       "template": null }
   ],
@@ -326,7 +333,9 @@ This step does not reshape onto any target idiom (Galaxy `sample_sheet:paired` v
 
 For each `process <NAME> { ... }` in `main.nf`, `workflows/`, `modules/**`, `subworkflows/**`:
 - Pull `container`, `conda`, `publishDir`, `when:` directives **verbatim** into `processes[].container` / `processes[].conda`. Modern nf-core directives are ternary expressions (`workflow.containerEngine == 'singularity' ? <sing-uri> : <docker-uri>`) and file references (`${moduleDir}/environment.yml`); keep the directive text intact and resolve into `tools[]` separately (§5). An in-body `publishDir` is kept in `processes[].publish_dir`.
-- Follow the root `includeConfig` chain into workflow configs, per-module `nextflow.config` files, and `conf/modules/`. Skip `tests/` and `.github/`. Leave `includeConfig` statements and `withName:` / `withLabel:` selectors that sit inside a `profiles { }` block out of that walk. When `--profile` names a profile, follow only that profile's includes and selectors, and set `profile` on the `publish_dir_matches` and `resolved_args` entries they produce. Match selectors, including regular expressions and subworkflow-qualified names, against the process name, its aliases, and its labels. Record each matched `publishDir` in `publish_dir_matches` and, when the process body has none, in `publish_dir`. Record `ext.args`, `ext.args2`, and `ext.prefix` in `resolved_args` with the selector and the config path. Keep closure text verbatim so a downstream Mold can see which `params` and `meta` fields it reads.
+- Follow the root `includeConfig` chain into workflow configs, per-module `nextflow.config` files, and `conf/modules/`. Skip `tests/` and `.github/`. Leave `includeConfig` statements and `withName:` / `withLabel:` selectors that sit inside a `profiles { }` block out of that walk. When `--profile` names a profile, follow only that profile's includes and selectors, and set `profile` on the `publish_dir_matches` and `resolved_args` entries they produce. Match selectors against the process's labels and, for each of its calls, the process name, the alias, and the call path below. A pattern, regular expression or not, must match a whole name. Record each matched `publishDir` in `publish_dir_matches` and, when the process body has none, in `publish_dir`. Record `ext.args`, `ext.args2`, and `ext.prefix` in `resolved_args` with the selector, the config path, and an `id` naming the assignment. Keep closure text verbatim so a downstream Mold can see which `params` and `meta` fields it reads.
+- Trace each process call's path, Nextflow's fully qualified name for it (`task.process` at run time): the names each workflow is called by, from the entry workflow down, joined by `:`, ending in the name the call uses, e.g. `NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_MAP_MAP`. An aliased subworkflow contributes its alias. Resolve each call name through the calling file's own `include`s, since two files can bind one alias to different processes. The anonymous `workflow { }` in the entrypoint adds no segment. Without one, each named workflow no other workflow calls starts a path, as under `-entry`. A process no traced workflow calls gets its bare name and aliases.
+- Rank `resolved_args` per call path into `effective_args`, so no consumer re-derives Nextflow's selector priority. For each call path and `key`, the highest-ranked entries whose selector reaches the call take effect: `withLabel` < `withName` on the process name < `withName` on the alias < `withName` on the whole call path. `.*:NAME` reaches no aliased call, and a selector naming another alias never reaches the call. One call name used from two subworkflows gets a row per path. At the same rank a selected profile's entry beats the root chain's, except that a profile selector the root chain also declares replaces only that selector's root entries. Among entries still level after that, the later declaration of the same selector in one config wins. List entries still level with different expressions with `tie: true`, including a declaration's assignments to one key in different branches of an `if`. [[summary-nextflow]] gives the full contract.
 - Tokenize the `input:` and `output:` blocks for declared channel names and shapes — typed channels (`tuple val(meta), path(reads)`) become shape strings (`"tuple(meta, [path])"`); arity is preserved as a string, not structured.
 - Sweep live `include { ... }` statements across the pipeline (`main.nf`, `workflows/`, `subworkflows/**`) to populate both `processes[].aliases` and `subworkflows[].aliases`. `include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS }` adds `MINIMAP2_CONSENSUS` to the canonical process; the same rule maps aliased subworkflow calls back to their canonical declaration. Calls and edges retain the alias spelling used by the source. Ignore includes inside line or block comments.
 - Detect `topic: <name>` annotations on outputs (Nextflow 24+ channel topics — nf-core templates emit `tuple(val("${task.process}"), val('toolname'), eval(...)) topic: versions` for version aggregation). Record the topic name in `ChannelIO.topic`.
@@ -422,6 +431,8 @@ The procedure assumes — and the cast skill must surface in `warnings[]` when r
 - **Channel shapes are strings, not structured types.** `"tuple(meta, [path,path])"` is enough for downstream Molds to reason about; structured channel typing is a research project. Downstream Molds that need structure must parse the string.
 - **Operator chains are summarized, not executed.** The LLM reconciliation pass is best-effort. Workflows with deeply nested closures (`map { ... }` with substantial Groovy logic) may produce edges flagged with low confidence in `notes`.
 - **`include` aliasing is followed one level.** `include { FASTP as TRIM_PROC } from '...'` resolves to `FASTP` in `processes[].name` and the alias is recorded in the call graph. Multi-level aliasing chains are not chased.
+- **Profiles follow the legacy config parser's order.** It merges a selected profile after the file, so the profile wins at equal rank. Under the strict parser, the default since Nextflow 26.04, a profile applies where `profiles { }` sits, and nf-core's trailing `includeConfig 'conf/modules.config'` can win instead.
+- **Config control flow isn't evaluated.** Assignments to one key in different branches of a selector block tie. A selector inside a top-level `if` counts as always declared.
 - **Test-fixture fetching is bounded.** Without explicit fixture fetching, record URL, role, filetype, and expected SHA-1 if present; do not download content for validation. When fixture fetching is requested, fetch only selected-profile URL params and direct remote URLs discovered in fetched samplesheets. Do not recursively crawl archives or arbitrary generated paths.
 
 ## Reference dispatch

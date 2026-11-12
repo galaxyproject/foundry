@@ -33,6 +33,23 @@ the oracle here is applied to whatever a scenario produces.
   context, expected input/output shape, and the likely downstream owner. It
   should be enough for later tool-discovery or per-step implementation to start.
 
+## Property: source arguments reach `_plan_state` unchanged
+
+- bucket: handoff
+- check: deterministic + llm-judged
+- assertion: every non-Resolved tool step whose call has an `effective_args`
+  row in `summary-nextflow.json` has a `_plan_state` that parses as a YAML
+  mapping with `calls`, `resolved_args`, and `intent`. Its `calls` names the
+  `call` path of each call the step translates. Its `resolved_args` lists
+  exactly the entries those paths' rows name: each `id`, `key`, `expression`,
+  `selector`, `config`, and any `profile` equals the summary entry with that
+  `id`, and entries of a `tie` row carry `tie: true`. An entry no row names for
+  the call is absent, such as one a higher-ranked selector overrides, one for a
+  different alias, or one for the same call name in another subworkflow. A
+  step whose call has no row keeps a plain-text `_plan_state`. A Resolved step
+  with rows instead has a disposition for every flag in the re-emitted ledger.
+  A paraphrase of the flags in place of the entries is a failure.
+
 ## Property: collection inputs use gxformat2-compatible structure
 
 - bucket: schema

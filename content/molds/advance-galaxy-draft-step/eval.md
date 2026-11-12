@@ -80,6 +80,17 @@ Properties are tagged by bucket:
   Hallucination guardrail: a fabricated `tool_id` or an invented output port
   that doesn't match the resolved wrapper's summary is a failure, not a pass.
 
+## Property: no source argument leaves the loop without a disposition
+
+- bucket: implementation
+- check: deterministic + llm-judged
+- assertion: when the chosen step's `_plan_state` carried `resolved_args`
+  before implementation, the ledger holds, by the time validation runs, a
+  record for each flag of every entry `_plan_state` listed. Each such record's
+  `source_arg` names that step and the entry's `id`, per the ledger's
+  **Source arguments** rules.
+  Implementation stripping `_plan_state` does not excuse a missing record.
+
 ## Property: the implemented loop round-trips to the oracle
 
 - bucket: implementation
@@ -106,6 +117,16 @@ Properties are tagged by bucket:
   removes it, it leaves `gxwf draft-next-step` reporting `draft: false` and writes
   `galaxy-workflow.gxwf.yml` (`class: GalaxyWorkflow`, no `_plan_*`) before
   returning, without a further invocation.
+
+## Property: the snapshots are written once and never edited
+
+- bucket: extract
+- check: deterministic
+- assertion: after the first invocation, `galaxy-workflow-draft.snapshot.gxwf.yml`
+  is byte-identical to the draft that invocation received, `_plan_*` fields
+  included. After the first extract, `galaxy-workflow.extracted.gxwf.yml` is
+  byte-identical to the `galaxy-workflow.gxwf.yml` it wrote. Later invocations,
+  repairs and extracts leave both files unchanged.
 
 ## Property: only a miss falls through to authoring
 

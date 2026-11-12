@@ -2,6 +2,10 @@ import {
   runCheckWorkflowBrief,
   type WorkflowBriefCheckOptions,
 } from "./commands/check-workflow-brief.js";
+import {
+  runCheckStepRemovals,
+  type StepRemovalsCheckOptions,
+} from "./commands/check-step-removals.js";
 import { runValidateMarkdown } from "./commands/validate-markdown.js";
 import { runValidateWorkflowBrief } from "./commands/validate-workflow-brief.js";
 import { Command } from "commander";
@@ -127,6 +131,18 @@ export function buildProgram(): Command {
     .option("--json", "Emit machine-readable structure and blocker diagnostics", false)
     .action((path: string, options: WorkflowBriefCheckOptions) =>
       runCheckWorkflowBrief(path, options),
+    );
+
+  program
+    .command("check-step-removals")
+    .description(
+      "Check that every step a gxwf diff reports removed has a kind: dropped ledger entry naming it and giving a reason.",
+    )
+    .argument("<diff.json>", "gxwf diff --json output, or - for stdin")
+    .argument("<ledger.yml>", "Open-requirements ledger")
+    .option("--json", "Emit the removed steps, their ledger entries and unwired inputs", false)
+    .action((diffPath: string, ledgerPath: string, options: StepRemovalsCheckOptions) =>
+      runCheckStepRemovals(diffPath, ledgerPath, options),
     );
 
   attachSchemaPin(

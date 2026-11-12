@@ -5,14 +5,17 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-06-16
-revised: 2026-11-10
-revision: 7
+revised: 2026-11-12
+revision: 9
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
   - "[[advance-galaxy-draft-step]]"
   - "[[repair-galaxy-draft-topology]]"
   - "[[implement-galaxy-tool-step]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
+  - "[[run-workflow-test]]"
+  - "[[debug-galaxy-workflow-output]]"
 summary: "Carried workflow-run knowledge artifact for obligations, discoveries, decisions, brief-change recommendations, and convergence state."
 ---
 
@@ -141,6 +144,46 @@ decisions:
 - A Mold that finds an accepted proposal wrong, including the first design Mold while recording it, records a brief-change recommendation, because the expert accepted that answer. It keeps using the accepted answer. If correctness depends on the change, stop as described above.
 - A later Mold that finds an `agent` decision wrong records its own decision. That decision repeats `open_question` and sets `supersedes` to the earlier decision's `id`. The earlier decision stays as history, unlike a superseded obligation entry, which reopens. The current answer to a question is the decision that no other decision supersedes.
 
+## Source arguments
+
+nf-core sets tool arguments outside the process body as `ext.args`, `ext.args2`, and `ext.prefix`. [[summarize-nextflow]] records them per process in `resolved_args` and names the entries that apply to each call in `effective_args`. [[nextflow-summary-to-galaxy-template]] copies a step's effective entries into its `_plan_state` ([[galaxy-workflow-draft-format]]). No rule maps a flag onto a wrapper's parameters, so the Mold that binds `state` records one disposition per flag: [[implement-galaxy-tool-step]], or the template for a step it resolves itself. A disposition is a `carried` or `not_applicable` decision, a `kind: dropped` entry, or, for a tied flag, an open gap, as the rules below describe.
+
+Each record carries a `source_arg` naming the entry it covers:
+
+```yaml
+decisions:
+  - id: arg-view-map-map-args
+    decided_by: implement-galaxy-tool-step
+    source_arg:
+      step: view_map_map               # draft step that translates the call
+      arg: conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/args  # the entry's id
+      flags: ["-b", "-f1", "-F12"]     # omit for an ext.prefix
+    disposition: carried               # carried | not_applicable
+    decision: "BAM output, require flag 1, exclude flags 4 and 8, all set in `state`."
+    rationale: "The wrapper exposes output format and both flag filters."
+entries:
+  - id: arg-collate-map-args
+    status: open
+    kind: dropped
+    raised_by: implement-galaxy-tool-step
+    source_arg:
+      step: collate_map
+      arg: conf/modules.config#withName:COLLATE_FASTQ_MAP/args
+      flags: ["-f", "-r"]
+    units: "`-f -r <reads_in_memory>` from `ext.args`, set when `params.samtools_collate_fast`"
+    because: "`parsed_tool` for <wrapper> <version> has no fast-mode input: <its inputs, quoted>"
+    unmet: "fast collation mode"
+    missing: "no wrapper parameter sets it"
+```
+
+- A flag is one option token with any value attached to it (`-f1`, `-hb`). A value passed as the next token (`-r <reads_in_memory>`) belongs to its option, and the record's text names it. A whole `ext.prefix` is one flag, and its record omits `flags`.
+- A flag carried into `state` is a decision with `disposition: carried`, and `decision` says where it landed. A flag with no Galaxy counterpart is a decision with `disposition: not_applicable`, and `rationale` names what makes it inapplicable. An `ext.prefix` that only names output files is the usual case. Name those outputs.
+- A flag the step drops is a `kind: dropped` entry. Its `units` names the flag, and its `because` cites the tool summary's missing option. It stays `open`, like any drop.
+- Entries marked `tie: true` with the same `key` are tied: the summary can't tell which one Nextflow reads last. A flag every tied entry sets the same way is recorded as usual. Any other flag of a tied entry is an open gap (no `kind`), whose `missing` names the other tied entries' `id`s, and it stays out of `state`.
+- Each flag an effective entry can set has exactly one record. Flags with the same disposition can share a record and are listed together in `flags`. Read a closure as written, never evaluate it. List every flag it can set, and in `rationale` or `because`, name the `params` or `meta` field each conditional flag depends on.
+- A record names its step inside `source_arg`, never in a top-level `step`.
+- `source_arg.arg` is the summary entry's `id`. Join records to the summary on `source_arg.step` and `source_arg.arg`, not on the record's own `id`. While the step keeps a `_plan_state`, its `calls` names the summary call paths the step translates.
+
 ## How to use the ledger
 
 This section is the runtime protocol for every Mold that carries the ledger. A Mold's own page states only what is local to it — what raises an entry there, and what it does when it reads one; the mechanics are here.
@@ -151,7 +194,7 @@ This section is the runtime protocol for every Mold that carries the ledger. A M
 
 **Preserve every collection.** Carry obligation entries, discoveries, decisions, brief-change recommendations, and run-level headers untouched unless this Mold is explicitly adding to or updating the relevant collection. Never reinterpret one category as another merely to close it.
 
-**Append what you newly surface.** Each new obligation gets a stable kebab-case `id`, `status: open`, `raised_by` set to your own Mold name, and enough in `unmet` / `missing` for a later Mold to act without re-reading the source. Attach it to a draft step via `step` where one applies. Set `blocking: true` only when the settled draft can't give a correct run and a structural edit closes it.
+**Append what you newly surface.** Each new obligation gets a stable kebab-case `id`, `status: open`, `raised_by` set to your own Mold name, and enough in `unmet` / `missing` for a later Mold to act without re-reading the source. Attach it to a draft step via `step` where one applies, except for a flag record, which names its step in `source_arg` (see **Source arguments**). Set `blocking: true` only when the settled draft can't give a correct run and a structural edit closes it.
 
 **Mark resolved what you close.** When a decision you make discharges an open entry, set `status: resolved`, `resolved_by` to your own Mold name, and `note` to how it closed. Resolving is not deleting — a resolved entry stays in the ledger as the audit trail.
 
@@ -166,6 +209,12 @@ prose in a brief is invisible to every later Mold; a cut recorded as a `gap` rea
 something the pipeline could not do rather than something it chose not to do. Recording
 the drop is not the same as discharging it, and a well-written entry is not a substitute
 for the work — an entry makes a cut *legible*, never *justified*.
+
+A drop that removes a workflow step names it in the entry's top-level `step`, including
+a step taken out in the test phase to make the test pass. [[run-workflow-test]] fails a
+green run while a step removed since extraction has no such entry. Name a step inside an
+inline subworkflow by its path, its parent step's key and its own joined by `/`
+(`nested/first`), as `gxwf diff` keys it.
 
 **A refuted justification reopens its decision.** When work you do contradicts the
 `because` another entry rests on — discovery finds the wrapper a drop assumed absent, a

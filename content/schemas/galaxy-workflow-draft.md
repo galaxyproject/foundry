@@ -46,7 +46,7 @@ This page is auto-rendered from `@galaxy-tool-util/schema`'s `galaxyWorkflowDraf
 The draft is **gxformat2 with two relaxations** scoped to tool steps:
 
 - **`TODO_*` sentinels** are accepted anywhere a wrapper-tier identifier would normally go (`tool_id`, port names in `in:` / `out:` / `outputSource`, source references). The sentinel form `^TODO([_-][A-Za-z0-9_]+)?$` is enforced; `TODONE` and `TODOLIST` are not sentinels.
-- **`_plan_*` planning fields** (`_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`) carry free-text intent on drafty tool steps, populated by template Molds and consumed by per-step implementation Molds. Fully-resolved tool steps must not carry `_plan_*` — that's a `semanticError` from [[draft-validate]].
+- **`_plan_*` planning fields** (`_plan_state`, `_plan_context`, `_plan_in`, `_plan_out`) carry intent as strings on drafty tool steps, usually free text ([[galaxy-workflow-draft-format]] describes the structured source arguments a `_plan_state` can hold), populated by template Molds and consumed by per-step implementation Molds. Fully-resolved tool steps must not carry `_plan_*` — that's a `semanticError` from [[draft-validate]].
 
 Topology (workflow inputs, outputs, step set, producer→consumer edges, branches, `when:` guards) is **fully concrete** in a valid draft — the relaxations live at wrapper-tier only. See [[galaxy-workflow-draft-format]] for the design rationale and [[galaxy-data-flow-draft-contract]] for the data-flow invariants the template Mold must establish before handing off.
 

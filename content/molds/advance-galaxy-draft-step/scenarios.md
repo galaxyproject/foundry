@@ -96,3 +96,25 @@ the round-trip oracle. See that directory's `README.md`.
   and `open-requirements.ledger.yml` beside it.
 - expect: the call that picks `M19_dupradar`, once `M18_markdup` is realized, goes
   straight to [[repair-galaxy-draft-topology]] with no new search.
+
+## Case: a realized step's source arguments all have a record
+
+- fixture: a draft whose picked step translates nf-core/bamtofastq's
+  `COLLATE_FASTQ_MAP` and carries `_plan_state.resolved_args` for `args`,
+  `args2`, and `prefix` from `conf/modules.config`.
+- expect: before [[draft-validate]] runs, the ledger covers each of `args`'s
+  `-f` and `-r` (both set only when `params.samtools_collate_fast`),
+  `args2`'s `-N`, and the `prefix` exactly once, in records naming the step in
+  `source_arg`. A call that implements the step without them goes back to
+  implementation.
+
+## Case: the first call snapshots the draft, the first extract the workflow
+
+- fixture: `examples/brew3r-1step-degraded/draft.gxwf.yml`, with no snapshot
+  files beside it.
+- expect: the call that implements `merge assembled transcripts` first writes
+  `galaxy-workflow-draft.snapshot.gxwf.yml` byte-identical to `draft.gxwf.yml`,
+  with all four of that step's `_plan_*` fields. That call leaves no drafty step,
+  so it extracts, and `galaxy-workflow.extracted.gxwf.yml` is byte-identical to
+  the `galaxy-workflow.gxwf.yml` it writes. A second extract over an edited
+  workflow leaves both snapshots unchanged.

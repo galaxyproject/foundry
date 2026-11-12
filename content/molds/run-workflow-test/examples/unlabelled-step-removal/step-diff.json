@@ -1,0 +1,76 @@
+{
+  "before_is_draft": false,
+  "after_is_draft": false,
+  "inputs": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  },
+  "outputs": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  },
+  "steps": {
+    "added": {},
+    "removed": {
+      "subsample_reads": {
+        "label": null,
+        "id": "subsample_reads",
+        "type": "tool",
+        "tool_id": "Show beginning1",
+        "tool_version": "1.0.2",
+        "plan_fields": {},
+        "upstream": [
+          "Sequencing Reads"
+        ],
+        "downstream": [
+          "quality_control"
+        ],
+        "workflow_outputs": [],
+        "connections": [
+          "Sequencing Reads -> subsample_reads/input",
+          "subsample_reads/out_file1 -> quality_control/input_file"
+        ]
+      }
+    },
+    "changed": {
+      "quality_control": {
+        "label": null,
+        "fields": {},
+        "state": {},
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [
+            "Sequencing Reads -> quality_control/input_file"
+          ],
+          "removed": [
+            "subsample_reads/out_file1 -> quality_control/input_file"
+          ]
+        },
+        "connections_out": {
+          "added": [],
+          "removed": []
+        },
+        "upstream": {
+          "added": [
+            "Sequencing Reads"
+          ],
+          "removed": [
+            "subsample_reads"
+          ]
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {},
+        "plan_fields_after": {}
+      }
+    }
+  },
+  "unwired_inputs": [],
+  "warnings": [],
+  "has_changes": true
+}

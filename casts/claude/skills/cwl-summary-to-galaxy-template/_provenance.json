@@ -6,9 +6,9 @@
     "path": "content/molds/cwl-summary-to-galaxy-template/index.md",
     "revision": 6,
     "content_hash": "b14eef623c16859a525a138e7fd4beddbb5cf8568ab9f4c1cdb9b12fc7803a44",
-    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
+    "commit": "23ed81323d3a74198f66405fc3c0b811c035ec5f"
   },
-  "cast_at": "2026-11-10T10:22:51.464Z",
+  "cast_at": "2026-11-12T12:57:33.141Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -196,8 +196,8 @@
       "evidence": "hypothesis",
       "purpose": "Emit the gxformat2 draft superset: TODO tool_id, optional state / tool_shed_repository, and per-step _plan_state / _plan_context planning fields.",
       "verification": "Promote after a downstream per-step implementation Mold consumes _plan_state and _plan_context without round-tripping back through the source summary.",
-      "src_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
-      "dst_hash": "8bb5cad935b261021277487ef21ae0d2cfc6739908886e88d9a2fcf4acf05597",
+      "src_hash": "0bbc8445ac874d58ba71e74854db795112140de7908d6fabdca585fd0a6dc60e",
+      "dst_hash": "0bbc8445ac874d58ba71e74854db795112140de7908d6fabdca585fd0a6dc60e",
       "source": "deterministic"
     },
     {
@@ -261,8 +261,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the settled topology discharges, and append a blocking entry for any settled step whose declared output no wired input can supply — the computability gap gxwf validation cannot see, raised here rather than left for the per-step loop to hit.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
-      "dst_hash": "d3d36d558ae5a58de46a0eb869a5f5966be6b02fdb569476e4f77ce1cc1ddf7d",
+      "src_hash": "225ddba1f1e34a48980cb7da052ab3de93788a1e5ad81c06534fbdfbc5d96f22",
+      "dst_hash": "225ddba1f1e34a48980cb7da052ab3de93788a1e5ad81c06534fbdfbc5d96f22",
       "source": "deterministic"
     },
     {

@@ -2,7 +2,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
-import { buildSummary } from "../src/index.js";
+import { buildSummary, validateSummary } from "../src/index.js";
 
 interface SummaryLike {
   profiles: {
@@ -59,12 +59,14 @@ interface SummaryLike {
       profile?: string;
     }[];
     resolved_args: {
+      id: string;
       key: string;
       expression: string;
       selector: string;
       config: string;
       profile?: string;
     }[];
+    effective_args?: { call: string; key: string; ids: string[]; tie?: true }[];
     template: { path: string; line_count: number; body: string } | null;
   }[];
   subworkflows: {
@@ -3119,13 +3121,19 @@ includeConfig 'conf/modules.config'
     write(root, "modules/quiet.nf", "process QUIET {\n  script:\n  'quiet'\n}\n");
     write(
       root,
+      "subworkflows/sub.nf",
+      "include { BAZ } from '../modules/baz'\nworkflow SUB { BAZ() }\n",
+    );
+    write(
+      root,
       "main.nf",
       `include { FOO } from './modules/foo'
 include { BAR } from './modules/bar'
-include { BAZ } from './modules/baz'
+include { SUB } from './subworkflows/sub'
 include { LOW } from './modules/low'
 include { QUIET } from './modules/quiet'
-workflow PIPE { FOO(); BAR(); BAZ(); LOW(); QUIET() }
+workflow PIPE { FOO(); BAR(); LOW(); QUIET() }
+workflow { PIPE(); SUB() }
 `,
     );
 
@@ -3230,6 +3238,7 @@ profiles {
     const unselected = byDefault.processes.find((process) => process.name === "FOO");
     expect(unselected?.resolved_args).toEqual([
       {
+        id: "conf/base.config#withName:FOO/prefix",
         key: "prefix",
         expression: "'base'",
         selector: "withName:FOO",
@@ -3241,17 +3250,770 @@ profiles {
     const foo = selected.processes.find((process) => process.name === "FOO");
     expect(foo?.resolved_args).toEqual([
       {
+        id: "conf/base.config#withName:FOO/prefix",
         key: "prefix",
         expression: "'base'",
         selector: "withName:FOO",
         config: "conf/base.config",
       },
       {
+        id: "conf/test.config[test]#withName:FOO/args",
         key: "args",
         expression: "'--from-test'",
         selector: "withName:FOO",
         config: "conf/test.config",
         profile: "test",
+      },
+    ]);
+  });
+
+  test("ranks ext args per call: label < process < alias < fully qualified", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/ranks' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withLabel: 'lab' {
+        ext.args = '-l'
+        ext.prefix = 'lab'
+    }
+    withName: 'FOO' {
+        ext.args = '-p'
+    }
+    withName: 'FOO_A' {
+        ext.args = '-a'
+    }
+    withName: 'PIPE:SUB:FOO_B' {
+        ext.args = '-q'
+    }
+    withName: 'SUB:FOO_B' {
+        ext.args = '-n'
+    }
+    withName: 'FOO_B' {
+        ext.args = '-b'
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  label 'lab'\n  script:\n  'foo'\n}\n");
+    write(
+      root,
+      "subworkflows/sub.nf",
+      `include { FOO as FOO_B } from '../modules/foo'
+include { FOO } from '../modules/foo'
+workflow SUB { FOO_B(); FOO() }
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { FOO as FOO_A } from './modules/foo'
+include { SUB } from './subworkflows/sub'
+workflow PIPE { FOO_A(); SUB() }
+`,
+    );
+
+    const summary = await summarize(root);
+    expect(validateSummary(summary).valid).toBe(true);
+    const foo = summary.processes.find((process) => process.name === "FOO")!;
+    const id = (selector: string, key: string) => `conf/modules.config#${selector}/${key}`;
+
+    expect(foo.resolved_args.map((arg) => arg.id)).toEqual([
+      id("withLabel:lab", "args"),
+      id("withLabel:lab", "prefix"),
+      id("withName:FOO", "args"),
+      id("withName:FOO_A", "args"),
+      id("withName:PIPE:SUB:FOO_B", "args"),
+      id("withName:FOO_B", "args"),
+    ]);
+    expect(foo.effective_args).toEqual([
+      { call: "PIPE:FOO_A", key: "args", ids: [id("withName:FOO_A", "args")] },
+      { call: "PIPE:FOO_A", key: "prefix", ids: [id("withLabel:lab", "prefix")] },
+      { call: "PIPE:SUB:FOO", key: "args", ids: [id("withName:FOO", "args")] },
+      { call: "PIPE:SUB:FOO", key: "prefix", ids: [id("withLabel:lab", "prefix")] },
+      { call: "PIPE:SUB:FOO_B", key: "args", ids: [id("withName:PIPE:SUB:FOO_B", "args")] },
+      { call: "PIPE:SUB:FOO_B", key: "prefix", ids: [id("withLabel:lab", "prefix")] },
+    ]);
+  });
+
+  test("qualifies an aliased call by its alias, and ranks a colon-free regex on the qualified name", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/fq-alias' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: '.*:FOO' {
+        ext.args = '-q'
+    }
+    withName: 'FOO_B' {
+        ext.args = '-b'
+    }
+    withName: '.*FOO_C' {
+        ext.args = '-r'
+    }
+    withName: 'FOO_C' {
+        ext.args = '-c'
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(
+      root,
+      "subworkflows/sub.nf",
+      `include { FOO } from '../modules/foo'
+include { FOO as FOO_B } from '../modules/foo'
+include { FOO as FOO_C } from '../modules/foo'
+workflow SUB { FOO(); FOO_B(); FOO_C() }
+`,
+    );
+    write(root, "main.nf", "include { SUB } from './subworkflows/sub'\nworkflow PIPE { SUB() }\n");
+
+    const foo = (await summarize(root)).processes.find((process) => process.name === "FOO")!;
+    const id = (selector: string) => `conf/modules.config#withName:${selector}/args`;
+    expect(foo.effective_args).toEqual([
+      { call: "PIPE:SUB:FOO", key: "args", ids: [id(".*:FOO")] },
+      { call: "PIPE:SUB:FOO_B", key: "args", ids: [id("FOO_B")] },
+      { call: "PIPE:SUB:FOO_C", key: "args", ids: [id(".*FOO_C")] },
+    ]);
+  });
+
+  test("lets a selected profile beat the root chain at the same selector rank", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/profile-rank' }
+profiles {
+    test { includeConfig 'conf/test.config' }
+    other {
+        process {
+            withName: 'FOO' {
+                ext.args = '--other'
+            }
+        }
+    }
+}
+includeConfig 'conf/modules.config'
+`,
+    );
+    write(
+      root,
+      "conf/modules.config",
+      "process {\n    withName: 'FOO' {\n        ext.args = '--root'\n        ext.args2 = '-s'\n        ext.prefix = 'root'\n    }\n}\n",
+    );
+    write(
+      root,
+      "conf/test.config",
+      `process {
+    withName: 'FOO' {
+        ext.args = '--profile'
+        ext.args2 = '-s'
+    }
+    withLabel: 'lab' {
+        ext.prefix = 'profile-label'
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  label 'lab'\n  script:\n  'foo'\n}\n");
+    write(root, "main.nf", "include { FOO } from './modules/foo'\nworkflow PIPE { FOO() }\n");
+
+    const test = (await summarize(root, undefined, "test")).processes[0]!;
+    expect(test.effective_args).toEqual([
+      { call: "PIPE:FOO", key: "args", ids: ["conf/test.config[test]#withName:FOO/args"] },
+      { call: "PIPE:FOO", key: "args2", ids: ["conf/test.config[test]#withName:FOO/args2"] },
+      { call: "PIPE:FOO", key: "prefix", ids: ["conf/modules.config#withName:FOO/prefix"] },
+    ]);
+
+    const both = (await summarize(root, undefined, "test,other")).processes[0]!;
+    expect(both.effective_args?.[0]).toEqual({
+      call: "PIPE:FOO",
+      key: "args",
+      ids: ["nextflow.config[other]#withName:FOO/args", "conf/test.config[test]#withName:FOO/args"],
+      tie: true,
+    });
+  });
+
+  test("ties a profile selector the root chain also declares with another root selector", async () => {
+    // The legacy parser merges a profile selector into the root's map key, at the root's position.
+    const profileArgs = async (rootSelectors: string) => {
+      const root = tempPipelineRoot();
+      write(
+        root,
+        "nextflow.config",
+        `manifest { name = 'nf-core/profile-key' }
+includeConfig 'conf/modules.config'
+profiles {
+    test { includeConfig 'conf/test.config' }
+}
+`,
+      );
+      write(root, "conf/modules.config", `process {\n${rootSelectors}}\n`);
+      write(
+        root,
+        "conf/test.config",
+        "process {\n    withName: 'FOO' {\n        ext.args = '-p'\n    }\n}\n",
+      );
+      write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+      write(root, "main.nf", "include { FOO } from './modules/foo'\nworkflow { FOO() }\n");
+      return (await summarize(root, undefined, "test")).processes[0]!.effective_args;
+    };
+    const either = "    withName: 'FOO|BAR' {\n        ext.args = '-rb'\n    }\n";
+    const tied = {
+      call: "FOO",
+      key: "args",
+      ids: [
+        "conf/modules.config#withName:FOO|BAR/args",
+        "conf/test.config[test]#withName:FOO/args",
+      ],
+      tie: true,
+    };
+
+    expect(
+      await profileArgs(`    withName: 'FOO' {\n        ext.args = '-r'\n    }\n${either}`),
+    ).toEqual([tied]);
+    expect(
+      await profileArgs(`    withName: 'FOO' {\n        publishDir = 'out'\n    }\n${either}`),
+    ).toEqual([tied]);
+    expect(await profileArgs(either)).toEqual([
+      { call: "FOO", key: "args", ids: ["conf/test.config[test]#withName:FOO/args"] },
+    ]);
+  });
+
+  test("flags same-rank conflicts across configs as ties, and lets a later declaration in one config win", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      `manifest { name = 'nf-core/ties' }
+includeConfig 'conf/a.config'
+includeConfig 'conf/b.config'
+`,
+    );
+    write(
+      root,
+      "conf/a.config",
+      `process {
+    withName: 'FOO' {
+        ext.args = '-F12'
+        ext.prefix = 'same'
+    }
+    withLabel: 'shared' {
+        ext.args2 = '-x'
+    }
+}
+process {
+    withName: 'FOO' {
+        ext.args2 = '-y'
+        ext.args2 = '-z'
+    }
+}
+`,
+    );
+    write(
+      root,
+      "conf/b.config",
+      "process {\n    withName: 'FOO' {\n        ext.args = '-F4'\n        ext.prefix = 'same'\n    }\n}\n",
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  label 'shared'\n  script:\n  'foo'\n}\n");
+    write(root, "modules/bar.nf", "process BAR {\n  label 'shared'\n  script:\n  'bar'\n}\n");
+    write(
+      root,
+      "main.nf",
+      `include { FOO } from './modules/foo'
+include { BAR } from './modules/bar'
+workflow PIPE { FOO(); BAR() }
+`,
+    );
+
+    const summary = await summarize(root);
+    expect(validateSummary(summary).valid).toBe(true);
+    const byName = Object.fromEntries(summary.processes.map((process) => [process.name, process]));
+
+    expect(byName.FOO!.resolved_args.map((arg) => arg.id)).toEqual([
+      "conf/a.config#withName:FOO/args",
+      "conf/a.config#withName:FOO/prefix",
+      "conf/a.config#withLabel:shared/args2",
+      "conf/a.config#withName:FOO~2/args2",
+      "conf/a.config#withName:FOO~2/args2~2",
+      "conf/b.config#withName:FOO/args",
+      "conf/b.config#withName:FOO/prefix",
+    ]);
+    expect(byName.BAR!.resolved_args.map((arg) => arg.id)).toEqual([
+      "conf/a.config#withLabel:shared/args2",
+    ]);
+    expect(byName.FOO!.effective_args).toEqual([
+      {
+        call: "PIPE:FOO",
+        key: "args",
+        ids: ["conf/a.config#withName:FOO/args", "conf/b.config#withName:FOO/args"],
+        tie: true,
+      },
+      { call: "PIPE:FOO", key: "args2", ids: ["conf/a.config#withName:FOO~2/args2~2"] },
+      { call: "PIPE:FOO", key: "prefix", ids: ["conf/a.config#withName:FOO/prefix"] },
+    ]);
+  });
+
+  test("ties a key a selector block assigns in both branches of an if", async () => {
+    // Shaped like nf-core/sarek's markduplicates.config CRAM_TO_BAM block.
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/branches' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'FOO' {
+        ext.args = '-b'
+    }
+    withName: 'PIPE:FOO' {
+        if (params.tools && params.tools.split(',').contains('dedup')) {
+            ext.prefix = { "\${meta.id}.dedup" }
+            ext.args2 = '-x'
+        } else {
+            ext.prefix = { "\${meta.id}.md" }
+            ext.args2 = '-x'
+        }
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(root, "main.nf", "include { FOO } from './modules/foo'\nworkflow PIPE { FOO() }\n");
+
+    const summary = await summarize(root);
+    expect(validateSummary(summary).valid).toBe(true);
+    expect(summary.processes[0]!.effective_args).toEqual([
+      { call: "PIPE:FOO", key: "args", ids: ["conf/modules.config#withName:FOO/args"] },
+      { call: "PIPE:FOO", key: "args2", ids: ["conf/modules.config#withName:PIPE:FOO/args2"] },
+      {
+        call: "PIPE:FOO",
+        key: "prefix",
+        ids: [
+          "conf/modules.config#withName:PIPE:FOO/prefix",
+          "conf/modules.config#withName:PIPE:FOO/prefix~2",
+        ],
+        tie: true,
+      },
+    ]);
+  });
+
+  test("keys a call name used from two subworkflows by its call path", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/fq-tie' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'SUB_A:FOO' {
+        ext.args = '-a'
+    }
+    withName: 'SUB_B:FOO' {
+        ext.args = '-b'
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(
+      root,
+      "subworkflows/a.nf",
+      "include { FOO } from '../modules/foo'\nworkflow SUB_A { FOO() }\n",
+    );
+    write(
+      root,
+      "subworkflows/b.nf",
+      "include { FOO } from '../modules/foo'\nworkflow SUB_B { FOO() }\n",
+    );
+    write(
+      root,
+      "main.nf",
+      `include { SUB_A } from './subworkflows/a'
+include { SUB_B } from './subworkflows/b'
+workflow { SUB_A(); SUB_B() }
+`,
+    );
+
+    const summary = await summarize(root);
+    expect(validateSummary(summary).valid).toBe(true);
+    const foo = summary.processes.find((process) => process.name === "FOO")!;
+    expect(foo.resolved_args.map((arg) => arg.id)).toEqual([
+      "conf/modules.config#withName:SUB_A:FOO/args",
+      "conf/modules.config#withName:SUB_B:FOO/args",
+    ]);
+    expect(foo.effective_args).toEqual([
+      { call: "SUB_A:FOO", key: "args", ids: ["conf/modules.config#withName:SUB_A:FOO/args"] },
+      { call: "SUB_B:FOO", key: "args", ids: ["conf/modules.config#withName:SUB_B:FOO/args"] },
+    ]);
+  });
+
+  test("resolves an alias two files bind to different processes by each file's includes", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/alias-scope' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'SUB_A:X' {
+        ext.args = '-p'
+    }
+    withName: 'SUB_B:X' {
+        ext.args = '-q'
+    }
+}
+`,
+    );
+    write(root, "modules/p.nf", "process P {\n  script:\n  'p'\n}\n");
+    write(root, "modules/q.nf", "process Q {\n  script:\n  'q'\n}\n");
+    write(
+      root,
+      "subworkflows/a.nf",
+      "include { P as X } from '../modules/p'\nworkflow SUB_A { X() }\n",
+    );
+    write(
+      root,
+      "subworkflows/b.nf",
+      "include { Q as X } from '../modules/q'\nworkflow SUB_B { X() }\n",
+    );
+    write(
+      root,
+      "main.nf",
+      `include { SUB_A } from './subworkflows/a'
+include { SUB_B } from './subworkflows/b'
+workflow { SUB_A(); SUB_B() }
+`,
+    );
+
+    const byName = Object.fromEntries(
+      (await summarize(root)).processes.map((process) => [process.name, process]),
+    );
+    const id = (selector: string) => `conf/modules.config#withName:${selector}/args`;
+    expect(byName.P!.effective_args).toEqual([
+      { call: "SUB_A:X", key: "args", ids: [id("SUB_A:X")] },
+    ]);
+    expect(byName.Q!.effective_args).toEqual([
+      { call: "SUB_B:X", key: "args", ids: [id("SUB_B:X")] },
+    ]);
+  });
+
+  test("gives a process only an uncalled named workflow calls its bare-name rows", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/dead' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'BAR' {
+        ext.args = '-bar'
+    }
+    withName: 'DEAD:BAR' {
+        ext.args = '-dead'
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(root, "modules/bar.nf", "process BAR {\n  script:\n  'bar'\n}\n");
+    write(
+      root,
+      "main.nf",
+      `include { FOO } from './modules/foo'
+include { BAR } from './modules/bar'
+workflow DEAD { BAR() }
+workflow { FOO() }
+`,
+    );
+
+    const bar = (await summarize(root)).processes.find((process) => process.name === "BAR")!;
+    expect(bar.resolved_args.map((arg) => arg.id)).toEqual([
+      "conf/modules.config#withName:BAR/args",
+    ]);
+    expect(bar.effective_args).toEqual([
+      { call: "BAR", key: "args", ids: ["conf/modules.config#withName:BAR/args"] },
+    ]);
+  });
+
+  test("matches qualified selectors only along a call chain from the entry workflow", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/chain' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'SUB_B:FOO' {
+        ext.args = '-b'
+    }
+    withName: '.*:SUB_B:FOO' {
+        ext.args = '-B'
+    }
+    withName: 'SUB_A:FOO' {
+        ext.args = '-nested'
+    }
+    withName: '.*:SUB_A:FOO' {
+        ext.args = '-a'
+    }
+    withName: 'PIPE:BAR' {
+        ext.args = '-nested'
+    }
+    withName: 'OTHER:BAR' {
+        ext.args = '-o'
+    }
+    withName: 'NFCORE_PIPE:PIPE:BAR' {
+        ext.args = '-p'
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(root, "modules/bar.nf", "process BAR {\n  script:\n  'bar'\n}\n");
+    write(
+      root,
+      "subworkflows/a.nf",
+      "include { FOO } from '../modules/foo'\nworkflow SUB_A { FOO() }\n",
+    );
+    write(
+      root,
+      "subworkflows/b.nf",
+      "include { BAR } from '../modules/bar'\nworkflow SUB_B { BAR() }\n",
+    );
+    write(
+      root,
+      "workflows/pipe.nf",
+      `include { SUB_A } from '../subworkflows/a'
+include { SUB_B } from '../subworkflows/b'
+include { BAR } from '../modules/bar'
+workflow PIPE { SUB_A(); SUB_B(); BAR() }
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { PIPE } from './workflows/pipe'
+workflow NFCORE_PIPE { PIPE() }
+workflow { NFCORE_PIPE() }
+`,
+    );
+
+    const summary = await summarize(root);
+    expect(validateSummary(summary).valid).toBe(true);
+    const byName = Object.fromEntries(summary.processes.map((process) => [process.name, process]));
+    const id = (selector: string) => `conf/modules.config#withName:${selector}/args`;
+
+    expect(byName.FOO!.resolved_args.map((arg) => arg.id)).toEqual([id(".*:SUB_A:FOO")]);
+    expect(byName.FOO!.effective_args).toEqual([
+      { call: "NFCORE_PIPE:PIPE:SUB_A:FOO", key: "args", ids: [id(".*:SUB_A:FOO")] },
+    ]);
+    expect(byName.BAR!.resolved_args.map((arg) => arg.id)).toEqual([id("NFCORE_PIPE:PIPE:BAR")]);
+    expect(byName.BAR!.effective_args).toEqual([
+      { call: "NFCORE_PIPE:PIPE:BAR", key: "args", ids: [id("NFCORE_PIPE:PIPE:BAR")] },
+    ]);
+  });
+
+  test("traces calls through a workflow whose inline comment has an apostrophe", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/comment' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      "process {\n    withName: '.*:PIPE:SUB:FOO' {\n        ext.args = '-s'\n    }\n}\n",
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(
+      root,
+      "subworkflows/sub.nf",
+      "include { FOO } from '../modules/foo'\nworkflow SUB { FOO() }\n",
+    );
+    write(
+      root,
+      "workflows/pipe.nf",
+      `include { SUB } from '../subworkflows/sub'
+workflow PIPE {
+    SUB()  // the sub's files
+}
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { PIPE } from './workflows/pipe'
+workflow NFCORE_PIPE { PIPE() }
+workflow { NFCORE_PIPE() }
+`,
+    );
+
+    const foo = (await summarize(root)).processes.find((process) => process.name === "FOO")!;
+    expect(foo.effective_args).toEqual([
+      {
+        call: "NFCORE_PIPE:PIPE:SUB:FOO",
+        key: "args",
+        ids: ["conf/modules.config#withName:.*:PIPE:SUB:FOO/args"],
+      },
+    ]);
+  });
+
+  test("qualifies calls in an aliased subworkflow by the subworkflow alias", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/sub-alias' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'SUB:FOO' {
+        ext.args = '-s'
+    }
+    withName: 'SUB_X:FOO' {
+        ext.args = '-x'
+    }
+    withName: 'SUB_Y:FOO' {
+        ext.args = '-y'
+    }
+}
+`,
+    );
+    write(root, "modules/foo.nf", "process FOO {\n  script:\n  'foo'\n}\n");
+    write(
+      root,
+      "subworkflows/sub.nf",
+      "include { FOO } from '../modules/foo'\nworkflow SUB { FOO() }\n",
+    );
+    write(
+      root,
+      "main.nf",
+      `include { SUB as SUB_X } from './subworkflows/sub'
+include { SUB as SUB_Y } from './subworkflows/sub'
+workflow { SUB_X(); SUB_Y() }
+`,
+    );
+
+    const foo = (await summarize(root)).processes.find((process) => process.name === "FOO")!;
+    const id = (selector: string) => `conf/modules.config#withName:${selector}/args`;
+    expect(foo.resolved_args.map((arg) => arg.id)).toEqual([id("SUB_X:FOO"), id("SUB_Y:FOO")]);
+    expect(foo.effective_args).toEqual([
+      { call: "SUB_X:FOO", key: "args", ids: [id("SUB_X:FOO")] },
+      { call: "SUB_Y:FOO", key: "args", ids: [id("SUB_Y:FOO")] },
+    ]);
+  });
+
+  test("gives each bamtofastq-style alias its own samtools view args", async () => {
+    const root = tempPipelineRoot();
+    write(
+      root,
+      "nextflow.config",
+      "manifest { name = 'nf-core/bamtofastq' }\nincludeConfig 'conf/modules.config'\n",
+    );
+    write(
+      root,
+      "conf/modules.config",
+      `process {
+    withName: 'SAMTOOLS_VIEW' {
+        ext.args = '-h'
+    }
+    withName: SAMTOOLS_VIEW_MAP_MAP {
+        ext.args = '-b -f1 -F12'
+        ext.prefix = { "\${meta.id}.map_map" }
+    }
+    withName: SAMTOOLS_VIEW_UNMAP_UNMAP {
+        ext.args = '-b -f12 -F256'
+        ext.prefix = { "\${meta.id}.unmap_unmap" }
+    }
+    withName: SAMTOOLS_CHR {
+        ext.args = "-hb"
+    }
+}
+`,
+    );
+    write(
+      root,
+      "modules/nf-core/samtools/view/main.nf",
+      "process SAMTOOLS_VIEW {\n  script:\n  'samtools view'\n}\n",
+    );
+    write(
+      root,
+      "workflows/bamtofastq.nf",
+      `include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_MAP_MAP } from '../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_UNMAP_UNMAP } from '../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_CHR } from '../modules/nf-core/samtools/view/main'
+workflow BAMTOFASTQ { SAMTOOLS_CHR(); SAMTOOLS_VIEW_MAP_MAP(); SAMTOOLS_VIEW_UNMAP_UNMAP() }
+`,
+    );
+    write(
+      root,
+      "main.nf",
+      `include { BAMTOFASTQ } from './workflows/bamtofastq'
+workflow NFCORE_BAMTOFASTQ { BAMTOFASTQ() }
+workflow { NFCORE_BAMTOFASTQ() }
+`,
+    );
+
+    const view = (await summarize(root)).processes.find(
+      (process) => process.name === "SAMTOOLS_VIEW",
+    )!;
+    const id = (selector: string, key: string) => `conf/modules.config#withName:${selector}/${key}`;
+
+    expect(view.resolved_args).toHaveLength(6);
+    expect(view.effective_args).toEqual([
+      {
+        call: "NFCORE_BAMTOFASTQ:BAMTOFASTQ:SAMTOOLS_CHR",
+        key: "args",
+        ids: [id("SAMTOOLS_CHR", "args")],
+      },
+      {
+        call: "NFCORE_BAMTOFASTQ:BAMTOFASTQ:SAMTOOLS_VIEW_MAP_MAP",
+        key: "args",
+        ids: [id("SAMTOOLS_VIEW_MAP_MAP", "args")],
+      },
+      {
+        call: "NFCORE_BAMTOFASTQ:BAMTOFASTQ:SAMTOOLS_VIEW_MAP_MAP",
+        key: "prefix",
+        ids: [id("SAMTOOLS_VIEW_MAP_MAP", "prefix")],
+      },
+      {
+        call: "NFCORE_BAMTOFASTQ:BAMTOFASTQ:SAMTOOLS_VIEW_UNMAP_UNMAP",
+        key: "args",
+        ids: [id("SAMTOOLS_VIEW_UNMAP_UNMAP", "args")],
+      },
+      {
+        call: "NFCORE_BAMTOFASTQ:BAMTOFASTQ:SAMTOOLS_VIEW_UNMAP_UNMAP",
+        key: "prefix",
+        ids: [id("SAMTOOLS_VIEW_UNMAP_UNMAP", "prefix")],
       },
     ]);
   });
