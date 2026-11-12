@@ -30,7 +30,7 @@ scenario produces.
   hands off a structured summary that identifies the observed failure modality
   and the next reference surface to inspect: Planemo result, Galaxy job API,
   Galaxy invocation API, history contents, test assertion report, workflow
-  import response, or Galaxy server log. A workflow import Galaxy rejected for
+  import response, Galaxy server log, or step-removal check. A workflow import Galaxy rejected for
   the workflow's content or through a server defect is a `fail` with modality
   `workflow-import-rejected`, never a `not-run` and never an assertion or
   invocation failure.
@@ -39,3 +39,17 @@ scenario produces.
 
 - check: deterministic
 - assertion: when no test definition exists, or a test exists but cannot be executed, the run still emits the structured result with `status: test-definition-missing` or `status: not-run` and its reason. It claims no pass, and it attributes no failure modality or next reference surface to a run that did not happen. Aborting without a handoff fails this property, and so does presenting an unrun test as a green one.
+
+## Property: a green run that lost a step without a drop label is not a pass
+
+- check: deterministic
+- assertion: when the extracted-workflow snapshot exists and Planemo passes,
+  the result carries `step_removals` from `foundry check-step-removals` over
+  `gxwf diff --json <snapshot> <final workflow>`. It is `status: pass` only if
+  every step in the diff's `steps.removed` has a `kind: dropped` ledger entry
+  naming it in its top-level `step`. A removed step labelled only by a gap, a
+  `source_arg` flag record, or nothing makes it `fail` with modality
+  `unlabelled-step-removal`. A check that couldn't run makes it `fail` with
+  modality `step-removal-check-error`. Inputs that feed no step are reported
+  and never change the status. Without a snapshot, `step_removals` is `null`
+  and the status follows Planemo.

@@ -1,0 +1,160 @@
+{
+  "before_is_draft": false,
+  "after_is_draft": false,
+  "inputs": {
+    "added": [],
+    "removed": [],
+    "changed": {
+      "min_quality": {
+        "default": {
+          "before": 20,
+          "after": 25
+        },
+        "min": {
+          "before": null,
+          "after": 0
+        },
+        "max": {
+          "before": null,
+          "after": 60
+        }
+      }
+    }
+  },
+  "outputs": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  },
+  "steps": {
+    "added": {},
+    "removed": {},
+    "changed": {
+      "qc": {
+        "label": "qc",
+        "fields": {
+          "tool_id": {
+            "before": "toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.74+galaxy0",
+            "after": "toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.74+galaxy1"
+          },
+          "tool_version": {
+            "before": "0.74+galaxy0",
+            "after": "0.74+galaxy1"
+          }
+        },
+        "state": {},
+        "in_defaults": {},
+        "out_actions": {
+          "html_report": {
+            "before": null,
+            "after": {
+              "rename": "QC report"
+            }
+          }
+        },
+        "connections_in": {
+          "added": [],
+          "removed": []
+        },
+        "connections_out": {
+          "added": [],
+          "removed": []
+        },
+        "upstream": {
+          "added": [],
+          "removed": []
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {},
+        "plan_fields_after": {}
+      },
+      "trim": {
+        "label": "quality trim",
+        "fields": {
+          "label": {
+            "before": "trim reads",
+            "after": "quality trim"
+          }
+        },
+        "state": {
+          "mode": {
+            "before": "strict",
+            "after": "lenient",
+            "kind": "changed"
+          },
+          "advanced|window": {
+            "before": 4,
+            "after": 5,
+            "kind": "changed"
+          },
+          "advanced|min_len": {
+            "before": null,
+            "after": 30,
+            "kind": "added"
+          }
+        },
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [],
+          "removed": []
+        },
+        "connections_out": {
+          "added": [],
+          "removed": []
+        },
+        "upstream": {
+          "added": [],
+          "removed": []
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {},
+        "plan_fields_after": {}
+      },
+      "filter": {
+        "label": "filter",
+        "fields": {
+          "when": {
+            "before": null,
+            "after": "$(inputs.input != null)"
+          }
+        },
+        "state": {},
+        "in_defaults": {
+          "header_lines": {
+            "before": null,
+            "after": 1
+          }
+        },
+        "out_actions": {},
+        "connections_in": {
+          "added": [],
+          "removed": []
+        },
+        "connections_out": {
+          "added": [],
+          "removed": []
+        },
+        "upstream": {
+          "added": [],
+          "removed": []
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {},
+        "plan_fields_after": {}
+      }
+    }
+  },
+  "unwired_inputs": [],
+  "warnings": [],
+  "has_changes": true
+}

@@ -8,7 +8,7 @@ tags:
 status: reviewed
 created: 2026-06-02
 revised: 2026-11-12
-revision: 13
+revision: 14
 summary: "Advance the gxformat2 draft by one step: pick the next drafty step, resolve a wrapper, implement the step, and validate."
 loop_endstate: "It owns its own endstate oracle (`gxwf draft-next-step`) and concretizes one drafty step per call; re-invoke until it reports `draft: false`, then it extracts the concrete `galaxy-workflow.gxwf.yml` (via `gxwf draft-extract`) and continues."
 input_artifacts:
@@ -30,6 +30,15 @@ output_artifacts:
     kind: yaml
     default_filename: open-requirements.ledger.yml
     description: "Carried obligations ledger re-emitted by this step: entries it appended or closed updated, every other entry passed through with its provenance intact."
+  - id: galaxy-workflow-draft-snapshot
+    kind: yaml
+    default_filename: galaxy-workflow-draft.snapshot.gxwf.yml
+    schema: "[[galaxy-workflow-draft]]"
+    description: "Copy of the draft as the loop first received it, with every `_plan_*` field intact: the record of which source work each settled step carried. Written once and never edited."
+  - id: galaxy-workflow-extracted
+    kind: yaml
+    default_filename: galaxy-workflow.extracted.gxwf.yml
+    description: "Copy of the first `galaxy-workflow.gxwf.yml` this Mold extracts, frozen before the test phase. [[run-workflow-test]] diffs the final workflow against it. Written once and never edited."
 references:
   - kind: schema
     ref: "[[galaxy-workflow-draft]]"
@@ -155,6 +164,8 @@ This Mold is **single-entry, single-exit**: it owns the loop oracle ([[draft-nex
 ## Sequence
 
 Choose a writable tool-cache directory for the run. Pass the same `--cache-dir <dir>` to cache commands, wrapper summarization, and validation.
+
+Keep two snapshots, each written once and never edited afterwards. When `galaxy-workflow-draft.snapshot.gxwf.yml` is absent, copy the incoming draft there before this call changes anything. Implementation strips a step's `_plan_*` fields, so this copy is the only one that still maps every step to its source. When a call runs [[draft-extract]] and `galaxy-workflow.extracted.gxwf.yml` is absent, copy the extracted workflow there. Later phases edit `galaxy-workflow.gxwf.yml` in place, and [[run-workflow-test]] diffs it against this copy to find the steps they removed.
 
 1. **Pick.** Run [[draft-next-step]]. If `draft: false`, the loop is done: apply step 5 to any `open` blocking entry, then run [[draft-extract]] to emit the concrete `galaxy-workflow.gxwf.yml` (drafty steps dropped, `_plan_*` stripped, `class` promoted to `GalaxyWorkflow`), then return. Otherwise keep the chosen step id, and any `resolved_args` in its `_plan_state`, which implementation strips. If an `open` blocking entry against it already records the wrapper as confirmed absent, the author branch as ruled out, a found wrapper that can't serve the step, or why its wired inputs can't supply the step, go to step 5. Tool Shed misses and a tool version missing from a cache don't record that.
 2. **Resolve a wrapper.** First check for an existing pin:

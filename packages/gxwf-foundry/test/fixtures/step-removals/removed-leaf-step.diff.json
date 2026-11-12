@@ -1,0 +1,72 @@
+{
+  "before_is_draft": false,
+  "after_is_draft": false,
+  "inputs": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  },
+  "outputs": {
+    "added": [],
+    "removed": [
+      "filtered"
+    ],
+    "changed": {}
+  },
+  "steps": {
+    "added": {},
+    "removed": {
+      "filter": {
+        "label": "filter",
+        "type": "tool",
+        "tool_id": "Filter1",
+        "tool_version": "1.1.0",
+        "plan_fields": {},
+        "upstream": [
+          "trim"
+        ],
+        "downstream": [],
+        "workflow_outputs": [
+          "filtered"
+        ],
+        "connections": [
+          "trim/out_file1 -> filter/input"
+        ]
+      }
+    },
+    "changed": {
+      "trim": {
+        "label": "trim reads",
+        "fields": {},
+        "state": {},
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [],
+          "removed": []
+        },
+        "connections_out": {
+          "added": [],
+          "removed": [
+            "trim/out_file1 -> filter/input"
+          ]
+        },
+        "upstream": {
+          "added": [],
+          "removed": []
+        },
+        "downstream": {
+          "added": [],
+          "removed": [
+            "filter"
+          ]
+        },
+        "plan_fields_before": {},
+        "plan_fields_after": {}
+      }
+    }
+  },
+  "unwired_inputs": [],
+  "warnings": [],
+  "has_changes": true
+}

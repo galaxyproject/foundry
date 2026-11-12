@@ -270,6 +270,41 @@ export const foundryCliMeta: CliProgramSpec = {
       commands: [],
     },
     {
+      name: "check-step-removals",
+      fullName: "foundry check-step-removals",
+      description:
+        "Check that every step a gxwf diff reports removed has a kind: dropped ledger entry naming it.",
+      synopsis: "foundry check-step-removals [options] <diff.json> <ledger.yml>",
+      args: [
+        {
+          raw: "diff.json",
+          name: "diff.json",
+          required: true,
+          variadic: false,
+          description: "gxwf diff --json output, or - for stdin",
+        },
+        {
+          raw: "ledger.yml",
+          name: "ledger.yml",
+          required: true,
+          variadic: false,
+          description: "Open-requirements ledger",
+        },
+      ],
+      options: [
+        {
+          flags: "--json",
+          name: "json",
+          description: "Emit the removed steps, their ledger entries and unwired inputs",
+          takesArgument: false,
+          optionalArgument: false,
+          negatable: false,
+          defaultValue: false,
+        },
+      ],
+      commands: [],
+    },
+    {
       name: "validate-tests-format",
       fullName: "foundry validate-tests-format",
       description:

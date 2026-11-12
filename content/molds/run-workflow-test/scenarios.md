@@ -44,6 +44,29 @@ checked against a real artifact rather than a description of one.
   test is never reported as a pass, and the result artifact is still emitted so
   [[review-galaxy-workflow]] can cite it.
 
+## Case: a step removed in the test phase without a drop entry fails a green run
+
+- fixture: `examples/unlabelled-step-removal/` (`galaxy-workflow.extracted.gxwf.yml`,
+  `galaxy-workflow.gxwf.yml`, `galaxy-workflow.gxwf-tests.yml`,
+  `open-requirements.ledger.yml`)
+- expect: Planemo passes (`planemo_result.failed == 0`), but `status: "fail"`
+  with `failure_modality: "unlabelled-step-removal"` and
+  `next_reference_surface: "step-removal check"`. `step_removals.unlabelled` is
+  `["subsample_reads"]`: the only ledger entry on that step,
+  `subsample-reads-validation-failed`, is a gap, not a `kind: dropped` entry.
+  `artifacts.step_diff_json` names the saved diff. The result matches the
+  fixture's `workflow-test-result.json`.
+- variant: add a `kind: dropped` entry with `step: subsample_reads` to the
+  ledger, and the same run is `status: "pass"`, with that entry's id in
+  `step_removals.removed_steps[0].dropped_entries`.
+
+## Case: no snapshot leaves the status to Planemo
+
+- fixture: `content/molds/review-galaxy-workflow/examples/clean-passing/`, which
+  has no `galaxy-workflow.extracted.gxwf.yml`, as in the review pipeline.
+- expect: `status: "pass"` with `step_removals: null`, as the fixture's
+  `workflow-test-result.json` records.
+
 ## Coverage gaps
 
 No committed fixture exercises `status: "not-run"`, or a run against an existing
@@ -52,3 +75,7 @@ that ran records `galaxy_mode: "managed"`, and `missing-test` records none at al
 because nothing ran. No case asserts either until a fixture binds them.
 
 No fixture exercises `failure_modality: "workflow-import-rejected"` either.
+
+No fixture exercises `failure_modality: "step-removal-check-error"`. `gxwf diff`
+isn't in a released `@galaxy-tool-util/cli` yet, so every run on the pinned 1.15
+would hit it.

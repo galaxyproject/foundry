@@ -118,6 +118,16 @@ Properties are tagged by bucket:
   `galaxy-workflow.gxwf.yml` (`class: GalaxyWorkflow`, no `_plan_*`) before
   returning, without a further invocation.
 
+## Property: the snapshots are written once and never edited
+
+- bucket: extract
+- check: deterministic
+- assertion: after the first invocation, `galaxy-workflow-draft.snapshot.gxwf.yml`
+  is byte-identical to the draft that invocation received, `_plan_*` fields
+  included. After the first extract, `galaxy-workflow.extracted.gxwf.yml` is
+  byte-identical to the `galaxy-workflow.gxwf.yml` it wrote. Later invocations,
+  repairs and extracts leave both files unchanged.
+
 ## Property: only a miss falls through to authoring
 
 - bucket: routing

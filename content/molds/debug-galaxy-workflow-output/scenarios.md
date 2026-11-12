@@ -34,6 +34,18 @@
   Nextflow-translated workflow, traces it to a possibly-lossy operator
   translation — rather than relaxing the assertion to make the test pass.
 
+## Case: a green run that lost a step on a misread log line
+
+- fixture: `content/molds/run-workflow-test/examples/unlabelled-step-removal/`,
+  whose `workflow-test-result.json` reports `unlabelled-step-removal` for
+  `subsample_reads`.
+- expect: the first failure surface is the unlabelled step removal. The report
+  notes that the gap `subsample-reads-validation-failed` rests only on Galaxy's
+  `validation_failed` log line, which is not a failure verdict
+  (galaxyproject/galaxy#24837). It recommends restoring `subsample_reads` from
+  `galaxy-workflow.extracted.gxwf.yml` and rerunning, and does not recommend
+  recording a drop on that evidence.
+
 ## Case: reference gap discovery
 
 - fixture: any debug run where the failure cannot be classified confidently from

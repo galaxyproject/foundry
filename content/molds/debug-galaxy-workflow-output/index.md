@@ -7,12 +7,18 @@ tags:
   - target/galaxy
 status: reviewed
 created: 2026-04-30
-revised: 2026-10-26
-revision: 6
+revised: 2026-11-12
+revision: 7
 summary: "Triage failing Galaxy run outputs; classify the failure surface and capture evidence before recommending repairs."
 input_artifacts:
   - id: workflow-test-result
-    description: "Structured run handoff from run-workflow-test: Planemo result, invocation/job/artifact context, and the observed failure modality."
+    description: "Structured run handoff from run-workflow-test: Planemo result, invocation/job/artifact context, the removed-step check, and the observed failure modality."
+  - id: open-requirements-ledger
+    optional: true
+    description: "Carried obligations ledger [[open-requirements-ledger]]: the drops and gaps whose justifications a diagnosis can confirm or refute."
+  - id: galaxy-workflow-extracted
+    optional: true
+    description: "The workflow as the per-step loop first extracted it, before the test phase: where a removed step is restored from."
 output_artifacts:
   - id: workflow-debug-report
     kind: markdown
@@ -75,22 +81,31 @@ references:
     evidence: corpus-observed
     purpose: "Locate which Planemo artifact or Galaxy API surface preserves the failure evidence."
     trigger: "When Planemo output is ambiguous, structured test JSON is available or missing because Galaxy rejected the workflow import, or rerunning can be avoided by inspecting an existing invocation."
+  - kind: research
+    ref: "[[open-requirements-ledger]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Hold a diagnosis against the ledger: a cause that refutes an earlier drop's `because` reopens it, and a step taken out of the workflow is recorded as a `kind: dropped` entry with a cited `because`, never as a gap."
+    verification: "Promote after a test-phase run reopens a drop its diagnosis refuted and restores the step."
 ---
 # debug-galaxy-workflow-output
 
 Triage a failing Galaxy workflow test. Take the structured handoff from [[run-workflow-test]], classify the failure surface before proposing any repair, and capture the reference evidence the surface requires. When the failure cannot be classified from existing references, recommend a focused follow-up rather than converting uncertainty into a guessed fix.
 
-Classify before repairing. A red run can be a workflow import rejection, a tool/job failure, a workflow invocation failure, a collection-output mismatch, a missing workflow output, or an assertion mismatch—and each routes to a different reference surface and a different fix. Locate where the evidence lives first ([[planemo-workflow-test-architecture]]).
+Classify before repairing. A red run can be a workflow import rejection, a tool/job failure, a workflow invocation failure, a collection-output mismatch, a missing workflow output, an assertion mismatch, or a step removed without a drop label—and each routes to a different reference surface and a different fix. Locate where the evidence lives first ([[planemo-workflow-test-architecture]]).
 
 ## Sequence
 
-1. **Classify the first failure surface.** From the run's structured result, decide whether the first failure is a workflow import rejection, a tool/job failure, a workflow invocation failure, a collection-output mismatch, a missing workflow output, or an assertion mismatch. Check import first: when the handoff reports `failure_modality: workflow-import-rejected`, or carries no workflow, history, or invocation id because Galaxy refused the workflow, no later surface exists to inspect. Classify before proposing repairs.
+1. **Classify the first failure surface.** From the run's structured result, decide whether the first failure is a workflow import rejection, a tool/job failure, a workflow invocation failure, a collection-output mismatch, a missing workflow output, an assertion mismatch, or an unlabelled step removal. Check import first: when the handoff reports `failure_modality: workflow-import-rejected`, or carries no workflow, history, or invocation id because Galaxy refused the workflow, no later surface exists to inspect. Classify before proposing repairs.
 2. **Capture import-rejection evidence.** When Galaxy rejected the workflow import, record the HTTP status and response body from the import request, the Galaxy server-log traceback for that request when one exists, and the Planemo terminal log. A 500 leaves a traceback. A handled 400 usually does not, and its response body carries the reason. A managed Galaxy's traceback also appears in the Planemo terminal log. An external Galaxy's appears only in its own server log. No structured Planemo output exists in this case—Planemo writes no test JSON or HTML report when the import fails ([[planemo-workflow-test-architecture]])—and steps 4–7 have nothing to inspect.
 3. **Isolate an import rejection's trigger, then route it.** Bisect with small, self-contained synthetic gxformat2 workflows rather than truncating the real one. Truncation leaves dangling step references that fail with unrelated errors. Import each variant as the same user on the same server, through the same conversion Planemo used, change one structural feature at a time, and keep a variant that imports as the passing control. Imports can leave state behind—an embedded user-defined tool is created on first import—so use distinct tool definitions per variant or a fresh server when that state could mask the trigger. Then route by what the bisection shows:
    - A minimal variant that passes the pipeline's static validation (`gxwf validate`) reproduces a 500 with an internal server traceback: an upstream Galaxy or gxformat2 defect. Record the smallest failing variant, its passing control, and the traceback as the repro. Do not reshape the workflow to dodge the defect.
    - A 400 naming a schema, validation, or lint problem, or a 500 that disappears once the variant passes static validation: a workflow-content error. Route it back to the phase that emitted the offending construct. When static validation accepted the construct Galaxy rejected, also record that validator gap as its own finding.
-4. **Capture job-failure evidence.** When a job is in `error`/`failed`/`stopped`, record job id, tool id, exit code, job messages, the stdout/stderr distinction, and output dataset state per [[galaxy-tool-job-failure-reference]]; check whether the wrapper's failure semantics already explain it.
+4. **Capture job-failure evidence.** When a job is in `error`/`failed`/`stopped`, record job id, tool id, exit code, job messages, the stdout/stderr distinction, and output dataset state per [[galaxy-tool-job-failure-reference]]; check whether the wrapper's failure semantics already explain it. Galaxy's scheduler logs `workflow tool request state: ... validation_failed` for steps whose jobs then run and succeed ([galaxyproject/galaxy#24837](https://github.com/galaxyproject/galaxy/issues/24837)), so that line is not a failure verdict. Read the job's state, and the job directory for the real error. Planemo deletes job directories unless it ran with `--no_cleanup`.
 5. **Capture invocation-failure evidence.** When the invocation state or messages indicate scheduling, materialization, cancellation, conditional, or output-resolution failure, record invocation state, the structured message reason, the affected step, any subworkflow path, and the jobs summary per [[galaxy-workflow-invocation-failure-reference]]; note whether Planemo surfaced or hid the relevant Galaxy API detail.
 6. **Trace collection mismatches.** When a failing output is a collection or mapped output, diagnose shape, mapping, reduction, and element-identifier mismatches with [[galaxy-collection-semantics]]; for workflows translated from Nextflow, trace wrong nesting / missing elements / bad joins back to possibly-lossy operator translations via [[nextflow-operators-to-galaxy-collection-recipes]].
 7. **Read assertion failures honestly.** When the failure is an assertion, use [[planemo-asserts-idioms]] to decide whether it is an assertion-choice/tolerance problem or a real output regression. Before weakening an assertion, widening a delta, or switching to an existence check, confirm against [[iwc-shortcuts-anti-patterns]] that the relaxation is an accepted IWC shortcut and not masking a real failure.
-8. **Discover reference gaps.** When the failure cannot be classified confidently from the references above, recommend a focused follow-up — reference documentation, pattern capture, API verification, or eval coverage — rather than emitting a repair recipe built on a guess.
+8. **Route an unlabelled step removal.** When the handoff's modality is `unlabelled-step-removal`, the test passed on a workflow that lost steps since extraction, and `step_removals.unlabelled` names them. Treat each as a repair someone made without recording it. Find the failure that led to the removal in the run's evidence, and diagnose it with steps 4–7. When it was a symptom of another defect, or its only evidence is a `validation_failed` log line, recommend restoring the step from `galaxy-workflow.extracted.gxwf.yml` and rerunning. When the step truly can't run, recommend a `kind: dropped` entry with the step in its top-level `step`, its `units`, and a `because` that quotes the job's error, as the [[open-requirements-ledger]] requires. A plain gap on the step does not label it. When your diagnosis refutes the `because` of an earlier drop, reopen that entry as the ledger directs. A `step-removal-check-error` is an environment problem, usually a gxwf without `diff`: recommend fixing the tooling, not the workflow.
+9. **Discover reference gaps.** When the failure cannot be classified confidently from the references above, recommend a focused follow-up — reference documentation, pattern capture, API verification, or eval coverage — rather than emitting a repair recipe built on a guess.

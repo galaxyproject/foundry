@@ -1,0 +1,104 @@
+{
+  "before_is_draft": true,
+  "after_is_draft": false,
+  "inputs": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  },
+  "outputs": {
+    "added": [],
+    "removed": [],
+    "changed": {
+      "fastq": {
+        "before": "to_fastq/TODO_fastq",
+        "after": "to_fastq/output"
+      }
+    }
+  },
+  "steps": {
+    "added": {},
+    "removed": {
+      "chr_filter": {
+        "label": "keep only requested chromosomes",
+        "type": "tool",
+        "tool_id": "TODO",
+        "tool_version": "TODO",
+        "plan_fields": {
+          "_plan_state": "Keep alignments on the contigs named by chr.\n",
+          "_plan_context": "Upstream process SAMTOOLS_VIEW with --chr.\n"
+        },
+        "upstream": [
+          "chr",
+          "reads"
+        ],
+        "downstream": [
+          "to_fastq"
+        ],
+        "workflow_outputs": [],
+        "connections": [
+          "chr -> chr_filter/TODO_regions",
+          "chr_filter/TODO_filtered -> to_fastq/TODO_input",
+          "reads -> chr_filter/TODO_input"
+        ]
+      }
+    },
+    "changed": {
+      "to_fastq": {
+        "label": "convert BAM to FASTQ",
+        "fields": {
+          "tool_id": {
+            "before": "TODO",
+            "after": "toolshed.g2.bx.psu.edu/repos/iuc/samtools_fastx/samtools_fastx/1.15.1+galaxy2"
+          },
+          "tool_version": {
+            "before": "TODO",
+            "after": "1.15.1+galaxy2"
+          }
+        },
+        "state": {
+          "output_fmt": {
+            "before": null,
+            "after": "fastqsanger",
+            "kind": "added"
+          }
+        },
+        "in_defaults": {},
+        "out_actions": {},
+        "connections_in": {
+          "added": [
+            "reads -> to_fastq/input"
+          ],
+          "removed": [
+            "chr_filter/TODO_filtered -> to_fastq/TODO_input"
+          ]
+        },
+        "connections_out": {
+          "added": [],
+          "removed": []
+        },
+        "upstream": {
+          "added": [
+            "reads"
+          ],
+          "removed": [
+            "chr_filter"
+          ]
+        },
+        "downstream": {
+          "added": [],
+          "removed": []
+        },
+        "plan_fields_before": {
+          "_plan_context": "Upstream process SAMTOOLS_FASTQ.\n"
+        },
+        "plan_fields_after": {}
+      }
+    }
+  },
+  "unwired_inputs": [
+    "chr"
+  ],
+  "warnings": [],
+  "has_changes": true
+}

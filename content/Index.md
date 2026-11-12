@@ -147,6 +147,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## CLI Commands
 
 - [[add]] — Fetch a tool from the Tool Shed (shed-path or bare/stock id) and cache its ParsedTool locally for later summarize/schema.
+- [[check-step-removals]] — Check that every step a `gxwf diff` reports removed has a `kind: dropped` ledger entry naming it.
 - [[check-workflow-brief]] — Check Workflow Brief structure and stop on explicit workflow or agent environment blockers.
 - [[convert]] — Convert a Galaxy workflow between native (.ga) and format2 (.gxwf.yml) representations.
 - [[draft-extract]] — Extract the concrete subset of a draft workflow: trim drafty steps, strip `_plan_*`, promote class when fully resolved.
