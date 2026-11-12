@@ -6,9 +6,9 @@
     "path": "content/molds/advance-galaxy-draft-step/index.md",
     "revision": 13,
     "content_hash": "e1744028a5e91ae215aa264cca6ba229040db6a12537c29e3ec69dad5cbaea0d",
-    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
+    "commit": "6224dac5bce8d9eb65c75e99939d55d23df15d04"
   },
-  "cast_at": "2026-11-11T23:05:00.906Z",
+  "cast_at": "2026-11-11T23:14:42.151Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -148,8 +148,8 @@
       "evidence": "hypothesis",
       "purpose": "Read the ledger for an open blocking entry against the picked step, or any open blocking entry once no drafty step is left, count the open blocking entries the convergence gate reads, and maintain the topology_repair escalation budget the loop's termination guard depends on.",
       "verification": "Promote after a run where a blocking entry appended by implement is detected here and drives an escalation that leaves fewer open blocking entries than it found.",
-      "src_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
-      "dst_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
+      "src_hash": "25ce2ba60b21ca1db3fe31053f642dc96d140a8c5a2d76ca981c88c71196f6da",
+      "dst_hash": "25ce2ba60b21ca1db3fe31053f642dc96d140a8c5a2d76ca981c88c71196f6da",
       "source": "deterministic"
     },
     {

@@ -28,15 +28,18 @@
 
 - fixture: nf-core/bamtofastq at `869832186b25d2ccbcd31d5f69edacc1ba32b718`,
   summarized by `summarize-nextflow`, with its interface and data-flow briefs.
-  `SAMTOOLS_VIEW` has six aliases, and `conf/modules.config` gives four of
-  them their own `ext.args`.
+  `SAMTOOLS_VIEW` has six aliases. `conf/modules.config` gives five of them
+  their own `ext.args`: four view filters, plus `SAMTOOLS_CHR`'s `"-hb"`.
+  `SAMTOOLS_PE` has none.
 - expect: the steps translating `SAMTOOLS_VIEW_MAP_MAP`,
   `SAMTOOLS_VIEW_MAP_UNMAP`, `SAMTOOLS_VIEW_UNMAP_MAP`, and
   `SAMTOOLS_VIEW_UNMAP_UNMAP` carry `'-b -f1 -F12'`, `'-b -f8 -F260'`,
   `'-b -f4 -F264'`, and `'-b -f12 -F256'` respectively in
   `_plan_state.resolved_args`, each with its own `prefix` entry and with
   `invoked_as` naming the alias. No step carries another alias's entries or
-  `SAMTOOLS_CHR`'s. The collate steps carry `args2: '-N'`. `gxwf
+  `SAMTOOLS_CHR`'s, and a step translating `SAMTOOLS_PE` keeps a plain-text
+  `_plan_state`. Each `expression` parses back to the summary's string,
+  closures included. The collate steps carry `args2: '-N'`. `gxwf
   draft-validate --json` exits 0.
 
 ## Case: collection inputs use gxformat2-compatible structure

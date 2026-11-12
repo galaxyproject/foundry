@@ -196,7 +196,7 @@ This section is the runtime protocol for every Mold that carries the ledger. A M
 
 **Preserve every collection.** Carry obligation entries, discoveries, decisions, brief-change recommendations, and run-level headers untouched unless this Mold is explicitly adding to or updating the relevant collection. Never reinterpret one category as another merely to close it.
 
-**Append what you newly surface.** Each new obligation gets a stable kebab-case `id`, `status: open`, `raised_by` set to your own Mold name, and enough in `unmet` / `missing` for a later Mold to act without re-reading the source. Attach it to a draft step via `step` where one applies. Set `blocking: true` only when the settled draft can't give a correct run and a structural edit closes it.
+**Append what you newly surface.** Each new obligation gets a stable kebab-case `id`, `status: open`, `raised_by` set to your own Mold name, and enough in `unmet` / `missing` for a later Mold to act without re-reading the source. Attach it to a draft step via `step` where one applies, except for a flag record, which names its step in `source_arg` (see **Source arguments**). Set `blocking: true` only when the settled draft can't give a correct run and a structural edit closes it.
 
 **Mark resolved what you close.** When a decision you make discharges an open entry, set `status: resolved`, `resolved_by` to your own Mold name, and `note` to how it closed. Resolving is not deleting — a resolved entry stays in the ledger as the audit trail.
 

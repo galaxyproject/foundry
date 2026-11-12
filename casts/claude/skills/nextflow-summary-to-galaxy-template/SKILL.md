@@ -73,25 +73,22 @@ Topology is this skill's job to settle. The output must be concrete gxformat2: w
 
 Source tendency: nf-core modules name their tool, pin a version, and carry the `command:` block, conda packages, and container tags — so steps reach **Resolved** when a pattern page or IWC exemplar covers the operation (fill `tool_id`, parameters, and port names from the worked example), and **Identity-pinned** when the module names the tool but its settings for this context stay open. **Deferred** is for domain-specific scientific tools with no covering pattern (alignment, variant calling, expression quantification, etc.) — pack `_plan_context` with the source command, conda specs, container tags, and pre/post conditions the per-step skill needs to pick a wrapper. Emitting `TODO` over a pattern-covered recipe discards real evidence the per-step skill cannot recover.
 
-Carry the source's tool arguments into the step as data. `summary-nextflow.json` records each process's `ext.args`, `ext.args2`, and `ext.prefix` in `resolved_args`. The per-step skill binds `state` from `_plan_state`, so every flag nf-core sets must reach it there. Copy the entries, don't describe them: a paraphrase is a claim about what the flags do, and nothing downstream checks that claim. For each tool step that translates a process with a non-empty `resolved_args`, write `_plan_state` as a YAML document with two keys:
+Carry the source's tool arguments into the step as data. `summary-nextflow.json` records each process's `ext.args`, `ext.args2`, and `ext.prefix` in `resolved_args`. The per-step skill binds `state` from `_plan_state`, so every flag nf-core sets must reach it there. Copy the entries, don't describe them: a paraphrase is a claim about what the flags do, and nothing downstream checks that claim. For each tool step with at least one `resolved_args` entry that applies to the call it translates, write `_plan_state` as a YAML document with two keys:
 
 ```yaml
 _plan_state: |
   resolved_args:
-    - process: SAMTOOLS_VIEW
-      invoked_as: SAMTOOLS_VIEW_MAP_MAP
-      key: args
-      expression: "'-b -f1 -F12'"
-      selector: withName:SAMTOOLS_VIEW_MAP_MAP
-      config: conf/modules.config
+    - {"process": "SAMTOOLS_VIEW", "invoked_as": "SAMTOOLS_VIEW_MAP_MAP", "key": "args", "expression": "'-b -f1 -F12'", "selector": "withName:SAMTOOLS_VIEW_MAP_MAP", "config": "conf/modules.config"}
+    - {"process": "SAMTOOLS_VIEW", "invoked_as": "SAMTOOLS_VIEW_MAP_MAP", "key": "prefix", "expression": "{ \"${meta.id}.map_map\" }", "selector": "withName:SAMTOOLS_VIEW_MAP_MAP", "config": "conf/modules.config"}
   intent: |
     Keep paired reads whose read and mate are both mapped.
 ```
 
-- `resolved_args` holds the summary's entries, each copied unchanged, with `process` set to the summary's `processes[].name` and `invoked_as` set to the alias when the step translates an aliased call. Copy every entry whose `selector` can match the call, through its alias, its canonical name, or a label. Leave out an entry only when its selector names a different alias. A step that translates several processes lists each one's entries. Never evaluate a closure or rewrite an expression.
+- `resolved_args` holds the summary's entries, each copied unchanged, with `process` set to the summary's `processes[].name` and `invoked_as` set to the alias when the step translates an aliased call. An entry applies when its `selector` can match the call, through its alias, its canonical name, or a label; copy every one that does, and leave out those whose selector names a different alias. A step that translates several processes lists each one's entries. Never evaluate a closure or rewrite an expression.
+- Write each entry as a one-line JSON object, as above. JSON is valid YAML, and its quoting keeps every `expression` equal to the summary's string. Unquoted YAML strips Groovy's own quotes and reads a closure's braces as a mapping.
 - `intent` holds the free-text binding intent the step would otherwise carry. Where it and a flag disagree, the flag is the source evidence.
 
-The draft schema types `_plan_state` as a string, which is why the block is a YAML document inside one; a mapping value fails draft-validate. A step whose processes have no `resolved_args` keeps a plain-text `_plan_state`. A step you resolve fully carries no `_plan_*`, so bind its flags into `state` yourself and record a disposition for each one in the open-requirements-ledger, as its **Source arguments** section describes.
+The draft schema types `_plan_state` as a string, which is why the block is a YAML document inside one; a mapping value fails draft-validate. A step with no applicable entry keeps a plain-text `_plan_state`. A step you resolve fully carries no `_plan_*`, so bind its flags into `state` yourself and record a disposition for each one in the open-requirements-ledger, as its **Source arguments** section describes.
 
 Optionally, once topology is settled, group the step set into titled stage frames via the gxformat2 `comments:` array (one frame per analysis stage, `contains_steps:` populated, color decorative) — see galaxy-workflow-comments for the convention.
 

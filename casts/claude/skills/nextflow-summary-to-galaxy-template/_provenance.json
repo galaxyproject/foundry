@@ -5,10 +5,10 @@
     "name": "nextflow-summary-to-galaxy-template",
     "path": "content/molds/nextflow-summary-to-galaxy-template/index.md",
     "revision": 11,
-    "content_hash": "927d40f6542bb9e232c6c0836da58cf6b00ba62b449c03452d1bfeb24d617ebe",
-    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
+    "content_hash": "aa1fadb898387151203e4e02971fbca48d0ddc68a0a2fdba41fd4b10f2d620fc",
+    "commit": "6224dac5bce8d9eb65c75e99939d55d23df15d04"
   },
-  "cast_at": "2026-11-11T23:05:02.736Z",
+  "cast_at": "2026-11-11T23:14:43.626Z",
   "cast_date": "2026-05-07",
   "cast_revision": 3,
   "cast_history": [
@@ -310,8 +310,8 @@
       "evidence": "hypothesis",
       "purpose": "Close the open entries the settled topology discharges, and append a blocking entry for any settled step whose declared output no wired input can supply — the computability gap gxwf validation cannot see, raised here rather than left for the per-step loop to hit.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
-      "dst_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
+      "src_hash": "25ce2ba60b21ca1db3fe31053f642dc96d140a8c5a2d76ca981c88c71196f6da",
+      "dst_hash": "25ce2ba60b21ca1db3fe31053f642dc96d140a8c5a2d76ca981c88c71196f6da",
       "source": "deterministic"
     },
     {

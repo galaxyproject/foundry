@@ -6,9 +6,9 @@
     "path": "content/molds/nextflow-summary-to-galaxy-reference-data/index.md",
     "revision": 5,
     "content_hash": "b49bae31e3b8918b45f852b8f50e1101e71837380b97f8e8ec237a5dd2955f7f",
-    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
+    "commit": "6224dac5bce8d9eb65c75e99939d55d23df15d04"
   },
-  "cast_at": "2026-11-11T23:05:02.657Z",
+  "cast_at": "2026-11-11T23:14:43.572Z",
   "refs": [
     {
       "kind": "research",
@@ -64,8 +64,8 @@
       "evidence": "hypothesis",
       "purpose": "Inherit open entries rather than re-deriving them, close the ones a settled reference-data shape discharges, and append reference obligations the pipeline leaves open — a genome key with no Galaxy data table, a reference the pipeline builds at runtime, a build the corpus doesn't carry.",
       "verification": "Promote after a worked run shows entries this Mold appends or resolves are consumed downstream without re-derivation.",
-      "src_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
-      "dst_hash": "d9aaacad5e5461ad593647dc994f7b4797da9e170b7cadd8d22797811f425544",
+      "src_hash": "25ce2ba60b21ca1db3fe31053f642dc96d140a8c5a2d76ca981c88c71196f6da",
+      "dst_hash": "25ce2ba60b21ca1db3fe31053f642dc96d140a8c5a2d76ca981c88c71196f6da",
       "source": "deterministic"
     },
     {
