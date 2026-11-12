@@ -6,10 +6,11 @@ tags:
 status: draft
 created: 2026-06-16
 revised: 2026-11-12
-revision: 9
+revision: 10
 related_notes:
   - "[[galaxy-workflow-draft-format]]"
 related_molds:
+  - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[advance-galaxy-draft-step]]"
   - "[[repair-galaxy-draft-topology]]"
   - "[[implement-galaxy-tool-step]]"
@@ -183,6 +184,47 @@ entries:
 - Each flag an effective entry can set has exactly one record. Flags with the same disposition can share a record and are listed together in `flags`. Read a closure as written, never evaluate it. List every flag it can set, and in `rationale` or `because`, name the `params` or `meta` field each conditional flag depends on.
 - A record names its step inside `source_arg`, never in a top-level `step`.
 - `source_arg.arg` is the summary entry's `id`. Join records to the summary on `source_arg.step` and `source_arg.arg`, not on the record's own `id`. While the step keeps a `_plan_state`, its `calls` names the summary call paths the step translates.
+
+## Source scope
+
+A large nf-core pipeline offers analyses no single Galaxy workflow should carry at once: germline and somatic calling, five aligners, several start points. [[nextflow-summary-to-galaxy-interface]] picks the branch the run builds and records the choice as one scope decision. Each major branch it leaves out becomes an open `kind: dropped` entry:
+
+```yaml
+decisions:
+  - id: scope-germline-strelka
+    decided_by: nextflow-summary-to-galaxy-interface
+    scope:
+      candidate: "tests/default.nf.test::dynamically-generated"   # the test candidate the scope follows, if any
+      controls:                        # each branch control the scope fixes
+        - {control: params.step, value: mapping, from: "params[step].default"}
+        - {control: params.tools, value: strelka, from: "test_candidates[tests/default.nf.test::dynamically-generated].params_delta"}
+    decision: "Germline short-variant calling from FASTQ with BWA-MEM and Strelka."
+    rationale: "The selected test candidate runs this branch."
+entries:
+  - id: scope-somatic-calling
+    status: open
+    kind: dropped
+    raised_by: nextflow-summary-to-galaxy-interface
+    scope_branch:
+      decision: scope-germline-strelka   # the scope decision it falls outside
+      selected_by:                       # control values that would run the branch
+        - {control: params.tools, value: mutect2, from: "test_candidates[tests/variant_calling_mutect2.nf.test::dynamically-generated]"}
+        - {control: profile, value: mutect, from: "profiles[mutect]"}
+    units: "`BAM_VARIANT_CALLING_SOMATIC_ALL` and the callers under it"
+    because: "outside the selected scope `scope-germline-strelka`: somatic calling needs tumor/normal pairs and `tools` values the scope doesn't set"
+    unmet: "somatic variant calls"
+    missing: "no designed step calls somatic variants"
+```
+
+- A branch control is a summary value that selects which analyses run: a `params` entry such as `step`, `aligner` or `tools`, a profile such as `mutect`, or a `workflow.conditionals[]` guard.
+- `control` is `params.<name>` or `profile`. `from` names where the summary holds the value: `<array>[<name or id>]` with an optional field, as in `params[aligner].enum`, `params[concatenate_vcfs]` for a boolean set `true`, `profiles[mutect]`, `test_candidates[<id>].params_delta` or `workflow.conditionals[<a name in affects>]`. When a control has no `enum`, as with sarek's `tools`, cite a test candidate whose `id` names the value, such as `test_candidates[tests/variant_calling_mutect2.nf.test::dynamically-generated]`, with no field.
+- Record one drop per branch family (somatic calling, alternative aligners, annotation), not per process. Pipeline plumbing such as initialisation and CSV writing is not a branch.
+- `units` names the summary's own subworkflows and processes, backticked, so a reader can join them to the summary.
+- `because` names the scope decision and says what puts the branch outside it.
+- A scope drop names no top-level `step` and has no `source_arg`. An excluded branch never became a step, so the [[run-workflow-test]] step-removal check never reads it, and `scope_branch` tells it apart from a flag record.
+- A pipeline carried whole needs no scope decision. A control the scope leaves open stays a workflow input, and a control it fixes does not become one.
+
+Later Molds work inside the scope. They design no step, `when:` arm or fan-in for an excluded branch and carry its drop through `open`.
 
 ## How to use the ledger
 

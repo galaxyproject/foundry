@@ -6,9 +6,9 @@
     "path": "content/molds/run-workflow-test/index.md",
     "revision": 9,
     "content_hash": "1d1137183e48a3a81fc35bbf8e31a4c860f219c6ee26895d60dfe5619e9a114b",
-    "commit": "147f383bb573079ea175659972ec411c21c85ced"
+    "commit": "b74c6bdd0ccc36940ed2db94632931e529733b0a"
   },
-  "cast_at": "2026-11-12T13:20:43.866Z",
+  "cast_at": "2026-11-12T13:53:30.252Z",
   "cast_date": "2026-07-20",
   "cast_revision": 1,
   "cast_history": [
@@ -91,8 +91,8 @@
       "purpose": "Know what labels a removed step: a `kind: dropped` entry with a top-level `step` and a cited `because`, as opposed to a gap or a per-flag `source_arg` record.",
       "trigger": "When the removed-step check reports an unlabelled step.",
       "verification": "Promote after a test-phase run that removed a step ends red until the drop is recorded, then green.",
-      "src_hash": "225ddba1f1e34a48980cb7da052ab3de93788a1e5ad81c06534fbdfbc5d96f22",
-      "dst_hash": "225ddba1f1e34a48980cb7da052ab3de93788a1e5ad81c06534fbdfbc5d96f22",
+      "src_hash": "1b602ee1080aa4d2ce5bd2cc537506a25cabea9b51f6caa1243ca041adc33440",
+      "dst_hash": "1b602ee1080aa4d2ce5bd2cc537506a25cabea9b51f6caa1243ca041adc33440",
       "source": "deterministic"
     },
     {
