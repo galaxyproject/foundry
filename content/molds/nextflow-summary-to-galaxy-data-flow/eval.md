@@ -21,6 +21,15 @@ Properties are tagged by bucket:
   must not present unresolved `collect` / `mix` behavior as already-implemented
   Galaxy wiring.
 
+## Property: excluded branches are not designed
+
+- bucket: fidelity
+- check: llm-judged
+- assertion: when the ledger holds a scope decision, the draft designs no node,
+  `when:` arm or fan-in for a branch that has a scope drop, and passes every
+  scope drop through still `open`. Naming an excluded branch as a companion
+  workflow is fine; designing it is not.
+
 ## Property: operator translation is classified, not guessed
 
 - bucket: utility
