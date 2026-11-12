@@ -12,7 +12,7 @@ Evaluation plan for the `nextflow-summary-to-galaxy-interface` Mold. This file i
 
 - bucket: utility
 - check: llm-judged
-- assertion: a branch-affecting control flag is surfaced as a control, or fixed by the ledger's scope decision, rather than silently dropped from the interface. Every source branch the brief leaves out has a scope drop in the ledger.
+- assertion: a branch-affecting control flag is surfaced as a control, or fixed by the ledger's scope decision, rather than silently dropped from the interface. Every source branch the brief leaves out has a scope drop in the ledger. When the scope follows a test candidate, the brief names its `id`.
 
 ## Property: scope records cite the summary and stay apart from step and flag records
 

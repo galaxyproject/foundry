@@ -5,10 +5,10 @@
     "name": "nextflow-to-test-data",
     "path": "content/molds/nextflow-to-test-data/index.md",
     "revision": 5,
-    "content_hash": "9faeedf909e5983541e8aff612c93a8ae940c4a2c3cdc303cfc9c83696125972",
-    "commit": "94fcfb580b2db0d4dbb0604a6590febea845a72e"
+    "content_hash": "b8dda5201c6b489832aa813759d83558e73575079afd0ee7efc5e21326081661",
+    "commit": "eb81515c5eeb2e97f94f51e3d49d17f269a732d4"
   },
-  "cast_at": "2026-11-12T14:25:13.018Z",
+  "cast_at": "2026-11-12T14:40:39.409Z",
   "refs": [
     {
       "kind": "research",

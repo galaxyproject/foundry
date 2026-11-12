@@ -65,7 +65,7 @@ references:
 ---
 # nextflow-to-test-data
 
-Resolve the Nextflow pipeline's own declared test fixtures into Galaxy `test-data-refs`. The Nextflow summary carries every statically visible whole-pipeline case in `test_candidates[]` and records the default decision in `test_selection`. Each candidate owns its effective profiles, parameter delta, inputs, outputs, execution mode, scope, and assertions. Map the selected candidate's inputs onto the Galaxy workflow and emit one ref per input, ready for [[implement-galaxy-workflow-test]] to stage. If selection is unresolved, surface that scope decision before resolving data rather than silently choosing by profile name.
+Resolve the Nextflow pipeline's own declared test fixtures into Galaxy `test-data-refs`. The Nextflow summary carries every statically visible whole-pipeline case in `test_candidates[]` and records the default decision in `test_selection`. Each candidate owns its effective profiles, parameter delta, inputs, outputs, execution mode, scope, and assertions. Map the selected candidate's inputs onto the Galaxy workflow and emit one ref per input, ready for [[implement-galaxy-workflow-test]] to stage. If selection is unresolved, follow the candidate the interface brief's scope names. Surface the choice only when the brief names none, never silently choosing by profile name.
 
 This Mold is the source-specific first leg of the harness's `test-data-resolution` branch. It resolves what the pipeline itself declares; any input it cannot resolve from a declared fixture stays a reported gap and the harness falls through to [[find-test-data]] (search), then to `user-supplied`. Deciding to fall through is a harness concern, not this Mold's — its job is an honest map of the pipeline's own fixtures.
 
