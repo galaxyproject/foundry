@@ -80,6 +80,17 @@ Properties are tagged by bucket:
   Hallucination guardrail: a fabricated `tool_id` or an invented output port
   that doesn't match the resolved wrapper's summary is a failure, not a pass.
 
+## Property: no source argument leaves the loop without a disposition
+
+- bucket: implementation
+- check: deterministic + llm-judged
+- assertion: when the chosen step's `_plan_state` carried `resolved_args`
+  before implementation, the ledger holds, by the time validation runs, a
+  record for each flag of every entry `_plan_state` listed. Each such record's
+  `source_arg` names that step and the entry's `id`, per the ledger's
+  **Source arguments** rules.
+  Implementation stripping `_plan_state` does not excuse a missing record.
+
 ## Property: the implemented loop round-trips to the oracle
 
 - bucket: implementation

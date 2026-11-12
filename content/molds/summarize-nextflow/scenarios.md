@@ -81,6 +81,34 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
   `gnomon_training_iteration4`; and the canonical
   `gnomon_training_iteration.aliases[]` contains aliases 2, 3, and 4.
 
+## Case: rnaseq `SALMON_QUANT` effective arguments per call path
+
+- fixture: `workflow-fixtures/pipelines/nf-core__rnaseq`.
+- expect: `SALMON_QUANT` has three `effective_args` rows for `args`.
+  `NFCORE_RNASEQ:RNASEQ:FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS:FASTQ_SUBSAMPLE_FQ_SALMON:SALMON_QUANT`
+  names the `'--skipQuant'` entry.
+  `NFCORE_RNASEQ:RNASEQ:QUANTIFY_BAM_SALMON:SALMON_QUANT`, through the
+  subworkflow alias, and `NFCORE_RNASEQ:RNASEQ:QUANTIFY_PSEUDO_ALIGNMENT:SALMON_QUANT`
+  each name their own `withName:.*:<subworkflow>:SALMON_QUANT` entry from
+  `workflows/rnaseq/nextflow.config`. No row is a tie.
+
+## Case: bamtofastq aliases rank only their own selectors
+
+- fixture: `workflow-fixtures/pipelines/nf-core__bamtofastq`.
+- expect: each `SAMTOOLS_VIEW` alias with its own `withName:` block in
+  `conf/modules.config` has rows naming only that block's entries, under
+  paths like `NFCORE_BAMTOFASTQ:BAMTOFASTQ:ALIGNMENT_TO_FASTQ:SAMTOOLS_VIEW_MAP_MAP`.
+  `SAMTOOLS_PE` has no row, and no row is a tie.
+
+## Case: sarek `CRAM_TO_BAM` prefix set in both branches of an `if`
+
+- fixture: `workflow-fixtures/pipelines/nf-core__sarek`, whose
+  `conf/modules/markduplicates.config` block
+  `withName: 'NFCORE_SAREK:SAREK:FASTQ_PREPROCESS_GATK:CRAM_TO_BAM'` sets
+  `ext.prefix` to `.dedup` or `.md` depending on `params.tools`.
+- expect: the row for that call and `prefix` names both entries, `…/prefix`
+  and `…/prefix~2`, with `tie: true`.
+
 ## Case: bacass nf-core module metadata and tests
 
 - fixture: `workflow-fixtures/pipelines/nf-core__bacass`.

@@ -96,3 +96,14 @@ the round-trip oracle. See that directory's `README.md`.
   and `open-requirements.ledger.yml` beside it.
 - expect: the call that picks `M19_dupradar`, once `M18_markdup` is realized, goes
   straight to [[repair-galaxy-draft-topology]] with no new search.
+
+## Case: a realized step's source arguments all have a record
+
+- fixture: a draft whose picked step translates nf-core/bamtofastq's
+  `COLLATE_FASTQ_MAP` and carries `_plan_state.resolved_args` for `args`,
+  `args2`, and `prefix` from `conf/modules.config`.
+- expect: before [[draft-validate]] runs, the ledger covers each of `args`'s
+  `-f` and `-r` (both set only when `params.samtools_collate_fast`),
+  `args2`'s `-N`, and the `prefix` exactly once, in records naming the step in
+  `source_arg`. A call that implements the step without them goes back to
+  implementation.

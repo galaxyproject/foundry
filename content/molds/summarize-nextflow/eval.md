@@ -181,6 +181,29 @@ whatever a scenario produces. Properties are tagged by bucket:
   or in a config that block includes, stay out unless the caller selected that
   profile. A selected profile's entries name it in `profile`.
 
+## Property: effective arguments follow Nextflow selector priority
+
+- bucket: fidelity
+- check: deterministic
+- assertion: each `resolved_args` entry has an `id` unique within its process.
+  Each `effective_args` row's `call` is a call path traced from the entry
+  workflow, with subworkflow aliases as segments and no segment for the
+  anonymous entry, or, for a process no traced workflow calls, its bare name
+  or alias. Each call name resolves through the calling file's own includes.
+  For every call path of a process and every `key` an entry sets for it,
+  `effective_args` has one row whose `ids` name the highest-ranked entry:
+  `withLabel` < `withName` on the process name < `withName` on the alias <
+  `withName` on the whole call path. At the same rank a selected profile's
+  entry beats the root chain's, unless the root chain declares the same
+  selector. Then the profile entry replaces only that selector's root
+  entries, at the root declaration's position. A qualified selector whose subworkflow doesn't
+  call the process on that path, an entry whose selector names a different
+  alias, and `.*:NAME` for an aliased call are never effective for it. One
+  call name used from two subworkflows gives separate rows. Within one config
+  a later declaration of the same selector wins, but assignments to the key in
+  different branches of one block stay level. Several `ids` appear only with
+  `tie: true`, when level entries set different expressions.
+
 ## Property: re-runs are reproducible
 
 - bucket: regression
