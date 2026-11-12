@@ -187,23 +187,22 @@ whatever a scenario produces. Properties are tagged by bucket:
 - check: deterministic
 - assertion: each `resolved_args` entry has an `id` unique within its process.
   Each `effective_args` row's `call` is a call path traced from the entry
-  workflow (subworkflow aliases included, the anonymous entry adding no
-  segment), or, for a process no traced workflow calls, its bare name or
-  alias. Each call name resolves through the calling file's own includes.
-  For every call path of a process and every `key` an entry sets
-  for it, `effective_args` has one row whose `ids` name the entry with the
-  highest rank (`withLabel` < `withName` on the process < `withName` on the
-  alias < `withName` on the whole path). At the same rank a selected
-  profile's entry beats the root chain's, unless the root chain declares the
-  same selector, which then keeps its position and only that selector's root
-  entries lose. A qualified selector whose
-  subworkflow doesn't call the process on that path, an entry whose selector
-  names a different alias, and `.*:NAME` for an aliased call are never
-  effective for it. One call name used from two subworkflows gives separate
-  rows. Within one config a later declaration of the same selector wins,
-  except over assignments to the key in different branches of one block,
-  which stay level. Several `ids` appear only with `tie: true`, when level
-  entries set different expressions.
+  workflow, with subworkflow aliases as segments and no segment for the
+  anonymous entry, or, for a process no traced workflow calls, its bare name
+  or alias. Each call name resolves through the calling file's own includes.
+  For every call path of a process and every `key` an entry sets for it,
+  `effective_args` has one row whose `ids` name the highest-ranked entry:
+  `withLabel` < `withName` on the process name < `withName` on the alias <
+  `withName` on the whole call path. At the same rank a selected profile's
+  entry beats the root chain's, unless the root chain declares the same
+  selector. Then the root declaration keeps its position and only that
+  selector's root entries lose. A qualified selector whose subworkflow doesn't
+  call the process on that path, an entry whose selector names a different
+  alias, and `.*:NAME` for an aliased call are never effective for it. One
+  call name used from two subworkflows gives separate rows. Within one config
+  a later declaration of the same selector wins, but assignments to the key in
+  different branches of one block stay level. Several `ids` appear only with
+  `tie: true`, when level entries set different expressions.
 
 ## Property: re-runs are reproducible
 

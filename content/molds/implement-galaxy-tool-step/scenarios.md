@@ -17,7 +17,7 @@
 
 ## Case: `samtools view` flags from bamtofastq's config
 
-- fixture: a draft whose Identity-pinned step translates nf-core/bamtofastq's `SAMTOOLS_VIEW_MAP_MAP` (pinned at `869832186b25d2ccbcd31d5f69edacc1ba32b718`). Its `_plan_state.resolved_args` has `args: '-b -f1 -F12'` and `prefix: { "${meta.id}.map_map" }` from `withName:SAMTOOLS_VIEW_MAP_MAP` in `conf/modules.config`, with ids `conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/args` and `…/prefix`, and its `intent` says only to keep mapped reads. Add the [[galaxy-tool-summary]] for the pinned Tool Shed `samtools_view` wrapper.
+- fixture: a draft whose Identity-pinned step translates nf-core/bamtofastq's `SAMTOOLS_VIEW_MAP_MAP` (pinned at `869832186b25d2ccbcd31d5f69edacc1ba32b718`). Its `_plan_state.resolved_args` has `args: '-b -f1 -F12'` and `prefix: { "${meta.id}.map_map" }` from `withName:SAMTOOLS_VIEW_MAP_MAP` in `conf/modules.config`, with ids `conf/modules.config#withName:SAMTOOLS_VIEW_MAP_MAP/args` and `…/prefix`, and its `intent` says only to keep mapped reads. The [[galaxy-tool-summary]] for the pinned Tool Shed `samtools_view` wrapper comes with it.
 - expect: `state` sets BAM output, requires flag 1, and excludes flags 4 and 8, following the flags rather than `intent`. The ledger gains `carried` decisions covering `-b`, `-f1`, and `-F12` once each, and a `not_applicable` decision for `prefix`, each with `source_arg.step` set to the step and `source_arg.arg` set to the entry's id. No flag record has a top-level `step`.
 
 ## Case: two configs tie on one selector

@@ -85,10 +85,10 @@ Properties are tagged by bucket:
 - bucket: implementation
 - check: deterministic + llm-judged
 - assertion: when the chosen step's `_plan_state` carried `resolved_args`
-  before implementation, then by validation the ledger holds a record whose
-  `source_arg` names that step and the entry's `id` for each flag of every
-  entry `_plan_state` listed, per the ledger's **Source arguments** rules. The
-  stripped `_plan_state` does not excuse a missing record.
+  before implementation, the ledger holds, by the time validation runs, a
+  record for each flag of every listed entry, whose `source_arg` names that
+  step and the entry's `id`, per the ledger's **Source arguments** rules.
+  Implementation stripping `_plan_state` does not excuse a missing record.
 
 ## Property: the implemented loop round-trips to the oracle
 

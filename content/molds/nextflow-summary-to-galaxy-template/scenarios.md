@@ -61,9 +61,9 @@
   `FASTQ_SUBSAMPLE_FQ_SALMON`, by `QUANTIFY_PSEUDO_ALIGNMENT`, and by that
   subworkflow's alias `QUANTIFY_BAM_SALMON`, each with its own
   `withName:.*:<subworkflow>:SALMON_QUANT` `ext.args`.
-- expect: the step translating the subsampling call has `calls:
-  ["NFCORE_RNASEQ:RNASEQ:FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS:FASTQ_SUBSAMPLE_FQ_SALMON:SALMON_QUANT"]`
-  and only the `'--skipQuant'` entry. The quantification steps each list
+- expect: the step translating the subsampling call lists
+  `NFCORE_RNASEQ:RNASEQ:FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS:FASTQ_SUBSAMPLE_FQ_SALMON:SALMON_QUANT`
+  as its only `calls` path and carries only the `'--skipQuant'` entry. The quantification steps each list
   their own path (`NFCORE_RNASEQ:RNASEQ:QUANTIFY_BAM_SALMON:SALMON_QUANT` or
   `NFCORE_RNASEQ:RNASEQ:QUANTIFY_PSEUDO_ALIGNMENT:SALMON_QUANT`) and only
   that path's `{ params.extra_salmon_quant_args ?: '' }` entry. No

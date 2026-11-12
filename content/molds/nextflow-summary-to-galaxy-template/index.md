@@ -215,9 +215,13 @@ _plan_state: |
 - `calls` lists the `call` path of each call the step translates, spelled as in `effective_args`: usually one. A call name used from two subworkflows has two paths, and each one's step lists only its own path.
 - `resolved_args` holds the entries that the rows for those paths name by `id`, each copied unchanged from the process's `resolved_args`. Add `"tie": true` to the entries of a row marked `tie`. Leave every other entry out. A step that translates several calls lists each one's effective entries, each `id` once. Never evaluate a closure or rewrite an expression.
 - Write `calls` as a one-line JSON array and each entry as a one-line JSON object, as above, so every `expression` stays equal to the summary's string. Plain YAML strips Groovy's quotes and reads a closure's braces as a mapping.
-- `intent` holds the free-text binding intent the step would otherwise carry. Where it and a flag disagree, the flag is the source evidence.
+- `intent` holds the free-text binding intent the step would otherwise carry. Where it and a flag disagree, the flag wins, since it is source evidence.
 
-Keep the document inside the string (`_plan_state: |`). A mapping value fails [[draft-validate]]. A step whose call has no `effective_args` row keeps a plain-text `_plan_state`. `resolved_args` holds only config-set arguments. Flags the module's own script writes are in `script_excerpt`, so a missing entry doesn't mean the source sets no flags. A step you resolve fully carries no `_plan_*`, so bind its flags into `state` yourself and record a disposition for each one in the [[open-requirements-ledger]], as its **Source arguments** section describes.
+Keep the document inside the string (`_plan_state: |`). A mapping value fails [[draft-validate]]. A step whose call has no `effective_args` row keeps a plain-text `_plan_state`.
+
+`resolved_args` holds only config-set arguments. Flags the module's own script writes are in `script_excerpt`, so a missing entry doesn't mean the source sets no flags.
+
+A step you resolve fully carries no `_plan_*`. Bind its flags into `state` yourself and record a disposition for each one in the [[open-requirements-ledger]], as its **Source arguments** section describes.
 
 Optionally, once topology is settled, group the step set into titled stage frames via the gxformat2 `comments:` array (one frame per analysis stage, `contains_steps:` populated, color decorative) — see [[galaxy-workflow-comments]] for the convention.
 

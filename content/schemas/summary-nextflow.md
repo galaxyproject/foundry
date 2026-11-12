@@ -87,9 +87,9 @@ Nextflow's selector priority themselves.
   the `id` that takes effect. `call` is Nextflow's fully qualified call
   name (`task.process`), traced from the entry workflow through subworkflow
   aliases, so one call name used from two subworkflows gets two rows.
-  Priority is `withLabel` < `withName` on the process < `withName` on the
-  alias < `withName` on the whole path, and a pattern must match a whole
-  name. At the same rank a selected profile beats the root chain, as under
+  Priority is `withLabel` < `withName` on the process name < `withName` on
+  the alias < `withName` on the whole call path, and a pattern must match a
+  whole name. At the same rank a selected profile beats the root chain, as under
   the legacy config parser, unless the root chain also declares the
   profile's selector: then the profile replaces only that selector's root
   entries and can tie another root selector. Under the strict parser
