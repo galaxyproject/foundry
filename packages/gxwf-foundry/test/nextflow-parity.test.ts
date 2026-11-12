@@ -207,6 +207,37 @@ describe("assembleNextflowParity", () => {
     expect(() => assembleNextflowParity(extra)).toThrow(InputShapeError);
   });
 
+  it("keys inner steps only where gxwf diff recurses: an inline run on both sides", () => {
+    const nested = inputs();
+    const inline = { class: "GalaxyWorkflow", inputs: {}, outputs: {}, steps: { inner: {} } };
+    const snapshot = nested.snapshot as { steps: Record<string, Record<string, unknown>> };
+    snapshot.steps.chr_filter!.run = inline;
+    snapshot.steps.summarize!.run = inline;
+    const final = nested.workflow as { steps: Record<string, Record<string, unknown>> };
+    final.steps.summarize!.run = "summarize.gxwf.yml";
+    const result = assembleNextflowParity(nested);
+    expect(result.steps.map((s) => s.step)).not.toContain("chr_filter/inner");
+    expect(result.steps.map((s) => s.step)).not.toContain("summarize/inner");
+
+    final.steps.summarize!.run = inline;
+    expect(assembleNextflowParity(nested).steps.map((s) => s.step)).toContain("summarize/inner");
+  });
+
+  it("lists a step drop no removed step matches with the other drops", () => {
+    const stale = inputs();
+    (stale.ledger as { entries: unknown[] }).entries.push({
+      id: "collate-dropped",
+      status: "open",
+      kind: "dropped",
+      step: "collate",
+      because: "fast mode has no wrapper input",
+    });
+    expect(assembleNextflowParity(stale).other_drops.map((d) => d.id)).toEqual([
+      "multiqc-not-built",
+      "collate-dropped",
+    ]);
+  });
+
   it("reports a flag record whose source_arg lacks a step or arg", () => {
     const broken = inputs();
     (broken.ledger as { entries: unknown[] }).entries.push({

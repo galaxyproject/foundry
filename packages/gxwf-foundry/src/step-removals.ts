@@ -15,14 +15,14 @@ export interface StepRemovalCheck {
   unwired_inputs: string[];
 }
 
-export function removedSteps(diff: unknown): Record<string, unknown> {
+function removedSteps(diff: unknown): Record<string, unknown> {
   const removed = isRecord(diff) && isRecord(diff.steps) ? diff.steps.removed : undefined;
   if (!isRecord(removed))
     throw new InputShapeError("diff has no steps.removed object; expected gxwf diff --json");
   return removed;
 }
 
-export function unwiredInputs(diff: unknown): string[] {
+function unwiredInputs(diff: unknown): string[] {
   const unwired = isRecord(diff) ? diff.unwired_inputs : undefined;
   if (unwired === undefined) return [];
   if (!Array.isArray(unwired) || !unwired.every((id) => typeof id === "string"))

@@ -1,7 +1,6 @@
 import YAML from "yaml";
-import { readInputOrExit } from "../lib/read-input.js";
-import { InputShapeError } from "../ledger.js";
-import { checkStepRemovals, type StepRemovalCheck } from "../step-removals.js";
+import { exitOnInputShape, readInputOrExit } from "../lib/read-input.js";
+import { checkStepRemovals } from "../step-removals.js";
 
 export interface StepRemovalsCheckOptions {
   json?: boolean;
@@ -16,14 +15,7 @@ export function runCheckStepRemovals(
 ): never {
   const diff = readInputOrExit<unknown>(diffPath, JSON.parse, stdinOr(diffPath));
   const ledger = readInputOrExit<unknown>(ledgerPath, YAML.parse, stdinOr(ledgerPath));
-  let result: StepRemovalCheck;
-  try {
-    result = checkStepRemovals(diff, ledger);
-  } catch (error) {
-    if (!(error instanceof InputShapeError)) throw error;
-    process.stderr.write(`${error.message}\n`);
-    process.exit(3);
-  }
+  const result = exitOnInputShape(() => checkStepRemovals(diff, ledger));
   if (options.json) {
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   } else {

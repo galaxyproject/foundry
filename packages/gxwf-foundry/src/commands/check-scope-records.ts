@@ -1,7 +1,6 @@
 import YAML from "yaml";
-import { readInputOrExit } from "../lib/read-input.js";
-import { InputShapeError } from "../ledger.js";
-import { checkScopeRecords, type ScopeRecordCheck, type ScopeSummary } from "../scope-records.js";
+import { exitOnInputShape, readInputOrExit } from "../lib/read-input.js";
+import { checkScopeRecords, type ScopeSummary } from "../scope-records.js";
 
 export interface ScopeRecordsCheckOptions {
   json?: boolean;
@@ -15,14 +14,7 @@ export function runCheckScopeRecords(
   const ledger = readInputOrExit<unknown>(ledgerPath, YAML.parse);
   const summary =
     summaryPath === undefined ? undefined : readInputOrExit<ScopeSummary>(summaryPath, JSON.parse);
-  let result: ScopeRecordCheck;
-  try {
-    result = checkScopeRecords(ledger, summary);
-  } catch (error) {
-    if (!(error instanceof InputShapeError)) throw error;
-    process.stderr.write(`${error.message}\n`);
-    process.exit(3);
-  }
+  const result = exitOnInputShape(() => checkScopeRecords(ledger, summary));
   if (options.json) {
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   } else {

@@ -25,7 +25,7 @@ Assemble the joins a source-parity report needs from five files of one `nextflow
 - `--workflow`: the final `galaxy-workflow.gxwf.yml`.
 - `--diff`: `gxwf diff --json <snapshot> <workflow>`.
 
-It reads, never judges. It joins what has a key and reports a difference with no recorded reason as a finding. Steps are keyed as `gxwf diff` keys them: the dict key, or a list-form step's label, then its `id`, then its index counted after the inputs, and `<parent>/<key>` inside an inline subworkflow.
+It reads, never judges. It joins what has a key and reports a difference with no recorded reason as a finding. Steps are keyed as `gxwf diff` keys them: the dict key, or a list-form step's label, then its `id`, then its index counted after the inputs, and `<parent>/<key>` inside a subworkflow step that is inline on both sides, the only place `gxwf diff` looks inside one.
 
 ## Output
 
@@ -38,7 +38,7 @@ Stdout holds one JSON object:
 - `source_args.overridden`: the `resolved_args` entries no `effective_args` row names. They need no record.
 - `source_args.stray_records`: flag records joined to no row, with a `problem`: `unknown-step`, `unknown-arg`, `not-effective` (an overridden entry), or `other-step` (effective, but for another step's calls).
 - `scope`: the [[check-scope-records]] result against the summary.
-- `other_drops`: `kind: dropped` entries with no top-level `step`, no `source_arg` and no `scope_branch`: the design tier's cuts.
+- `other_drops`: `kind: dropped` entries with no `source_arg` and no `scope_branch` that no removed step's `dropped_entries` lists: the design tier's cuts, output drops, and step drops that name a kept step or lack a `because`.
 - `findings`: one `{kind, subject, detail?}` per difference with no recorded reason:
   - `step-removed-unrecorded`: a removed step no drop names.
   - `output-removed-unrecorded`: a removed output no drop names, by its source step or in `units`. `detail` is the source step.

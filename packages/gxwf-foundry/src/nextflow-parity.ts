@@ -140,9 +140,10 @@ interface Summary extends ScopeSummary {
 const str = (value: unknown): string | null => (typeof value === "string" ? value : null);
 const nonEmpty = (value: unknown): string | null => str(value) || null;
 
-/** Steps keyed as `gxwf diff` keys them: dict key, else label, id or input-offset index, and `<parent>/<key>` inside inline subworkflows. */
-function workflowSteps(doc: unknown, prefix = ""): Map<string, Record<string, unknown>> {
-  const steps = new Map<string, Record<string, unknown>>();
+type StepMap = Map<string, Record<string, unknown>>;
+
+/** One level's steps keyed as `gxwf diff` keys them: dict key, else label, id or input-offset index. */
+function levelSteps(doc: unknown): [string, Record<string, unknown>][] {
   const raw = isRecord(doc) ? doc.steps : undefined;
   const inputs = isRecord(doc) ? doc.inputs : undefined;
   const offset = Array.isArray(inputs)
@@ -158,14 +159,28 @@ function workflowSteps(doc: unknown, prefix = ""): Map<string, Record<string, un
     : isRecord(raw)
       ? Object.entries(raw)
       : [];
-  for (const [key, step] of pairs) {
-    if (!isRecord(step)) continue;
-    const path = prefix ? `${prefix}/${key}` : key;
-    steps.set(path, step);
-    if (isRecord(step.run) && "steps" in step.run)
-      for (const [inner, value] of workflowSteps(step.run, path)) steps.set(inner, value);
+  return pairs.filter((pair): pair is [string, Record<string, unknown>] => isRecord(pair[1]));
+}
+
+const inlineRun = (step: Record<string, unknown> | undefined) =>
+  isRecord(step?.run) && "steps" in step.run ? step.run : undefined;
+
+/** Both sides' steps; like `gxwf diff`, inner steps appear as `<parent>/<key>` only under a step inline on both sides. */
+function joinSteps(
+  before: unknown,
+  after: unknown,
+  prefix = "",
+  out: { snapshot: StepMap; final: StepMap } = { snapshot: new Map(), final: new Map() },
+) {
+  const b = new Map(levelSteps(before).map(([key, step]) => [prefix + key, step]));
+  const a = new Map(levelSteps(after).map(([key, step]) => [prefix + key, step]));
+  for (const [key, step] of b) out.snapshot.set(key, step);
+  for (const [key, step] of a) out.final.set(key, step);
+  for (const key of b.keys()) {
+    const [bRun, aRun] = [inlineRun(b.get(key)), inlineRun(a.get(key))];
+    if (bRun && aRun) joinSteps(bRun, aRun, `${key}/`, out);
   }
-  return steps;
+  return out;
 }
 
 function planCalls(step: Record<string, unknown> | undefined): {
@@ -224,6 +239,33 @@ function malformedReason(record: LedgerRecord, collection: ArgRecord["collection
     : null;
 }
 
+function processLookup(processes: SummaryProcess[], tools: Map<string, SummaryTool>) {
+  return (call: string): CallSource => {
+    const name = call.split(":").at(-1)!;
+    const process = processes.find((p) => p.name === name || (p.aliases ?? []).includes(name));
+    const tool = process?.tool ? tools.get(process.tool) : undefined;
+    return {
+      call,
+      process: process?.name ?? null,
+      tool: process?.tool ?? null,
+      tool_versions: tool ? (tool.versions ?? [tool.version]) : [],
+      container: process?.container ?? null,
+      conda: process?.conda ?? null,
+    };
+  };
+}
+
+function strayProblem(
+  arg: string,
+  stepKnown: boolean,
+  resolvedIds: Set<string>,
+  effectiveIds: Set<string>,
+): StrayRecord["problem"] {
+  if (!stepKnown) return "unknown-step";
+  if (!resolvedIds.has(arg)) return "unknown-arg";
+  return effectiveIds.has(arg) ? "other-step" : "not-effective";
+}
+
 export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowParity {
   const summary = (isRecord(inputs.summary) ? inputs.summary : {}) as Summary;
   if (!Array.isArray(summary.processes))
@@ -233,8 +275,10 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
   const diffOutputs = diffSection(inputs.diff, "outputs");
   const added = isRecord(inputs.diff) && isRecord(inputs.diff.steps) ? inputs.diff.steps.added : {};
   const addedKeys = new Set(isRecord(added) ? Object.keys(added) : []);
-  const snapshotSteps = workflowSteps(inputs.snapshot);
-  const finalSteps = workflowSteps(inputs.workflow);
+  const { snapshot: snapshotSteps, final: finalSteps } = joinSteps(
+    inputs.snapshot,
+    inputs.workflow,
+  );
   const removedBy = new Map(removal.removed_steps.map((s) => [s.step, s.dropped_entries]));
   const mismatched = [
     ...[...snapshotSteps.keys()].filter((k) => !finalSteps.has(k) !== removedBy.has(k)),
@@ -245,50 +289,86 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
       `steps ${mismatched.join(", ")} disagree with the diff; diff the snapshot against the final workflow`,
     );
   const processes = summary.processes;
-  const tools = new Map((summary.tools ?? []).map((tool) => [tool.name, tool]));
+  const sourceOf = processLookup(
+    processes,
+    new Map((summary.tools ?? []).map((tool) => [tool.name, tool])),
+  );
 
   const ledgerRecords = [
     ...ledgerDecisions(inputs.ledger).map((r) => [r, "decisions"] as const),
     ...ledgerEntries(inputs.ledger).map((r) => [r, "entries"] as const),
-  ];
-  const malformed = ledgerRecords
-    .filter(([record]) => "source_arg" in record)
-    .flatMap(([record, collection]) => {
-      const detail = malformedReason(record, collection);
-      return detail ? [{ subject: recordId(record), detail }] : [];
-    });
-  const records = ledgerRecords.flatMap(([record, collection]) => {
-    const arg = sourceArg(record);
-    if (!arg || malformedReason(record, collection)) return [];
+  ].filter(([record]) => "source_arg" in record);
+  const malformed: { subject: string; detail: string }[] = [];
+  const records: { record: ArgRecord; arg: string }[] = [];
+  for (const [record, collection] of ledgerRecords) {
+    const detail = malformedReason(record, collection);
+    if (detail) {
+      malformed.push({ subject: recordId(record), detail });
+      continue;
+    }
+    const arg = sourceArg(record)!;
     const status = str(record.status);
-    const out: ArgRecord = {
-      id: recordId(record),
-      step: arg.step,
-      collection,
-      disposition: disposition(record, collection),
-      ...(status ? { status } : {}),
-      ...(arg.flags ? { flags: arg.flags } : {}),
-    };
-    return [{ record: out, arg: arg.arg }];
-  });
+    records.push({
+      arg: arg.arg,
+      record: {
+        id: recordId(record),
+        step: arg.step,
+        collection,
+        disposition: disposition(record, collection),
+        ...(status ? { status } : {}),
+        ...(arg.flags ? { flags: arg.flags } : {}),
+      },
+    });
+  }
 
   const keys = [...new Set([...snapshotSteps.keys(), ...finalSteps.keys()])];
+  const planned = new Map(keys.map((key) => [key, planCalls(snapshotSteps.get(key))]));
+  const callIds = new Map<string, string[]>();
+  for (const process of processes)
+    for (const { call, ids } of process.effective_args ?? [])
+      callIds.set(call, [...(callIds.get(call) ?? []), ...ids]);
+  const idCallCount = new Map<string, number>();
+  for (const ids of callIds.values())
+    for (const id of new Set(ids)) idCallCount.set(id, (idCallCount.get(id) ?? 0) + 1);
+  const callSteps = new Map(
+    [...callIds].map(([call, ids]): [string, Pick<ArgRow, "steps" | "steps_from">] => {
+      const mapped = keys.filter((key) => planned.get(key)!.calls?.includes(call));
+      if (mapped.length > 0) return [call, { steps: mapped, steps_from: "plan_state" }];
+      // A step the template resolved keeps no `_plan_state`; its records on this call's own ids name it.
+      const named = records
+        .filter(
+          ({ arg, record }) =>
+            ids.includes(arg) &&
+            idCallCount.get(arg) === 1 &&
+            planned.has(record.step) &&
+            !planned.get(record.step)!.calls,
+        )
+        .map(({ record }) => record.step);
+      const unique = [...new Set(named)];
+      return [call, { steps: unique, steps_from: unique.length > 0 ? "records" : null }];
+    }),
+  );
+  const recordCalls = new Map<string, string[]>();
+  for (const [call, { steps, steps_from }] of callSteps)
+    if (steps_from === "records")
+      for (const key of steps) recordCalls.set(key, [...(recordCalls.get(key) ?? []), call]);
+
   const steps: StepParity[] = keys.map((key) => {
     const before = snapshotSteps.get(key);
     const after = finalSteps.get(key);
-    const { plan_state, calls } = planCalls(before);
-    const status = removedBy.has(key) ? "removed" : addedKeys.has(key) ? "added" : "kept";
+    const { plan_state, calls: plan } = planned.get(key)!;
+    const calls = plan ?? recordCalls.get(key) ?? [];
     const tooled = after ?? before ?? {};
     return {
       step: key,
       label: str(after?.label) ?? str(before?.label),
-      status,
+      status: removedBy.has(key) ? "removed" : addedKeys.has(key) ? "added" : "kept",
       plan_state,
-      calls: calls ?? [],
-      calls_from: calls ? "plan_state" : null,
+      calls,
+      calls_from: plan ? "plan_state" : recordCalls.has(key) ? "records" : null,
       tool_id: str(tooled.tool_id),
       tool_version: str(tooled.tool_version),
-      source: [],
+      source: calls.map(sourceOf),
       dropped_entries: removedBy.get(key) ?? [],
     };
   });
@@ -297,34 +377,6 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
   const drops = ledgerEntries(inputs.ledger).filter(
     (entry) => entry.kind === "dropped" && !("source_arg" in entry),
   );
-  const callIds = new Map<string, string[]>();
-  for (const process of processes)
-    for (const { call, ids } of process.effective_args ?? [])
-      callIds.set(call, [...(callIds.get(call) ?? []), ...ids]);
-  const idCalls = new Map<string, Set<string>>();
-  for (const [call, ids] of callIds)
-    for (const id of ids) idCalls.set(id, (idCalls.get(id) ?? new Set()).add(call));
-  const callSteps = new Map(
-    [...callIds].map(([call, ids]): [string, Pick<ArgRow, "steps" | "steps_from">] => {
-      const mapped = steps
-        .filter((s) => s.calls_from === "plan_state" && s.calls.includes(call))
-        .map((s) => s.step);
-      if (mapped.length > 0) return [call, { steps: mapped, steps_from: "plan_state" }];
-      // A step the template resolved keeps no `_plan_state`; its records on this call's own ids name it.
-      const named = records
-        .filter(
-          ({ arg, record }) =>
-            ids.includes(arg) &&
-            idCalls.get(arg)!.size === 1 &&
-            stepByKey.has(record.step) &&
-            stepByKey.get(record.step)!.calls_from !== "plan_state",
-        )
-        .map(({ record }) => record.step);
-      const unique = [...new Set(named)];
-      return [call, { steps: unique, steps_from: unique.length > 0 ? "records" : null }];
-    }),
-  );
-
   const rows: ArgRow[] = processes.flatMap((process) => {
     const byId = new Map((process.resolved_args ?? []).map((entry) => [entry.id, entry]));
     return (process.effective_args ?? []).map((effective): ArgRow => {
@@ -353,31 +405,6 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
     });
   });
 
-  for (const row of rows.filter((r) => r.steps_from === "records"))
-    for (const key of row.steps) {
-      const step = stepByKey.get(key)!;
-      step.calls_from = "records";
-      if (!step.calls.includes(row.call)) step.calls.push(row.call);
-    }
-
-  const processFor = (call: string) => {
-    const name = call.split(":").at(-1)!;
-    return processes.find((p) => p.name === name || (p.aliases ?? []).includes(name));
-  };
-  for (const step of steps)
-    step.source = step.calls.map((call): CallSource => {
-      const process = processFor(call);
-      const tool = process?.tool ? tools.get(process.tool) : undefined;
-      return {
-        call,
-        process: process?.name ?? null,
-        tool: process?.tool ?? null,
-        tool_versions: tool ? (tool.versions ?? [tool.version]) : [],
-        container: process?.container ?? null,
-        conda: process?.conda ?? null,
-      };
-    });
-
   const effectiveIds = new Set(rows.flatMap((r) => r.ids));
   const resolvedIds = new Set(processes.flatMap((p) => (p.resolved_args ?? []).map((e) => e.id)));
   const attached = new Set(rows.flatMap((r) => r.entries.flatMap((e) => e.records)));
@@ -387,13 +414,7 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
       id: record.id,
       step: record.step,
       arg,
-      problem: !stepByKey.has(record.step)
-        ? "unknown-step"
-        : !resolvedIds.has(arg)
-          ? "unknown-arg"
-          : !effectiveIds.has(arg)
-            ? "not-effective"
-            : "other-step",
+      problem: strayProblem(arg, stepByKey.has(record.step), resolvedIds, effectiveIds),
     }));
   const overridden = processes.flatMap((process) =>
     (process.resolved_args ?? [])
@@ -426,8 +447,9 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
     });
 
   const scope = checkScopeRecords(inputs.ledger, summary);
+  const matchedStepDrops = new Set(removal.removed_steps.flatMap((s) => s.dropped_entries));
   const other_drops = drops
-    .filter((d) => !("step" in d) && !isScopeDrop(d))
+    .filter((d) => !isScopeDrop(d) && !matchedStepDrops.has(recordId(d)))
     .map((d) => ({ id: recordId(d), status: d.status, units: d.units, because: d.because }));
 
   const findings: ParityFinding[] = [
@@ -458,11 +480,13 @@ export function assembleNextflowParity(inputs: NextflowParityInputs): NextflowPa
       subject: r.id,
       detail: r.problem,
     })),
-    ...rows
-      .filter((row) => row.steps.length === 0 && row.covered_by.length === 0)
-      .map((row) => row.call)
-      .filter((call, i, calls) => calls.indexOf(call) === i)
-      .map((subject) => ({ kind: "call-unmapped" as const, subject })),
+    ...[
+      ...new Set(
+        rows
+          .filter((row) => row.steps.length === 0 && row.covered_by.length === 0)
+          .map((row) => row.call),
+      ),
+    ].map((subject) => ({ kind: "call-unmapped" as const, subject })),
     ...malformed.map((m) => ({ kind: "source-arg-malformed" as const, ...m })),
     ...scope.problems.map((p) => ({
       kind: "scope-record" as const,
