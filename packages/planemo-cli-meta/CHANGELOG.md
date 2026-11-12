@@ -1,5 +1,14 @@
 # @galaxy-foundry/planemo-cli-meta
 
+## 0.2.2
+
+### Patch Changes
+
+- [#766](https://github.com/galaxyproject/foundry/pull/766) [`01d2b58`](https://github.com/galaxyproject/foundry/commit/01d2b587690616873ed400ae24fa2ccec2f58603) Thanks [@jmchilton](https://github.com/jmchilton)! - Pin planemo 0.75.48. The vendored CLI metadata and test-report schema are
+  regenerated against it (command list and schema unchanged), the
+  gxwf-pi-harness container installs it and its default image tag names it, and
+  nfcore-tool-lab now requires it through the test-report schema pin.
+
 ## 0.2.1
 
 ### Patch Changes

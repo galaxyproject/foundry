@@ -1,5 +1,15 @@
 # @galaxy-foundry/summarize-nextflow
 
+## 0.5.0
+
+### Minor Changes
+
+- [#777](https://github.com/galaxyproject/foundry/pull/777) [`871b5e6`](https://github.com/galaxyproject/foundry/commit/871b5e6deadfd56aeb5e2ba92eb8f6f50c8449ee) Thanks [@PavelAbramau](https://github.com/PavelAbramau)! - Carry publishDir, resolved ext.args, and template bodies in the Nextflow summary.
+
+### Patch Changes
+
+- [#790](https://github.com/galaxyproject/foundry/pull/790) [`99decda`](https://github.com/galaxyproject/foundry/commit/99decdabff21360431019c1c44b67bf545da5715) Thanks [@PavelAbramau](https://github.com/PavelAbramau)! - Stop treating the test-data base path as a reference asset, record getGenomeAttribute calls from main.nf, keep path-valued test params, and ignore comments while reading nf-test overrides and workflow blocks.
+
 ## 0.4.0
 
 ### Minor Changes

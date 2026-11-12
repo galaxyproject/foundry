@@ -1,5 +1,14 @@
 # @galaxy-foundry/gxwf-foundry
 
+## 0.4.1
+
+### Patch Changes
+
+- [#778](https://github.com/galaxyproject/foundry/pull/778) [`b7fd298`](https://github.com/galaxyproject/foundry/commit/b7fd2980f4d502d414293edf7610a42510e8a153) Thanks [@jmchilton](https://github.com/jmchilton)! - Reword the `galaxy-tool-discovery` `status` description: `weak` needs confirmation before it is pinned and no longer falls through to authoring, and `miss` means no wrapper runs the executable or operation the need names. The enum is unchanged.
+
+- Updated dependencies [[`99decda`](https://github.com/galaxyproject/foundry/commit/99decdabff21360431019c1c44b67bf545da5715), [`871b5e6`](https://github.com/galaxyproject/foundry/commit/871b5e6deadfd56aeb5e2ba92eb8f6f50c8449ee)]:
+  - @galaxy-foundry/summarize-nextflow@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes
