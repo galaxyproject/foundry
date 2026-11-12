@@ -4,11 +4,11 @@
   "mold": {
     "name": "apply-galaxy-workflow-changeset",
     "path": "content/molds/apply-galaxy-workflow-changeset/index.md",
-    "revision": 4,
-    "content_hash": "f589ff84acc67e2172a57ce26ae44b865786d5d739615309b0085c323c0389f0",
-    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
+    "revision": 5,
+    "content_hash": "35e63ba23923d8d4bf9f7e9b6454ad1000758a207f4b8f84b31a55050c4dd33f",
+    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
   },
-  "cast_at": "2026-11-10T10:22:51.298Z",
+  "cast_at": "2026-11-12T09:51:38.775Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -100,8 +100,9 @@
       },
       {
         "id": "galaxy-workflow-changeset",
-        "description": "Reviewed, step-anchored change-set from [[interview-to-galaxy-workflow-changeset]]; the edit intents to realize.",
+        "description": "Reviewed, step-anchored change-set from [[interview-to-galaxy-workflow-changeset]] or [[improve-galaxy-workflow-efficiency]]; the edit intents to realize.",
         "producers": [
+          "improve-galaxy-workflow-efficiency",
           "interview-to-galaxy-workflow-changeset"
         ]
       },
@@ -119,6 +120,7 @@
           "freeform-summary-to-galaxy-interface",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
+          "improve-galaxy-workflow-efficiency",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",
           "nextflow-summary-to-galaxy-data-flow",

@@ -6,9 +6,9 @@
     "path": "content/molds/repair-galaxy-draft-topology/index.md",
     "revision": 7,
     "content_hash": "692708480037be9680eda6be70c7fa2fd93604037432f7d94b6363266a6ca25e",
-    "commit": "db8801f2f0a31746e35cf399dd96cdbb8aa36dcf"
+    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
   },
-  "cast_at": "2026-11-10T10:22:52.006Z",
+  "cast_at": "2026-11-12T09:51:39.424Z",
   "refs": [
     {
       "kind": "cli-command",
@@ -254,6 +254,7 @@
           "freeform-summary-to-galaxy-interface",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
+          "improve-galaxy-workflow-efficiency",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",
           "nextflow-summary-to-galaxy-data-flow",

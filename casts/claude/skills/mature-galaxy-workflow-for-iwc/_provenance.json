@@ -6,9 +6,9 @@
     "path": "content/molds/mature-galaxy-workflow-for-iwc/index.md",
     "revision": 2,
     "content_hash": "f7dd7ae7e1f5fa2227344cbf16efedb5c2b63ea2455231687641cf6d8ce70d55",
-    "commit": "a4988f41d403f6134dc7b944b8b05f3ade4b9e00"
+    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
   },
-  "cast_at": "2026-11-11T17:11:19.085Z",
+  "cast_at": "2026-11-12T09:51:39.230Z",
   "refs": [
     {
       "kind": "prompt",
@@ -175,6 +175,7 @@
           "freeform-summary-to-galaxy-interface",
           "freeform-summary-to-galaxy-template",
           "implement-galaxy-tool-step",
+          "improve-galaxy-workflow-efficiency",
           "interview-to-galaxy-workflow-changeset",
           "mature-galaxy-workflow-for-iwc",
           "nextflow-summary-to-galaxy-data-flow",

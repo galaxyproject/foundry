@@ -5,6 +5,7 @@ Generated from content frontmatter. Do not edit by hand.
 ## Pipelines
 
 - [[cwl-to-galaxy]] — Translate a CWL Workflow into a Galaxy gxformat2 workflow, then assemble and run a Galaxy workflow test.
+- [[galaxy-workflow-efficiency]] — Propose documented efficiency edits to an existing Galaxy workflow as a change-set, then apply, implement, and retest the result.
 - [[galaxy-workflow-maturation]] — Apply the pinned IWC publication checklist to an existing Galaxy workflow, then validate and retest the matured result.
 - [[galaxy-workflow-review]] — Post-construction review journey: summarize, validate, and test an existing Galaxy workflow, then apply pinned IWC policy.
 - [[interview-to-galaxy]] — Interview-driven path to a Galaxy gxformat2 workflow through the shared freeform-summary handoff. *(reviewed)*
@@ -45,6 +46,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.
 - [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary or an authored user-defined tool. *(reviewed)*
 - [[implement-galaxy-workflow-test]] — Assemble Galaxy workflow test fixtures and assertions. *(reviewed)*
+- [[improve-galaxy-workflow-efficiency]] — Find steps in an existing Galaxy workflow that a documented lower-cost alternative can replace, and emit them as a reviewable change-set.
 - [[interview-to-freeform-summary]] — Normalize a free-form user interview into the shared freeform-summary workflow handoff. *(reviewed)*
 - [[interview-to-galaxy-workflow-changeset]] — Interview a user against an existing Galaxy workflow summary and emit a reviewable, step-anchored change-set. *(reviewed)*
 - [[mature-galaxy-workflow-for-iwc]] — Apply the IWC publication checklist to an existing Galaxy workflow and emit a generalized, reviewable submission set.
@@ -214,6 +216,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[cwl-v1.2-schemas]] — Vendored official CWL v1.2.1 JSON/SALAD schema documents used as source-structure reference for CWL summarization.
 - [[cwl-when-pickvalue-to-galaxy-branching]] — CWL `when:`/`pickValue` → Galaxy. Three honest translations (paired_or_unpaired input, native pick_value step, sibling workflows) plus how to pick among them.
 - [[component-cwl-workflow-anatomy]] — CWL structure relevant to summarize-cwl: normalized documents, steps, scatter, conditionals, requirements, and dependency handling.
+- [[galaxy-efficient-tool-substitutions]] — Galaxy wrappers that replace a common tool at lower compute cost, how their ports and parameters map, and when to keep the original.
 - [[foundry-feedback-ledger]] — Runtime protocol for carrying actionable feedback about Foundry assets, and the related projects a run exercises, from cast skills back to Foundry maintainers.
 - [[foundry-run-manifest]] — Always-on runtime record of what a pipeline run is doing and what each phase put on disk, written by the harness and read by run-dashboard.
 - [[galaxy-discover-datasets]] — Reference for the <discover_datasets> Galaxy XML element — attributes, named/regex patterns, <data> vs <collection> contexts, test assertions.

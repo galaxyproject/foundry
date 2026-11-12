@@ -4,11 +4,11 @@
   "mold": {
     "name": "changeset-to-galaxy-test-plan",
     "path": "content/molds/changeset-to-galaxy-test-plan/index.md",
-    "revision": 4,
-    "content_hash": "1b8362487f534389c4e581cc2cb54e21fc004bb1a06d818b4dff1ba34bdc2423",
-    "commit": "a59d6025d612ce7013b09fa1ccb58f60507ccc6a"
+    "revision": 5,
+    "content_hash": "bf5851c04b13112b1a2ae95dd6e14838dd16f018ec07973f89b7988ac2b5bf4d",
+    "commit": "df991d0d789b0a29618cbcdbe7eb6d9508f1f062"
   },
-  "cast_at": "2026-10-26T16:18:38.156Z",
+  "cast_at": "2026-11-12T09:51:38.809Z",
   "refs": [
     {
       "kind": "research",
@@ -156,8 +156,9 @@
       },
       {
         "id": "galaxy-workflow-changeset",
-        "description": "Reviewed, step-anchored change-set from [[interview-to-galaxy-workflow-changeset]]; names which edits change observable behavior, hence which baseline cases to update and which new assertions to add.",
+        "description": "Reviewed, step-anchored change-set from [[interview-to-galaxy-workflow-changeset]] or [[improve-galaxy-workflow-efficiency]]; names which edits change observable behavior, hence which baseline cases to update and which new assertions to add.",
         "producers": [
+          "improve-galaxy-workflow-efficiency",
           "interview-to-galaxy-workflow-changeset"
         ]
       }

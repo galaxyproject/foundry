@@ -107,13 +107,18 @@ describe("closed-registry invariant", () => {
     expect(registry.allTags().length).toBeGreaterThan(10);
   });
 
-  it("keeps the lifecycle vocabulary closed to review and publication", () => {
+  it("keeps the lifecycle vocabulary closed to review, publication, and efficiency", () => {
     const lifecycleTags = registry
       .allTags()
       .filter((tag) => registry.facetOf(tag) === "lifecycle")
       .sort();
-    expect(lifecycleTags).toEqual(["lifecycle/publication", "lifecycle/review"]);
+    expect(lifecycleTags).toEqual([
+      "lifecycle/efficiency",
+      "lifecycle/publication",
+      "lifecycle/review",
+    ]);
     expect(registry.facetOf("lifecycle/review")).toBe("lifecycle");
     expect(registry.facetOf("lifecycle/publication")).toBe("lifecycle");
+    expect(registry.facetOf("lifecycle/efficiency")).toBe("lifecycle");
   });
 });

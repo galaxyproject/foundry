@@ -24,7 +24,7 @@ Hand-authored, monolithic conversion skills are brittle, hard to test, and don't
 
 ## What's here
 
-- **Pipelines** (`content/pipelines/`) — ordered Mold sequences composing into an end-to-end conversion (`paper-to-galaxy`, `nextflow-to-galaxy`, `cwl-to-galaxy`, `interview-to-galaxy`, `update-interview-to-galaxy`, `paper-to-cwl`, `nextflow-to-cwl`) or a post-construction lifecycle journey (`galaxy-workflow-maturation`, `galaxy-workflow-review`). Build artifact and primary navigation surface.
+- **Pipelines** (`content/pipelines/`) — ordered Mold sequences composing into an end-to-end conversion (`paper-to-galaxy`, `nextflow-to-galaxy`, `cwl-to-galaxy`, `interview-to-galaxy`, `update-interview-to-galaxy`, `paper-to-cwl`, `nextflow-to-cwl`) or a post-construction lifecycle journey (`galaxy-workflow-maturation`, `galaxy-workflow-review`, `galaxy-workflow-efficiency`). Build artifact and primary navigation surface.
 - **Molds** (`content/molds/`) — abstract templates describing a workflow-construction action. Each Mold is a typed reference manifest: it declares the patterns, CLI manual pages, schemas, prompts, and examples it depends on, and casts into one or more skill artifacts.
 - **Patterns** (`content/patterns/`) — Galaxy workflow construction reference (collection manipulation, tabular manipulation, conditional handling, custom-tool authoring). Wiki-linked from action Molds; pulled into cast skills via casting's pattern-kind dispatch.
 - **CLI manual pages** (`content/cli/<tool>/`) — one note per command or subcommand, covering `gxwf`, `planemo`, `cwltool`, `cwl-utils`, `foundry`, and `galaxy-tool-cache`. Cast to JSON sidecars by action Molds that reference exact commands.
@@ -132,16 +132,16 @@ Forward work is quality and reach rather than existence. Review is underway rath
 <!-- generated:corpus -->
 |  | count |
 | --- | --- |
-| Pipelines | 13 |
-| Molds | 56 — 29 draft, 27 reviewed |
-| … with `eval.md` | 42 |
-| … with `scenarios.md` | 36 |
+| Pipelines | 14 |
+| Molds | 57 — 30 draft, 27 reviewed |
+| … with `eval.md` | 43 |
+| … with `scenarios.md` | 37 |
 | Pattern pages | 54 |
 | Source-pattern pages | 7 |
 | CLI tools | 6 |
 | CLI command pages | 30 |
 | Schema notes | 16 |
-| Research notes | 72 |
+| Research notes | 73 |
 <!-- /generated:corpus -->
 
 Counted from the corpus by `foundry-build generate-readme`, not by hand — `make check-generated` fails the build when they drift. Everything outside the markers is hand-written.
