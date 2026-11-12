@@ -16,6 +16,18 @@
   distinction, output dataset state, and whether the wrapper failure semantics
   explain the failure.
 
+## Case: managed job failure the job records do not explain
+
+- fixture: failed workflow test on a Planemo-managed Galaxy, run without
+  `--no_cleanup`, where a tool job errors with a non-zero exit code and stderr
+  that does not name the cause. Every upstream job record in the structured
+  result is `ok`, yet the job's input dataset is empty.
+- expect: reads the job records in the structured result first, then reruns
+  once with `--no_cleanup` or names that rerun as the next step before
+  recommending any workflow change. When it reruns, it cites the kept job
+  working directory and the empty input, and notes that the kept
+  directory must be deleted by hand.
+
 ## Case: invocation failure reference capture
 
 - fixture: failed workflow test where the invocation state or invocation
